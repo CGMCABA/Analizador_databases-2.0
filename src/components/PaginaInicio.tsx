@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   FileSpreadsheet,
   AlertCircle,
@@ -18,6 +18,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { DriveFilePicker } from "@/components/DriveFilePicker";
+import { esUrlGoogleSheetValida } from "@/lib/googleSheetsUrl";
 
 interface PaginaInicioProps {
   onUrl: (url: string, nombre: string) => void;
@@ -108,16 +109,48 @@ const INDICADORES = [
   },
 ] as const;
 
+const EXTENSIONES_VALIDAS = /\.(xlsx|xls)$/i;
+
 export function PaginaInicio({ onUrl, onBuffer, onError, cargando, error }: PaginaInicioProps) {
   const [urlInput, setUrlInput] = useState("");
   const [nombreInput, setNombreInput] = useState("");
   const [guardadas, setGuardadas] = useState<UrlGuardada[]>(cargarUrlsGuardadas);
+  const [arrastrando, setArrastrando] = useState(false);
+  const inputArchivoRef = useRef<HTMLInputElement | null>(null);
+
+  const procesarArchivoLocal = (file: File) => {
+    if (!EXTENSIONES_VALIDAS.test(file.name)) {
+      onError("Formato no soportado. Subí un archivo .xlsx o .xls.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (reader.result instanceof ArrayBuffer) {
+        onBuffer(reader.result, file.name);
+      }
+    };
+    reader.onerror = () => onError("No se pudo leer el archivo local.");
+    reader.readAsArrayBuffer(file);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setArrastrando(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) procesarArchivoLocal(file);
+  };
+
+  const handleSeleccionarArchivo = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) procesarArchivoLocal(file);
+    e.target.value = "";
+  };
 
   useEffect(() => {
     guardarUrls(guardadas);
   }, [guardadas]);
 
-  const validarUrl = (url: string) => /\/d\/[a-zA-Z0-9_-]+/.test(url);
+  const validarUrl = (url: string) => esUrlGoogleSheetValida(url);
 
   const cargarDesdeUrl = (url: string, nombre: string) => {
     if (!validarUrl(url)) {
@@ -233,8 +266,46 @@ export function PaginaInicio({ onUrl, onBuffer, onError, cargando, error }: Pagi
               Cargá tus datos operativos
             </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              Pegá la URL de un Google Sheet o elegí un archivo desde Drive.
+              Subí un archivo local, pegá la URL de un Google Sheet, o elegí un archivo desde Drive.
             </p>
+          </div>
+
+          {/* ── Subida de archivo local (drag & drop) ──── */}
+          <div
+            onDragOver={(e) => {
+              e.preventDefault();
+              setArrastrando(true);
+            }}
+            onDragLeave={() => setArrastrando(false)}
+            onDrop={handleDrop}
+            onClick={() => !cargando && inputArchivoRef.current?.click()}
+            className={`w-full rounded-2xl border-2 border-dashed p-7 flex flex-col items-center gap-2 text-center transition-colors cursor-pointer ${
+              arrastrando
+                ? "border-blue-500 bg-blue-50 dark:bg-blue-500/10"
+                : "border-slate-300 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-500"
+            } ${cargando ? "opacity-60 cursor-not-allowed" : ""}`}
+          >
+            <input
+              ref={inputArchivoRef}
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleSeleccionarArchivo}
+              disabled={cargando}
+              className="hidden"
+            />
+            <FileSpreadsheet className="h-7 w-7 text-blue-500 dark:text-blue-400" />
+            <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+              Arrastrá tu archivo Excel acá
+            </p>
+            <p className="text-xs text-slate-400 dark:text-slate-500">
+              o hacé clic para elegirlo desde tu computadora (.xlsx, .xls)
+            </p>
+          </div>
+
+          <div className="w-full flex items-center gap-3">
+            <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
+            <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 shrink-0">o</span>
+            <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
           </div>
 
           <div className="w-full grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-start">

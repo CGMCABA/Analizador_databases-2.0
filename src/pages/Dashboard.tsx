@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { parsearExcel, DatosDashboard } from "@/lib/excelParser";
 import { filtrarDatos } from "@/lib/filtrarDatos";
+import { construirUrlExportXlsx } from "@/lib/googleSheetsUrl";
 import { calcularSemaforo, generarRecomendaciones } from "@/lib/semaforoRecomendaciones";
 import { etiquetaTipo } from "@/lib/columnClassifier";
 import { PaginaInicio } from "@/components/PaginaInicio";
@@ -137,18 +138,14 @@ export default function Dashboard() {
   const [urlComparacion, setUrlComparacion] = useState("");
   const ejecutarComparacionUrl = async (url: string) => {
     if (!datos) return;
-    const idMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-    if (!idMatch) {
+    const exportUrl = construirUrlExportXlsx(url);
+    if (!exportUrl) {
       setErrorB("URL de Google Sheet no válida.");
       return;
     }
     setCargandoB(true);
     setErrorB("");
     try {
-      const sheetId = idMatch[1];
-      const gidMatch = url.match(/gid=(\d+)/);
-      const gidParam = gidMatch ? `&gid=${gidMatch[1]}` : "";
-      const exportUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=xlsx${gidParam}`;
       const res = await fetch(exportUrl);
       if (!res.ok) throw new Error("No se pudo descargar. Verificá que el Sheet esté compartido.");
       const buffer = await res.arrayBuffer();
@@ -161,7 +158,7 @@ export default function Dashboard() {
         return;
       }
       const labelA = nombreArchivo.replace(/\.(xlsx|xls)$/i, "");
-      const labelB = `Sheet ${sheetId.slice(0, 8)}`;
+      const labelB = "Sheet comparado";
       const resultado = compararPeriodos(datos, datosSegundoArchivo, labelA, labelB, "archivos");
       setComparacionResultado(resultado);
       setModalComparacion(false);
@@ -203,17 +200,12 @@ export default function Dashboard() {
     setCargando(true);
     setError("");
     try {
-      // Extraer el ID del sheet y el gid de la URL
-      const idMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-      if (!idMatch) throw new Error("URL de Google Sheet no válida. Pegá la URL completa de tu Google Sheet.");
-      const sheetId = idMatch[1];
-      const gidMatch = url.match(/gid=(\d+)/);
-      const gidParam = gidMatch ? `&gid=${gidMatch[1]}` : "";
-      const exportUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=xlsx${gidParam}`;
+      const exportUrl = construirUrlExportXlsx(url);
+      if (!exportUrl) throw new Error("URL de Google Sheet no válida. Pegá la URL completa de tu Google Sheet.");
       const res = await fetch(exportUrl);
       if (!res.ok) throw new Error("No se pudo descargar el archivo. Verificá que el Sheet esté compartido como 'cualquiera con el link puede ver'.");
       const buffer = await res.arrayBuffer();
-      procesarBuffer(buffer, nombre || `Sheet ${sheetId.slice(0, 8)}`);
+      procesarBuffer(buffer, nombre || "Google Sheet");
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Error al cargar desde la URL.";
       setError(msg);
