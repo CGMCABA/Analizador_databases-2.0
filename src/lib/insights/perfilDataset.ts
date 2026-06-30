@@ -55,6 +55,7 @@ function calcularPerfilColumnas(datos: DatosDashboard): PerfilColumna[] {
           totalRegistros,
           valoresUnicos: c.cantidadUnicos,
           top1Pct: calcularTop1Pct(datosDist),
+          top1Nombre: datosDist[0]?.nombre ?? null,
           entropiaNormalizada: calcularEntropiaNormalizada(datosDist),
         };
       }
@@ -66,6 +67,7 @@ function calcularPerfilColumnas(datos: DatosDashboard): PerfilColumna[] {
         totalRegistros: datos.totalSolicitudes,
         valoresUnicos: c.cantidadUnicos,
         top1Pct: 0,
+        top1Nombre: null,
         entropiaNormalizada: 0,
       };
     });
@@ -106,7 +108,8 @@ function calcularCaracteristicas(
     confianzaAnalitica: calcularConfianzaAnalitica(
       datos.totalSolicitudes,
       datos.meses.length,
-      riquezaCategorica ?? 0
+      riquezaCategorica ?? 0,
+      datos.calidadDataset.registrosSinFechaValida ?? 0
     ),
   };
 }

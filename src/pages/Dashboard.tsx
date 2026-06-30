@@ -22,6 +22,7 @@ import { LineaDeTiempo } from "@/components/LineaDeTiempo";
 import { TablaDetalle } from "@/components/TablaDetalle";
 
 import { InsightsPanel } from "@/components/InsightsPanel";
+import { HallazgosPrincipales } from "@/components/HallazgosPrincipales";
 import { GraficoCruceHeatmap } from "@/components/GraficoCruceHeatmap";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { ClipboardList, Sun, Moon, Filter, Printer, Monitor, X, CheckCircle2, Tag, MapPin, BarChart2, Info, Ban, GitCompareArrows, FileSpreadsheet, AlertCircle } from "lucide-react";
@@ -431,6 +432,8 @@ export default function Dashboard() {
             <div className="hidden print:block text-xs text-slate-500 mb-2">
               Archivo: {nombreArchivo}{mesFiltro ? ` · Mes: ${mesFiltro}` : ""}{calleFiltro ? ` · Calle: ${calleFiltro}` : ""}
             </div>
+
+            {perfil && <HallazgosPrincipales perfil={perfil} />}
 
             {datos.columnas.length > 0 && (
               <div className="presentation-hide bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 print:hidden">

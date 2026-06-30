@@ -27,6 +27,9 @@ export interface PerfilColumna {
   totalRegistros: number;
   valoresUnicos: number;
   top1Pct: number;
+  /** Nombre del valor más frecuente (null si no aplica). Ya estaba calculado en
+   *  distribucionesCategoricas — esto solo evita descartarlo antes de tiempo. */
+  top1Nombre: string | null;
   entropiaNormalizada: number;
 }
 

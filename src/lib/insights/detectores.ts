@@ -193,10 +193,16 @@ export function calcularTendenciaGeneral(
 export function calcularConfianzaAnalitica(
   totalSolicitudes: number,
   cantidadMeses: number,
-  riquezaCategorica: number
+  riquezaCategorica: number,
+  registrosSinFechaValida: number = 0
 ): number {
   const volumenScore = Math.min(1, totalSolicitudes / 100);
   const coberturaScore = Math.min(1, cantidadMeses / 3);
   const diversidadScore = riquezaCategorica;
-  return Math.round((volumenScore * 0.5 + coberturaScore * 0.3 + diversidadScore * 0.2) * 100) / 100;
+  const base = volumenScore * 0.5 + coberturaScore * 0.3 + diversidadScore * 0.2;
+
+  const totalBruto = totalSolicitudes + registrosSinFechaValida;
+  const tasaExclusion = totalBruto > 0 ? registrosSinFechaValida / totalBruto : 0;
+
+  return Math.round(base * (1 - tasaExclusion) * 100) / 100;
 }
