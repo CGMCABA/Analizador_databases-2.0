@@ -164,13 +164,16 @@ export function PanelTiempoRespuestaInterno({
   const peorMotivo = porMotivo[porMotivo.length - 1];
 
   return (
-    <div className={`bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}>
+    <div className={`bg-white dark:bg-slate-800 rounded-xl border border-violet-200 dark:border-violet-800 shadow-sm p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}>
       <div className="flex items-center gap-2 mb-1">
         <Timer className="h-4 w-4 text-violet-500" />
         <h3 className="font-semibold text-slate-800 dark:text-slate-100">Tiempo de respuesta interno</h3>
       </div>
-      <p className="text-xs text-slate-400 dark:text-slate-500 mb-5 ml-6">
+      <p className="text-xs text-slate-400 dark:text-slate-500 mb-1 ml-6">
         Diferencia entre hora de ingreso y hora de derivación · calculado automáticamente
+      </p>
+      <p className="text-[11px] text-violet-600 dark:text-violet-400 mb-5 ml-6">
+        Mide solo la derivación interna — no es el tiempo de respuesta total registrado en el archivo.
       </p>
 
       <div className="grid grid-cols-3 gap-4 mb-6">

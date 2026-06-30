@@ -82,15 +82,18 @@ export function GraficoTiempoRespuesta({ datos, titulo, subtitulo }: GraficoTiem
   }));
 
   return (
-    <div className={`bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}>
+    <div className={`bg-white dark:bg-slate-800 rounded-xl border border-amber-200 dark:border-amber-800 shadow-sm p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}>
       <div className="flex items-center gap-2 mb-1">
         <Clock className="h-4 w-4 text-amber-500" />
         <h3 className="font-semibold text-slate-800 dark:text-slate-100">
           {titulo ?? "Tiempo de respuesta por área"}
         </h3>
       </div>
-      <p className="text-xs text-slate-400 dark:text-slate-500 mb-4 ml-6">
+      <p className="text-xs text-slate-400 dark:text-slate-500 mb-1 ml-6">
         {subtitulo ?? `Promedio de tiempo de respuesta en ${usarHoras ? "horas" : "minutos"} · áreas más rápidas primero · top 15`}
+      </p>
+      <p className="text-[11px] text-amber-600 dark:text-amber-500 mb-4 ml-6">
+        Calculado desde el campo "Tiempo de Respuesta" del archivo — no es la derivación interna.
       </p>
 
       <div className="flex items-center gap-4 mb-4 text-xs flex-wrap">

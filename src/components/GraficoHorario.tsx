@@ -71,7 +71,12 @@ export function GraficoHorario({ datos, totalSolicitudes }: GraficoHorarioProps)
   });
 
   const maxCantidad = Math.max(...datosCompletos.map((d) => d.cantidad));
-  const promedio = totalSolicitudes > 0 ? Math.round(totalSolicitudes / datosCompletos.length) : 0;
+  // Promedio calculado sobre la misma población que está graficada (suma de las barras),
+  // no sobre totalSolicitudes — ese total incluye registros sin hora válida o Programados,
+  // que ya están excluidos de "datos" (ver agregaciones.ts), y mezclaría dos universos
+  // distintos si se usara como base del promedio.
+  const sumaBarras = datosCompletos.reduce((acc, d) => acc + d.cantidad, 0);
+  const promedio = datosCompletos.length > 0 ? Math.round(sumaBarras / datosCompletos.length) : 0;
 
   const getColor = (cantidad: number): string => {
     if (maxCantidad === 0) return "hsl(220, 60%, 55%)";
