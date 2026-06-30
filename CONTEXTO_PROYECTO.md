@@ -183,6 +183,34 @@ esa ruta con el ID real del archivo. El fix vive en `src/lib/googleSheetsUrl.ts`
 
 ---
 
+## 6. Deuda técnica conocida (detectada, documentada, no resuelta a propósito)
+
+### Inconsistencia entre definiciones geográficas
+
+El sistema tiene **tres criterios distintos** de qué cuenta como "una calle", usados por
+distintos componentes, y nunca se unificaron:
+
+- `porCalle` (`agregaciones.ts` → `calcularPorCalle`): cuenta menciones en **calle1 + calle2 +
+  calle3** combinadas. Lo usa `GraficoCalles.tsx` y `ResumenGeografico.tsx`.
+- `porInterseccion` (`calcularPorInterseccion`): combina **calle1 + calle2 únicamente**
+  (ignora calle3). Lo usa el ranking de intersecciones en `Dashboard.tsx` y `GraficoMapa.tsx`
+  (vía `porSegmento`, que sí usa las 3).
+- `porCalle1Ranking` (`calcularPorCalle1Ranking`): usa **solo calle1**. Lo usa
+  `GraficoCruceCalle.tsx`.
+
+Esto significa que el mismo dataset puede mostrar un "top calle" distinto según qué
+componente se mire, sin que el usuario tenga forma de saber por qué. Se descubrió durante la
+fase 2.2 (desfragmentación geográfica) al construir `ResumenGeografico.tsx`: sumar los
+top-N de `porCalle` y dividirlos por el total de registros para mostrar un "% combinado de
+concentración" dio **116%** — porque `porCalle` no es una partición excluyente (un mismo
+registro puede aportar a dos entradas si la misma calle aparece en más de una posición, o si
+calle1 y calle2 son ambas "top"). Se corrigió mostrando el % individual de cada calle (nunca
+sumado), pero la causa de fondo —que existan 3 criterios distintos de "calle" en el sistema—
+**sigue sin resolverse**, queda para una fase dedicada que decida un único criterio (o
+documente explícitamente cuándo usar cada uno) y toque `agregaciones.ts`.
+
+---
+
 ## 6. Cómo correr el proyecto localmente
 
 ```

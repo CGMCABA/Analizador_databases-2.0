@@ -11,6 +11,7 @@ import { GraficoBarras } from "@/components/GraficoBarras";
 import { GraficoResolucion } from "@/components/GraficoResolucion";
 import { GraficoLineas } from "@/components/GraficoLineas";
 import { GraficoCalles } from "@/components/GraficoCalles";
+import { ResumenGeografico } from "@/components/ResumenGeografico";
 import { GraficoMapa } from "@/components/GraficoMapa";
 import { GraficoHeatmap } from "@/components/GraficoHeatmap";
 import { GraficoHorario } from "@/components/GraficoHorario";
@@ -810,6 +811,14 @@ export default function Dashboard() {
               />
             )}
 
+            {datos.tieneColumnasCalles && perfil && (
+              <ResumenGeografico
+                porCalle={datosFiltrados?.porCalle ?? []}
+                totalSolicitudes={datosFiltrados?.totalSolicitudes ?? 0}
+                perfil={perfil}
+              />
+            )}
+
             {datos.tieneColumnasCalles && (
               <GraficoCalles
                 datos={datosFiltrados?.porCalle ?? []}
@@ -818,13 +827,21 @@ export default function Dashboard() {
             )}
 
             {datos.tieneColumnasCalles && (datosFiltrados?.porCalle1Ranking ?? []).length >= 2 && (datosFiltrados?.porMotivo ?? []).length >= 2 && (
-              <GraficoCruceCalle
-                registros={datosFiltrados!.registros}
-                porMotivo={datosFiltrados!.porMotivo}
-                porCalle1Ranking={datosFiltrados!.porCalle1Ranking ?? []}
-                colNombreFila={datos.colCalle1}
-                colNombreMotivo={datos.colCategorica1}
-              />
+              <details className="group print:hidden">
+                <summary className="presentation-hide flex items-center gap-2 cursor-pointer select-none px-1 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 list-none hover:text-slate-800 dark:hover:text-slate-100">
+                  <span className="transition-transform group-open:rotate-90 text-slate-400">▶</span>
+                  Ver matriz calle × motivo (detalle avanzado)
+                </summary>
+                <div className="mt-2">
+                  <GraficoCruceCalle
+                    registros={datosFiltrados!.registros}
+                    porMotivo={datosFiltrados!.porMotivo}
+                    porCalle1Ranking={datosFiltrados!.porCalle1Ranking ?? []}
+                    colNombreFila={datos.colCalle1}
+                    colNombreMotivo={datos.colCategorica1}
+                  />
+                </div>
+              </details>
             )}
 
             {datos.tieneColumnasCalles && (
