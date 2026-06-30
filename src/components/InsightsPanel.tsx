@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { DatosDashboard } from "@/lib/excelParser";
+import { perfilarDataset } from "@/lib/insights/perfilDataset";
 import { Lightbulb, TrendingUp, TrendingDown, Minus, Clock, MapPin, Tag, Calendar, AlertTriangle } from "lucide-react";
 
 interface InsightsPanelProps {
@@ -7,7 +8,7 @@ interface InsightsPanelProps {
   mesFiltro: string;
 }
 
-interface Insight {
+interface InsightVisual {
   icono: "tendencia_up" | "tendencia_down" | "plano" | "hora" | "lugar" | "categoria" | "dia" | "alerta";
   texto: string;
   detalle?: string;
@@ -48,12 +49,45 @@ function pct(parte: number, total: number) {
 }
 
 export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
-  const insights = useMemo<Insight[]>(() => {
-    const lista: Insight[] = [];
+  const insights = useMemo<InsightVisual[]>(() => {
+    const lista: InsightVisual[] = [];
     const total = datos.totalSolicitudes;
     if (total === 0) return lista;
 
-    // 1. Categoría dominante
+    // ── Motor de insights genérico (capacidades + características del dataset) ──
+    // Cubre: concentración excesiva en cualquier columna categórica, cambios
+    // significativos de volumen vs. promedio reciente, y recurrencia (patrones).
+    const perfil = perfilarDataset(datos);
+
+    for (const i of perfil.insights) {
+      lista.push({
+        icono:
+          i.tipo === "tendencia"
+            ? (i.valor ?? 0) > 0
+              ? "tendencia_up"
+              : "tendencia_down"
+            : "categoria",
+        texto: i.texto,
+        detalle: i.detalle,
+        color: i.severidad === "critico" ? "red" : i.severidad === "atencion" ? "amber" : "blue",
+      });
+    }
+
+    if (perfil.patrones.length > 0) {
+      const top = perfil.patrones[0];
+      lista.push({
+        icono: "lugar",
+        texto: `Patrón recurrente detectado: ${top.descripcion}`,
+        detalle: `Fuerza del patrón: ${Math.round(top.fuerza * 100)}%`,
+        color: "red",
+      });
+    }
+
+    // ── Reglas específicas de dominio "solicitudes" ──────────────────────────
+    // Pendientes de generalizar al motor en una fase posterior (junto con el
+    // refactor de semaforoRecomendaciones.ts).
+
+    // Categoría dominante (descriptivo, no es alerta — la alerta de concentración la da el motor)
     if (datos.porMotivo.length > 0 && datos.colCategorica1) {
       const top = datos.porMotivo[0];
       const p = pct(top.cantidad, total);
@@ -65,7 +99,7 @@ export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
       });
     }
 
-    // 2. Hora pico
+    // Hora pico
     if (datos.porHora.length >= 3) {
       const pico = [...datos.porHora].sort((a, b) => b.cantidad - a.cantidad)[0];
       const p = pct(pico.cantidad, total);
@@ -77,7 +111,7 @@ export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
       });
     }
 
-    // 3. Día más activo
+    // Día más activo
     if (datos.porDiaSemana.length >= 3) {
       const pico = [...datos.porDiaSemana].sort((a, b) => b.cantidad - a.cantidad)[0];
       const p = pct(pico.cantidad, total);
@@ -89,7 +123,7 @@ export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
       });
     }
 
-    // 4. Intersección más cargada
+    // Intersección más cargada
     if (datos.porInterseccion.length > 0) {
       const top = datos.porInterseccion[0];
       const p = pct(top.cantidad, total);
@@ -101,35 +135,7 @@ export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
       });
     }
 
-    // 5. Tendencia del último mes vs. anterior (solo cuando hay >= 2 meses)
-    const meses = datos.porMes;
-    if (meses.length >= 2 && !mesFiltro) {
-      const ultimo = meses[meses.length - 1];
-      const anterior = meses[meses.length - 2];
-      if (anterior.cantidad > 0) {
-        const delta = Math.round(((ultimo.cantidad - anterior.cantidad) / anterior.cantidad) * 100);
-        if (Math.abs(delta) >= 5) {
-          const subiendo = delta > 0;
-          lista.push({
-            icono: subiendo ? "tendencia_up" : "tendencia_down",
-            texto: subiendo
-              ? `Los registros subieron ${delta}% en ${ultimo.mes}`
-              : `Los registros bajaron ${Math.abs(delta)}% en ${ultimo.mes}`,
-            detalle: `${ultimo.cantidad.toLocaleString("es-AR")} registros vs. ${anterior.cantidad.toLocaleString("es-AR")} en ${anterior.mes}`,
-            color: subiendo ? "red" : "green",
-          });
-        } else {
-          lista.push({
-            icono: "plano",
-            texto: `Volumen estable entre ${anterior.mes} y ${ultimo.mes}`,
-            detalle: `Variación de ${delta >= 0 ? "+" : ""}${delta}% (dentro del rango normal)`,
-            color: "slate",
-          });
-        }
-      }
-    }
-
-    // 6. Área / categoría secundaria más frecuente
+    // Área / categoría secundaria más frecuente
     if (datos.porArea.length > 0 && datos.colCategorica2 && datos.porArea[0].nombre !== "Sin área") {
       const top = datos.porArea[0];
       const p = pct(top.cantidad, total);
@@ -141,21 +147,7 @@ export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
       });
     }
 
-    // 7. Alerta: categoría que concentra más de 50% del total
-    if (datos.porMotivo.length > 0 && datos.colCategorica1) {
-      const top = datos.porMotivo[0];
-      const p = pct(top.cantidad, total);
-      if (p >= 50) {
-        lista.push({
-          icono: "alerta",
-          texto: `Alta concentración: "${top.nombre}" representa el ${p}% del total`,
-          detalle: "Considerar si existe diversificación suficiente en el registro de tipos.",
-          color: "red",
-        });
-      }
-    }
-
-    // 8. Tasa de resolución / finalización baja (solo para solicitudes)
+    // Tasa de resolución / finalización baja
     if (datos.tieneColumnaStatus && datos.tasaResolucion < 50 && datos.totalSolicitudes >= 10) {
       const esResuelto = datos.etiquetaStatus === "Resuelto";
       lista.push({
@@ -166,7 +158,7 @@ export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
       });
     }
 
-    // 9. Alerta de falsos positivos (cuando tasa > 15%)
+    // Alerta de falsos positivos (cuando tasa > 15%)
     if (datos.totalFalsosPositivos > 0 && datos.tasaFalsosPositivos > 15) {
       lista.push({
         icono: "alerta",
@@ -176,18 +168,7 @@ export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
       });
     }
 
-    // 10. Zona crónica (intersección con mayor recurrencia)
-    if (datos.crucesCronicos.length > 0) {
-      const top = datos.crucesCronicos[0];
-      lista.push({
-        icono: "lugar",
-        texto: `Zona crónica detectada: ${top.interseccion}`,
-        detalle: `"${top.motivo}" se repite ${top.meses.length} meses consecutivos (${top.cantidad.toLocaleString("es-AR")} registros).`,
-        color: "red",
-      });
-    }
-
-    // 11. Zona frágil (top 1 del índice de fragilidad)
+    // Zona frágil (top 1 del índice de fragilidad)
     if (datos.indiceFragilidad.length >= 3) {
       const top = datos.indiceFragilidad[0];
       lista.push({
@@ -198,7 +179,7 @@ export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
       });
     }
 
-    // 12. Split Programado / No Programado (shown whenever the column is detected)
+    // Split Programado / No Programado (shown whenever the column is detected)
     if (datos.tieneColumnaProgramacion) {
       const pctNoP = pct(datos.totalNoProgramados, total);
       lista.push({
@@ -208,7 +189,6 @@ export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
         color: "blue",
       });
 
-      // Alerta: No Programados con falta de hora > 10%
       if (datos.calidadDataset.pctSinHora > 10) {
         lista.push({
           icono: "alerta",
@@ -219,7 +199,7 @@ export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
       }
     }
 
-    // 13. Brecha de tiempo de respuesta (categoría más lenta vs. promedio global)
+    // Brecha de tiempo de respuesta (categoría más lenta vs. promedio global)
     if (datos.tiempoRespuestaPorMotivo.length >= 2) {
       const sorted = [...datos.tiempoRespuestaPorMotivo].sort((a, b) => b.promedio - a.promedio);
       const masLento = sorted[0];
@@ -227,7 +207,7 @@ export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
         sorted.reduce((acc, t) => acc + t.promedio, 0) / sorted.length
       );
       if (masLento.promedio > promedioGlobal * 1.5) {
-        const formatear = (m: number) => m >= 120 ? `${(m / 60).toFixed(1)}h` : `${m} min`;
+        const formatear = (m: number) => (m >= 120 ? `${(m / 60).toFixed(1)}h` : `${m} min`);
         lista.push({
           icono: "hora",
           texto: `Demora crítica en "${masLento.area}"`,
