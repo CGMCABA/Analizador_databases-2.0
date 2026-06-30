@@ -250,6 +250,11 @@ function validarYFormatearFecha(d: number, m: number, y: number): { mes: string;
     dateObj.getMonth() !== m - 1 ||
     dateObj.getDate() !== d
   ) return null;
+  // Reject dates strictly after today — a historical dataset shouldn't contain future
+  // events. Truncated to midnight so "today" itself stays valid (fecha > hoy, no >=).
+  const hoy = new Date();
+  const hoyTruncado = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+  if (dateObj.getTime() > hoyTruncado.getTime()) return null;
   const mesStr = MESES_NUM[String(m).padStart(2, "0")];
   if (!mesStr) return null;
   return {
@@ -1022,7 +1027,7 @@ export function parsearExcel(buffer: ArrayBuffer): DatosDashboard {
   // Quarantine notice — prepend so it's always the first suggestion
   if (registrosSinFechaValida > 0) {
     sugerencias.unshift(
-      `${registrosSinFechaValida} registro${registrosSinFechaValida !== 1 ? "s" : ""} ${registrosSinFechaValida !== 1 ? "fueron excluidos" : "fue excluido"} del análisis por tener fecha inválida o ausente. Revisá la columna de fecha en el archivo original para corregir estos registros.`
+      `${registrosSinFechaValida} registro${registrosSinFechaValida !== 1 ? "s" : ""} ${registrosSinFechaValida !== 1 ? "fueron excluidos" : "fue excluido"} del análisis por tener fecha inválida, ausente o futura. Revisá la columna de fecha en el archivo original para corregir estos registros.`
     );
   }
 
