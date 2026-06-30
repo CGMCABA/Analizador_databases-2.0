@@ -128,11 +128,16 @@ export default function Dashboard() {
     return () => window.removeEventListener("keydown", handler);
   }, [modoPresentation, modalComparacion, modoComparacion]);
 
-  const ejecutarComparacionMeses = () => {
-    if (!datos || !mesA || !mesB || mesA === mesB) return;
-    const dA = filtrarDatos(datos, { mes: mesA });
-    const dB = filtrarDatos(datos, { mes: mesB });
-    const resultado = compararPeriodos(dA, dB, mesA, mesB, "meses");
+  // Acepta mesA/mesB opcionales para poder dispararse directo (ej. desde el CTA de
+  // HallazgosPrincipales con los últimos 2 meses) sin pasar por el modal de selección.
+  // Misma lógica de siempre — solo agrega de dónde puede venir el mes elegido.
+  const ejecutarComparacionMeses = (mesAParam?: string, mesBParam?: string) => {
+    const a = mesAParam ?? mesA;
+    const b = mesBParam ?? mesB;
+    if (!datos || !a || !b || a === b) return;
+    const dA = filtrarDatos(datos, { mes: a });
+    const dB = filtrarDatos(datos, { mes: b });
+    const resultado = compararPeriodos(dA, dB, a, b, "meses");
     setComparacionResultado(resultado);
     setModalComparacion(false);
     setModoComparacion(true);
@@ -433,7 +438,22 @@ export default function Dashboard() {
               Archivo: {nombreArchivo}{mesFiltro ? ` · Mes: ${mesFiltro}` : ""}{calleFiltro ? ` · Calle: ${calleFiltro}` : ""}
             </div>
 
-            {perfil && <HallazgosPrincipales perfil={perfil} />}
+            {perfil && (
+              <HallazgosPrincipales
+                perfil={perfil}
+                onVerComparacion={() => {
+                  const ultimo = datos.meses[datos.meses.length - 1];
+                  const penultimo = datos.meses[datos.meses.length - 2];
+                  if (ultimo && penultimo) ejecutarComparacionMeses(penultimo, ultimo);
+                }}
+              />
+            )}
+
+            <CalidadDataset
+              calidadDataset={datos.calidadDataset}
+              tieneColumnaProgramacion={datos.tieneColumnaProgramacion}
+              etiquetaStatus={datos.etiquetaStatus}
+            />
 
             {datos.columnas.length > 0 && (
               <div className="presentation-hide bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 print:hidden">
@@ -861,13 +881,6 @@ export default function Dashboard() {
               />
             )}
 
-
-            <CalidadDataset
-              calidadDataset={datos.calidadDataset}
-              tieneColumnaProgramacion={datos.tieneColumnaProgramacion}
-              etiquetaStatus={datos.etiquetaStatus}
-            />
-
             {/* ─── PRESENTE ─────────────────────────────────────────────── */}
             <SeparadorCapa etiqueta="Presente" pregunta="¿Dónde estamos parados y qué es urgente?" acento="amber" />
 
@@ -1028,7 +1041,7 @@ export default function Dashboard() {
             {modoSeleccion === "meses" && datos.meses.length >= 2 && (
               <div className="px-6 pb-6 flex justify-end">
                 <button
-                  onClick={ejecutarComparacionMeses}
+                  onClick={() => ejecutarComparacionMeses()}
                   disabled={!mesA || !mesB || mesA === mesB}
                   className="flex items-center gap-2 bg-[#1a2b4a] hover:bg-[#243b63] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors"
                 >

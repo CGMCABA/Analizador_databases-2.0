@@ -1,9 +1,11 @@
 import { useMemo } from "react";
-import { Search, CheckCircle2, AlertCircle, AlertTriangle, TrendingUp, RefreshCw } from "lucide-react";
+import { Search, CheckCircle2, AlertCircle, AlertTriangle, TrendingUp, RefreshCw, ArrowUpRight, ArrowDownRight, ArrowRight, Zap, GitCompareArrows } from "lucide-react";
 import type { Anomalia, PerfilDataset } from "@/lib/insights/tipos";
 
 interface HallazgosPrincipalesProps {
   perfil: PerfilDataset;
+  /** Dispara la comparación de los últimos 2 meses (reusa ejecutarComparacionMeses de Dashboard.tsx). */
+  onVerComparacion?: () => void;
 }
 
 type Categoria = "concentracion" | "tendencia" | "recurrencia" | "anomalia";
@@ -166,6 +168,18 @@ function nivelCalidad(confianzaAnalitica: number): { etiqueta: string; color: st
   return { etiqueta: "Baja", color: "text-red-600 dark:text-red-400" };
 }
 
+const ETIQUETA_TENDENCIA: Record<string, { texto: string; icono: typeof ArrowUpRight; color: string }> = {
+  creciente: { texto: "Creciente", icono: ArrowUpRight, color: "text-amber-600 dark:text-amber-400" },
+  estable: { texto: "Estable", icono: ArrowRight, color: "text-slate-500 dark:text-slate-400" },
+  decreciente: { texto: "Decreciente", icono: ArrowDownRight, color: "text-blue-600 dark:text-blue-400" },
+};
+
+function nivelEstabilidad(volatilidadTemporal: number): string {
+  if (volatilidadTemporal < 0.3) return "Estable";
+  if (volatilidadTemporal < 0.6) return "Moderada";
+  return "Volátil";
+}
+
 const ESTILO_CATEGORIA: Record<
   Categoria,
   { borde: string; icono: typeof AlertCircle; iconoColor: string }
@@ -190,10 +204,20 @@ const ETIQUETA_ANALISIS: Record<string, string> = {
   anomalias: "Ver valores fuera de lo común",
 };
 
-export function HallazgosPrincipales({ perfil }: HallazgosPrincipalesProps) {
+export function HallazgosPrincipales({ perfil, onVerComparacion }: HallazgosPrincipalesProps) {
   const hallazgos = useMemo(() => seleccionarHallazgos(perfil), [perfil]);
   const calidad = nivelCalidad(perfil.caracteristicas.confianzaAnalitica);
-  const sugerencias = perfil.analisisDisponibles.slice(0, 2);
+  const tendencia = perfil.caracteristicas.tendenciaGeneral
+    ? ETIQUETA_TENDENCIA[perfil.caracteristicas.tendenciaGeneral]
+    : null;
+  const estabilidad = nivelEstabilidad(perfil.caracteristicas.volatilidadTemporal);
+  const sugerencias = [...perfil.analisisDisponibles].sort((a, b) => b.score - a.score);
+
+  const mostrarCTAComparacion =
+    !!onVerComparacion &&
+    perfil.capacidades.tieneComparacionPeriodos &&
+    !!perfil.caracteristicas.tendenciaGeneral &&
+    perfil.caracteristicas.tendenciaGeneral !== "estable";
 
   return (
     <div className="presentation-hide bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 print:hidden">
@@ -204,12 +228,25 @@ export function HallazgosPrincipales({ perfil }: HallazgosPrincipalesProps) {
           </div>
           <h2 className="font-semibold text-slate-800 dark:text-slate-100">Hallazgos Principales</h2>
         </div>
-        <span className="text-xs text-slate-500 dark:text-slate-400">
-          Calidad de datos:{" "}
-          <span className={`font-semibold ${calidad.color}`}>
-            {calidad.etiqueta} ({Math.round(perfil.caracteristicas.confianzaAnalitica * 100)}%)
+        <div className="flex items-center gap-3 flex-wrap text-xs text-slate-500 dark:text-slate-400">
+          <span>
+            Calidad de datos:{" "}
+            <span className={`font-semibold ${calidad.color}`}>
+              {calidad.etiqueta} ({Math.round(perfil.caracteristicas.confianzaAnalitica * 100)}%)
+            </span>
           </span>
-        </span>
+          {tendencia && (
+            <span className="flex items-center gap-1">
+              Tendencia:{" "}
+              <span className={`font-semibold inline-flex items-center gap-0.5 ${tendencia.color}`}>
+                <tendencia.icono className="h-3.5 w-3.5" /> {tendencia.texto}
+              </span>
+            </span>
+          )}
+          <span>
+            Estabilidad: <span className="font-semibold text-slate-600 dark:text-slate-300">{estabilidad}</span>
+          </span>
+        </div>
       </div>
 
       {hallazgos.length === 0 ? (
@@ -236,6 +273,21 @@ export function HallazgosPrincipales({ perfil }: HallazgosPrincipalesProps) {
             );
           })}
         </div>
+      )}
+
+      {mostrarCTAComparacion && (
+        <button
+          onClick={onVerComparacion}
+          className="mt-4 w-full flex items-center justify-between gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg px-3 py-2 text-left hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
+        >
+          <span className="flex items-center gap-2 text-xs text-amber-700 dark:text-amber-400">
+            <Zap className="h-3.5 w-3.5 shrink-0" />
+            Se detectó un cambio relevante entre períodos.
+          </span>
+          <span className="flex items-center gap-1 text-xs font-semibold text-amber-700 dark:text-amber-400 shrink-0">
+            <GitCompareArrows className="h-3.5 w-3.5" /> Ver comparación de períodos
+          </span>
+        </button>
       )}
 
       {sugerencias.length > 0 && (
