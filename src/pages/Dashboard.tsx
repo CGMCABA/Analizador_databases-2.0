@@ -12,6 +12,7 @@ import { GraficoResolucion } from "@/components/GraficoResolucion";
 import { GraficoLineas } from "@/components/GraficoLineas";
 import { GraficoCalles } from "@/components/GraficoCalles";
 import { ResumenGeografico } from "@/components/ResumenGeografico";
+import { ResumenTemporal } from "@/components/ResumenTemporal";
 import { GraficoMapa } from "@/components/GraficoMapa";
 import { GraficoHeatmap } from "@/components/GraficoHeatmap";
 import { GraficoHorario } from "@/components/GraficoHorario";
@@ -700,6 +701,8 @@ export default function Dashboard() {
 
             <InsightsPanel datos={datosFiltrados!} perfil={perfil!} mesFiltro={mesFiltro} />
 
+            {perfil && <ResumenTemporal perfil={perfil} />}
+
             <GraficoBarras
               datos={datos.porMes}
               mesFiltro={mesFiltro}
@@ -735,13 +738,32 @@ export default function Dashboard() {
               />
             )}
 
-            {(datosFiltrados?.crucesAutomaticos ?? []).map((cruce, idx) => (
-              <GraficoCruceHeatmap
-                key={`${cruce.tipo}-${idx}`}
-                cruce={cruce}
-                totalSolicitudes={datosFiltrados!.totalSolicitudes}
-              />
-            ))}
+            {(() => {
+              // La entrada "... por mes" de crucesAutomaticos es la misma matriz
+              // (categoría×mes) que ya muestra GraficoCruce de forma interactiva
+              // — se descarta acá, en presentación, sin tocar excelParser.ts.
+              const crucesSinMes = (datosFiltrados?.crucesAutomaticos ?? []).filter(
+                (c) => !c.titulo.toLowerCase().includes("mes")
+              );
+              if (crucesSinMes.length === 0) return null;
+              return (
+                <details className="group print:hidden">
+                  <summary className="presentation-hide flex items-center gap-2 cursor-pointer select-none px-1 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 list-none hover:text-slate-800 dark:hover:text-slate-100">
+                    <span className="transition-transform group-open:rotate-90 text-slate-400">▶</span>
+                    Ver patrones temporales avanzados (categoría × hora / día)
+                  </summary>
+                  <div className="mt-2 space-y-4">
+                    {crucesSinMes.map((cruce, idx) => (
+                      <GraficoCruceHeatmap
+                        key={`${cruce.tipo}-${idx}`}
+                        cruce={cruce}
+                        totalSolicitudes={datosFiltrados!.totalSolicitudes}
+                      />
+                    ))}
+                  </div>
+                </details>
+              );
+            })()}
 
             {(datosFiltrados?.porDiaSemana ?? []).length >= 7 && (
               <GraficoHeatmap datos={datosFiltrados!.porDiaSemana} />
