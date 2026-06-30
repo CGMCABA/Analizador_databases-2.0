@@ -31,8 +31,7 @@ import { PresentacionDiapositivas } from "@/components/PresentacionDiapositivas"
 import { GraficoTiempoRespuesta } from "@/components/GraficoTiempoRespuesta";
 import { PanelTiempoRespuestaInterno } from "@/components/PanelTiempoRespuestaInterno";
 import { PanelFalsosPositivos } from "@/components/PanelFalsosPositivos";
-import { PanelEventosCronicos } from "@/components/PanelEventosCronicos";
-import { IndiceFragilidad } from "@/components/IndiceFragilidad";
+import { ZonasDeAtencion } from "@/components/ZonasDeAtencion";
 import { CalidadDataset } from "@/components/CalidadDataset";
 import { SemaforoOperacional } from "@/components/SemaforoOperacional";
 import { RecomendacionesOperativas } from "@/components/RecomendacionesOperativas";
@@ -903,7 +902,12 @@ export default function Dashboard() {
 
             {semaforo && <SemaforoOperacional resultado={semaforo} />}
 
-            {!mesFiltro && <IndiceFragilidad indiceFragilidad={datosFiltrados?.indiceFragilidad ?? []} />}
+            {!mesFiltro && (
+              <ZonasDeAtencion
+                indiceFragilidad={datosFiltrados?.indiceFragilidad ?? []}
+                crucesCronicos={datosFiltrados?.crucesCronicos ?? []}
+              />
+            )}
 
             <PanelFalsosPositivos
               totalFalsosPositivos={datosFiltrados?.totalFalsosPositivos ?? 0}
@@ -911,8 +915,6 @@ export default function Dashboard() {
               totalSolicitudes={datosFiltrados?.totalSolicitudes ?? 0}
               tiposFalsosPositivos={datosFiltrados?.tiposFalsosPositivos ?? []}
             />
-
-            {!mesFiltro && <PanelEventosCronicos crucesCronicos={datosFiltrados?.crucesCronicos ?? []} />}
 
             {/* ─── FUTURO ───────────────────────────────────────────────── */}
             <SeparadorCapa etiqueta="Futuro" pregunta="¿Qué conviene hacer ahora?" acento="teal" />
