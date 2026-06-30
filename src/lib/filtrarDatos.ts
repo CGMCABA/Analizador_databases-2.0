@@ -1,6 +1,7 @@
-import { DatosDashboard } from "./excelParser";
+import { DatosDashboard, Solicitud } from "./excelParser";
 import {
   esResuelta,
+  normalizarCalle,
   calcularResolucion,
   calcularTiposFalsosPositivos,
   calcularPorMotivo,
@@ -19,19 +20,45 @@ import {
   calcularCruceCategoriaDia,
 } from "./agregaciones";
 
+export interface FiltrosDataset {
+  mes?: string;
+  /** Nombre de calle (cualquiera de calle1/calle2/calle3 de la solicitud). */
+  calle?: string;
+}
+
 /**
- * Devuelve un DatosDashboard con todas las agregaciones re-derivadas
- * desde los solicitudes/registros del mes indicado.
+ * Devuelve un DatosDashboard con todas las agregaciones re-derivadas desde el
+ * subconjunto de solicitudes/registros que cumple los filtros indicados (mes y/o calle).
  * Campos de config/schema (flags de tipo, nombres de columna, meses completos,
  * porMes, calidadDataset) se preservan del original para que el header y
  * el panel de calidad sigan mostrando contexto global.
  * crucesCronicos e indiceFragilidad se vacían porque son análisis multi-mes.
  */
-export function filtrarDatos(datos: DatosDashboard, mesFiltro: string): DatosDashboard {
-  if (!mesFiltro) return datos;
+export function filtrarDatos(datos: DatosDashboard, filtros: FiltrosDataset): DatosDashboard {
+  const { mes, calle } = filtros;
+  if (!mes && !calle) return datos;
 
-  const solicitudes = datos.solicitudes.filter((s) => s.mes === mesFiltro);
-  const registros = datos.registros.filter((r) => r._mes === mesFiltro);
+  const calleNorm = calle ? normalizarCalle(calle) : null;
+  const coincide = (s: Solicitud) => {
+    if (mes && s.mes !== mes) return false;
+    if (calleNorm) {
+      const enAlgunaCalle = [s.calle1, s.calle2, s.calle3].some(
+        (c) => normalizarCalle(c) === calleNorm
+      );
+      if (!enAlgunaCalle) return false;
+    }
+    return true;
+  };
+
+  // solicitudes y registros son arrays paralelos (excelParser.ts los construye fila
+  // a fila, uno junto al otro) — se filtran por índice para no depender de que
+  // RegistroGenerico tenga un campo de calle propio (solo tiene _mes/_fecha).
+  const indices: number[] = [];
+  datos.solicitudes.forEach((s, i) => {
+    if (coincide(s)) indices.push(i);
+  });
+  const solicitudes = indices.map((i) => datos.solicitudes[i]);
+  const registros = indices.map((i) => datos.registros[i]);
 
   const totalSolicitudes = solicitudes.length;
   const totalResueltas = solicitudes.filter((s) => esResuelta(s.resuelto, s.resolucion)).length;

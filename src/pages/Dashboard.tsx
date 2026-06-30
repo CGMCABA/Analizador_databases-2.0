@@ -99,6 +99,7 @@ export default function Dashboard() {
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string>("");
   const [mesFiltro, setMesFiltro] = useState<string>("");
+  const [calleFiltro, setCalleFiltro] = useState<string>("");
   const [modoPresentation, setModoPresentation] = useState(false);
   const [bannerExpandido, setBannerExpandido] = useState(false);
   const [bannerCuarentenaVisible, setBannerCuarentenaVisible] = useState(false);
@@ -128,8 +129,8 @@ export default function Dashboard() {
 
   const ejecutarComparacionMeses = () => {
     if (!datos || !mesA || !mesB || mesA === mesB) return;
-    const dA = filtrarDatos(datos, mesA);
-    const dB = filtrarDatos(datos, mesB);
+    const dA = filtrarDatos(datos, { mes: mesA });
+    const dB = filtrarDatos(datos, { mes: mesB });
     const resultado = compararPeriodos(dA, dB, mesA, mesB, "meses");
     setComparacionResultado(resultado);
     setModalComparacion(false);
@@ -179,6 +180,7 @@ export default function Dashboard() {
       setDatos(resultado);
       setNombreArchivo(nombre);
       setMesFiltro("");
+      setCalleFiltro("");
       setBannerExpandido(false);
       setBannerCuarentenaVisible((resultado.calidadDataset.registrosSinFechaValida ?? 0) > 0);
     } catch (e) {
@@ -219,13 +221,14 @@ export default function Dashboard() {
     setNombreArchivo("");
     setError("");
     setMesFiltro("");
+    setCalleFiltro("");
   };
 
   const datosFiltrados = useMemo<DatosDashboard | null>(() => {
     if (!datos) return null;
-    if (!mesFiltro) return datos;
-    return filtrarDatos(datos, mesFiltro);
-  }, [datos, mesFiltro]);
+    if (!mesFiltro && !calleFiltro) return datos;
+    return filtrarDatos(datos, { mes: mesFiltro || undefined, calle: calleFiltro || undefined });
+  }, [datos, mesFiltro, calleFiltro]);
 
   const ultimoMes = datos?.porMes?.[datos.porMes.length - 1];
   const penultimoMes = datos?.porMes?.[datos.porMes.length - 2];
@@ -295,6 +298,22 @@ export default function Dashboard() {
                   <option value="" className="bg-slate-800 text-white">Todos los meses</option>
                   {datos.meses.map((m) => (
                     <option key={m} value={m} className="bg-slate-800 text-white">{m}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+            {datos && datos.tieneColumnasCalles && datos.porCalle.length > 0 && (
+              <div className="presentation-hide flex items-center gap-1.5 bg-white/10 rounded-lg px-2 py-1.5">
+                <MapPin className="h-3.5 w-3.5 text-slate-300 shrink-0" />
+                <select
+                  value={calleFiltro}
+                  onChange={(e) => setCalleFiltro(e.target.value)}
+                  className="bg-transparent text-sm text-white font-medium focus:outline-none cursor-pointer pr-1 max-w-[180px]"
+                  style={{ colorScheme: "dark" }}
+                >
+                  <option value="" className="bg-slate-800 text-white">Todas las calles</option>
+                  {datos.porCalle.map((c) => (
+                    <option key={c.nombre} value={c.nombre} className="bg-slate-800 text-white">{c.nombre}</option>
                   ))}
                 </select>
               </div>
@@ -394,6 +413,15 @@ export default function Dashboard() {
                     >×</button>
                   </span>
                 )}
+                {calleFiltro && (
+                  <span className="text-xs text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/30 border border-violet-200 dark:border-violet-800 px-2.5 py-1 rounded-md font-medium">
+                    Calle: {calleFiltro}
+                    <button
+                      onClick={() => setCalleFiltro("")}
+                      className="ml-1.5 text-violet-400 hover:text-violet-600 dark:hover:text-violet-300"
+                    >×</button>
+                  </span>
+                )}
                 <div className="text-sm text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-md border border-slate-200 dark:border-slate-700">
                   {datos.meses.length} {datos.meses.length === 1 ? "mes" : "meses"} detectados
                 </div>
@@ -401,7 +429,7 @@ export default function Dashboard() {
             </div>
 
             <div className="hidden print:block text-xs text-slate-500 mb-2">
-              Archivo: {nombreArchivo}{mesFiltro ? ` · Mes: ${mesFiltro}` : ""}
+              Archivo: {nombreArchivo}{mesFiltro ? ` · Mes: ${mesFiltro}` : ""}{calleFiltro ? ` · Calle: ${calleFiltro}` : ""}
             </div>
 
             {datos.columnas.length > 0 && (
