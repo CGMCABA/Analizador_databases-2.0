@@ -1,4 +1,6 @@
 import { DatosDashboard, Solicitud } from "./excelParser";
+import type { PerfilDataset } from "./insights/tipos";
+import { calcularTopNPct, detectarPicoHistorico } from "./insights/detectores";
 
 export type EstadoSemaforo = "verde" | "amarillo" | "rojo" | "nd";
 
@@ -188,7 +190,7 @@ function tasaFpPorMotivo(solicitudes: Solicitud[]): { motivo: string; pct: numbe
     .sort((a, b) => b.pct - a.pct);
 }
 
-export function generarRecomendaciones(datos: DatosDashboard): Recomendacion[] {
+export function generarRecomendaciones(datos: DatosDashboard, perfil: PerfilDataset): Recomendacion[] {
   const lista: Recomendacion[] = [];
 
   // 1. Tasa de resolución/finalización
@@ -363,8 +365,10 @@ export function generarRecomendaciones(datos: DatosDashboard): Recomendacion[] {
     }
   }
 
-  // 10. Zona crónica
-  if (datos.crucesCronicos.length > 0) {
+  // 10. Zona crónica (gateado por perfil.patrones — mismo dato subyacente que
+  //     crucesCronicos[0], sin cambio visible; perfil.patrones es la fuente de verdad
+  //     que decide SI hay un patrón, datos.crucesCronicos da el detalle exacto).
+  if (perfil.patrones.length > 0 && datos.crucesCronicos.length > 0) {
     const top = datos.crucesCronicos[0];
     lista.push({
       prioridad: "alta",
@@ -374,25 +378,18 @@ export function generarRecomendaciones(datos: DatosDashboard): Recomendacion[] {
     });
   }
 
-  // 11. Concentración excesiva en un motivo (>40%)
-  if (datos.porMotivo.length > 0 && datos.totalSolicitudes > 0) {
-    const top = datos.porMotivo[0];
-    const pct = Math.round((top.cantidad / datos.totalSolicitudes) * 100);
-    if (pct >= 50) {
-      lista.push({
-        prioridad: "media",
-        texto: `Alta concentración en "${top.nombre}": ${pct}% del total`,
-        detalle: "Revisar si la tipificación refleja la realidad operativa o existe un problema de clasificación.",
-        icono: "alerta",
-      });
-    } else if (pct >= 40) {
-      lista.push({
-        prioridad: "baja",
-        texto: `"${top.nombre}" concentra el ${pct}% de los registros`,
-        detalle: "Analizar si esta categoría agrupa varios sub-tipos que conviene separar para mayor granularidad.",
-        icono: "tendencia",
-      });
-    }
+  // 11. Concentración excesiva en una columna categórica (vía perfil.insights — generaliza
+  //     a cualquier columna, no solo motivo; umbrales 40%/60% del motor reemplazan los
+  //     40%/50% que tenía esta función antes — PerfilDataset es ahora la única fuente
+  //     de verdad para "concentración significativa" en todo el proyecto).
+  for (const insight of perfil.insights) {
+    if (insight.tipo !== "concentracion") continue;
+    lista.push({
+      prioridad: insight.severidad === "critico" ? "alta" : "media",
+      texto: insight.texto,
+      detalle: insight.detalle,
+      icono: "alerta",
+    });
   }
 
   // 12. Motivos que lideran el top-3 mensual por 3+ meses consecutivos (demanda estructural)
@@ -411,7 +408,12 @@ export function generarRecomendaciones(datos: DatosDashboard): Recomendacion[] {
     }
   }
 
-  // 13. Cobertura temporal insuficiente (<3 meses)
+  // 13. Cobertura temporal insuficiente (<3 meses).
+  // NOTA: no se migró a capacidades.tieneComparacionPeriodos porque ese flag corta en
+  // ">=2 meses" (para habilitar comparación de períodos), mientras que esta recomendación
+  // usa un umbral de negocio distinto ("<3 meses" para hablar de tendencias/estacionalidad).
+  // Son dos umbrales legítimamente distintos sobre la misma variable (datos.meses.length);
+  // forzarlos a coincidir habría cambiado cuándo se dispara este aviso con exactamente 2 meses.
   if (datos.meses.length < 3 && datos.meses.length > 0) {
     lista.push({
       prioridad: "baja",
@@ -431,32 +433,45 @@ export function generarRecomendaciones(datos: DatosDashboard): Recomendacion[] {
     });
   }
 
-  // 15. Concentración de días: dos categorías lideran X% del total (siempre computable)
+  // 15. Top-2 categorías concentran ≥60% del total (vía calcularTopNPct sobre
+  //     distribucionesCategoricas — reutiliza la agregación ya calculada por
+  //     excelParser.ts, no recorre filas). No es redundante con el #11: detecta
+  //     concentración repartida en 2 categorías que individualmente no llegan al 40%.
   if (datos.porMotivo.length >= 2 && datos.totalSolicitudes > 0) {
-    const top2 = datos.porMotivo[0].cantidad + datos.porMotivo[1].cantidad;
-    const pct2 = Math.round((top2 / datos.totalSolicitudes) * 100);
-    if (pct2 >= 60) {
-      lista.push({
-        prioridad: "baja",
-        texto: `Las 2 categorías más frecuentes concentran el ${pct2}% de los registros`,
-        detalle: `"${datos.porMotivo[0].nombre}" y "${datos.porMotivo[1].nombre}" dominan la demanda. Analizar si requieren atención diferenciada.`,
-        icono: "alerta",
-      });
+    const distribucionPrincipal = datos.distribucionesCategoricas.find(
+      (d) => d.columna === datos.colCategorica1
+    );
+    if (distribucionPrincipal) {
+      const pct2 = calcularTopNPct(distribucionPrincipal.datos, 2);
+      const top2Nombres = [...distribucionPrincipal.datos]
+        .sort((a, b) => b.cantidad - a.cantidad)
+        .slice(0, 2);
+      if (pct2 >= 60) {
+        lista.push({
+          prioridad: "baja",
+          texto: `Las 2 categorías más frecuentes concentran el ${pct2}% de los registros`,
+          detalle: `"${top2Nombres[0]?.nombre}" y "${top2Nombres[1]?.nombre}" dominan la demanda. Analizar si requieren atención diferenciada.`,
+          icono: "alerta",
+        });
+      }
     }
   }
 
-  // 16. Mes pico: evaluar capacidad operativa
-  if (datos.porMes.length >= 2) {
-    const mesPico = [...datos.porMes].sort((a, b) => b.cantidad - a.cantidad)[0];
-    const promMensual = datos.totalSolicitudes / datos.meses.length;
-    if (mesPico.cantidad > promMensual * 1.5) {
-      lista.push({
-        prioridad: "baja",
-        texto: `Pico de demanda en ${mesPico.mes}: ${mesPico.cantidad.toLocaleString("es-AR")} registros (${Math.round((mesPico.cantidad / promMensual - 1) * 100)}% sobre el promedio)`,
-        detalle: "Planificar capacidad operativa para meses de alta demanda con base en este patrón histórico.",
-        icono: "tendencia",
-      });
-    }
+  // 16. Mes pico: evaluar capacidad operativa.
+  // NOTA: se probó reusar perfil.anomalias (detector de outliers por IQR, ya usado en
+  // el resto del motor) pero detectarOutliers exige ≥5 puntos para ser confiable, y la
+  // mayoría de los datasets reales tienen 3-4 meses — con tan pocos puntos el IQR no
+  // detecta el pico (matemáticamente queda "escondido" en su propio cuartil). Se usa en
+  // su lugar detectarPicoHistorico (insights/detectores.ts), un comparador directo
+  // apto para series cortas — vive en insights/, no se duplica la lógica acá.
+  const picoHistorico = detectarPicoHistorico(datos.porMes);
+  if (picoHistorico) {
+    lista.push({
+      prioridad: "baja",
+      texto: picoHistorico.texto,
+      detalle: "Planificar capacidad operativa para meses de alta demanda con base en este patrón histórico.",
+      icono: "tendencia",
+    });
   }
 
   const orden: Record<PrioridadRecomendacion, number> = { alta: 0, media: 1, baja: 2 };

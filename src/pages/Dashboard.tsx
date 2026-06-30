@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo, useEffect } from "react";
 import { parsearExcel, DatosDashboard } from "@/lib/excelParser";
 import { filtrarDatos } from "@/lib/filtrarDatos";
 import { construirUrlExportXlsx } from "@/lib/googleSheetsUrl";
+import { perfilarDataset } from "@/lib/insights/perfilDataset";
 import { calcularSemaforo, generarRecomendaciones } from "@/lib/semaforoRecomendaciones";
 import { etiquetaTipo } from "@/lib/columnClassifier";
 import { PaginaInicio } from "@/components/PaginaInicio";
@@ -256,9 +257,17 @@ export default function Dashboard() {
     [datosFiltrados]
   );
 
-  const recomendaciones = useMemo(
-    () => (datosFiltrados ? generarRecomendaciones(datosFiltrados) : []),
+  // Perfilado de dataset (capacidades/características/insights) — se calcula una sola
+  // vez acá y se reutiliza tanto en InsightsPanel como en generarRecomendaciones, para
+  // no correr perfilarDataset() dos veces sobre el mismo datosFiltrados por render.
+  const perfil = useMemo(
+    () => (datosFiltrados ? perfilarDataset(datosFiltrados) : null),
     [datosFiltrados]
+  );
+
+  const recomendaciones = useMemo(
+    () => (datosFiltrados && perfil ? generarRecomendaciones(datosFiltrados, perfil) : []),
+    [datosFiltrados, perfil]
   );
 
   return (
@@ -638,7 +647,7 @@ export default function Dashboard() {
               </div>
             )}
 
-            <InsightsPanel datos={datosFiltrados!} mesFiltro={mesFiltro} />
+            <InsightsPanel datos={datosFiltrados!} perfil={perfil!} mesFiltro={mesFiltro} />
 
             <GraficoBarras
               datos={datos.porMes}
@@ -861,6 +870,7 @@ export default function Dashboard() {
       {modoPresentation && datosFiltrados && (
         <PresentacionDiapositivas
           datos={datosFiltrados}
+          perfil={perfil!}
           nombreArchivo={nombreArchivo}
           onCerrar={() => setModoPresentation(false)}
         />

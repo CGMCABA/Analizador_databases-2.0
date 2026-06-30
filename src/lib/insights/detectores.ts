@@ -21,11 +21,19 @@ export function calcularEntropiaNormalizada(distribucion: { cantidad: number }[]
   return maxEntropia > 0 ? Math.round((entropia / maxEntropia) * 100) / 100 : 0;
 }
 
-export function calcularTop1Pct(distribucion: { cantidad: number }[]): number {
+/** % acumulado de las `n` categorías más frecuentes de una distribución. */
+export function calcularTopNPct(distribucion: { cantidad: number }[], n: number): number {
   const total = distribucion.reduce((acc, d) => acc + d.cantidad, 0);
   if (total === 0) return 0;
-  const top1 = Math.max(...distribucion.map((d) => d.cantidad));
-  return Math.round((top1 / total) * 100);
+  const topN = [...distribucion.map((d) => d.cantidad)]
+    .sort((a, b) => b - a)
+    .slice(0, n)
+    .reduce((acc, v) => acc + v, 0);
+  return Math.round((topN / total) * 100);
+}
+
+export function calcularTop1Pct(distribucion: { cantidad: number }[]): number {
+  return calcularTopNPct(distribucion, 1);
 }
 
 // ── Insight 1: concentración excesiva en una columna categórica ─────────────
@@ -91,6 +99,33 @@ export function detectarOutliers(
       desviacion: Math.round(((s.valor - limiteSuperior) / iqr) * 100) / 100,
       texto: `"${s.etiqueta}" tiene un valor atípicamente alto (${s.valor}) en "${nombreColumna}"`,
     }));
+}
+
+/**
+ * Mes de mayor volumen vs. promedio del resto de los meses. Es un detector aparte de
+ * detectarOutliers/IQR a propósito: con series de pocos meses (típico en datasets
+ * municipales, 3-4 meses) el método IQR no es confiable — el outlier queda "escondido"
+ * dentro de su propio cuartil cuando hay tan pocos puntos. Esta es una comparación
+ * directa (ratio simple), apta para series cortas, sin duplicar el cálculo de
+ * detectarOutliers (sirven para casos distintos: aquí no exigimos mínimo de puntos
+ * más allá de 2 meses, porque la comparación es contra "el resto", no contra cuartiles).
+ */
+export function detectarPicoHistorico(
+  porMes: { mes: string; cantidad: number }[]
+): Anomalia | null {
+  if (porMes.length < 2) return null;
+  const pico = [...porMes].sort((a, b) => b.cantidad - a.cantidad)[0];
+  const resto = porMes.filter((m) => m.mes !== pico.mes);
+  const promedioResto = resto.reduce((a, m) => a + m.cantidad, 0) / resto.length;
+  if (promedioResto === 0 || pico.cantidad <= promedioResto * 1.5) return null;
+  return {
+    columna: "Volumen mensual",
+    etiqueta: pico.mes,
+    valorObservado: pico.cantidad,
+    valorEsperado: Math.round(promedioResto),
+    desviacion: Math.round(((pico.cantidad - promedioResto) / promedioResto) * 100) / 100,
+    texto: `Pico de demanda en ${pico.mes}: ${pico.cantidad} registros (${Math.round(((pico.cantidad - promedioResto) / promedioResto) * 100)}% sobre el promedio del resto)`,
+  };
 }
 
 /** Corre detectarOutliers sobre las series temporales/rankings ya agregados en DatosDashboard. */

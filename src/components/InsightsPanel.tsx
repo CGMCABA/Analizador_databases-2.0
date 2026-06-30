@@ -1,10 +1,11 @@
 import { useMemo } from "react";
 import { DatosDashboard } from "@/lib/excelParser";
-import { perfilarDataset } from "@/lib/insights/perfilDataset";
+import type { PerfilDataset } from "@/lib/insights/tipos";
 import { Lightbulb, TrendingUp, TrendingDown, Minus, Clock, MapPin, Tag, Calendar, AlertTriangle } from "lucide-react";
 
 interface InsightsPanelProps {
   datos: DatosDashboard;
+  perfil: PerfilDataset;
   mesFiltro: string;
 }
 
@@ -48,7 +49,7 @@ function pct(parte: number, total: number) {
   return total > 0 ? Math.round((parte / total) * 100) : 0;
 }
 
-export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
+export function InsightsPanel({ datos, perfil, mesFiltro }: InsightsPanelProps) {
   const insights = useMemo<InsightVisual[]>(() => {
     const lista: InsightVisual[] = [];
     const total = datos.totalSolicitudes;
@@ -57,8 +58,8 @@ export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
     // ── Motor de insights genérico (capacidades + características del dataset) ──
     // Cubre: concentración excesiva en cualquier columna categórica, cambios
     // significativos de volumen vs. promedio reciente, y recurrencia (patrones).
-    const perfil = perfilarDataset(datos);
-
+    // `perfil` se calcula una sola vez en Dashboard.tsx y se reutiliza acá y en
+    // generarRecomendaciones, en vez de recalcularse en cada consumidor.
     for (const i of perfil.insights) {
       lista.push({
         icono:
@@ -218,7 +219,7 @@ export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
     }
 
     return lista.slice(0, 9);
-  }, [datos, mesFiltro]);
+  }, [datos, perfil, mesFiltro]);
 
   if (insights.length === 0) return null;
 

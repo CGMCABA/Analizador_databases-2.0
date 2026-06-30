@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DatosDashboard } from "@/lib/excelParser";
+import type { PerfilDataset } from "@/lib/insights/tipos";
 import { calcularSemaforo, generarRecomendaciones } from "@/lib/semaforoRecomendaciones";
 import { GraficoBarras } from "@/components/GraficoBarras";
 import { GraficoCruce } from "@/components/GraficoCruce";
@@ -38,6 +39,7 @@ import {
 
 interface PresentacionDiapositivasProps {
   datos: DatosDashboard;
+  perfil: PerfilDataset;
   nombreArchivo: string;
   onCerrar: () => void;
 }
@@ -542,9 +544,9 @@ const PRIORIDAD_DOT: Record<string, string> = {
   baja: "#3b82f6",
 };
 
-function EstadoOperativoSlide({ datos }: { datos: DatosDashboard }) {
+function EstadoOperativoSlide({ datos, perfil }: { datos: DatosDashboard; perfil: PerfilDataset }) {
   const semaforo = calcularSemaforo(datos);
-  const recomendaciones = generarRecomendaciones(datos).filter((r) => r.prioridad === "alta").slice(0, 3);
+  const recomendaciones = generarRecomendaciones(datos, perfil).filter((r) => r.prioridad === "alta").slice(0, 3);
 
   return (
     <div className="space-y-6">
@@ -734,7 +736,7 @@ const TITULO_TIPO: Record<string, string> = {
   generico: "Dashboard Analítico",
 };
 
-export function PresentacionDiapositivas({ datos, nombreArchivo, onCerrar }: PresentacionDiapositivasProps) {
+export function PresentacionDiapositivas({ datos, perfil, nombreArchivo, onCerrar }: PresentacionDiapositivasProps) {
   const [indice, setIndice] = useState(0);
   const [dir, setDir] = useState<1 | -1>(1);
   const [slideKey, setSlideKey] = useState(0);
@@ -1113,7 +1115,7 @@ export function PresentacionDiapositivas({ datos, nombreArchivo, onCerrar }: Pre
                 </div>
               )}
 
-              {meta?.id === "estadoOperativo" && <EstadoOperativoSlide datos={datos} />}
+              {meta?.id === "estadoOperativo" && <EstadoOperativoSlide datos={datos} perfil={perfil} />}
               {meta?.id === "falsosPositivos" && <FalsosPositivosSlide datos={datos} />}
               {meta?.id === "eventosCronicos" && <EventosCronicosSlide datos={datos} />}
               {meta?.id === "fragilidad" && <FragilidadSlide datos={datos} />}
