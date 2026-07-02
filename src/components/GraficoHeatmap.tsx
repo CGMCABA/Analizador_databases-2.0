@@ -19,6 +19,7 @@ interface DatoDia {
 interface GraficoHeatmapProps {
   datos: DatoDia[];
   topMotivoPorDia?: Record<string, string>;
+  totalSolicitudes?: number;
 }
 
 interface CustomTooltipProps {
@@ -26,19 +27,29 @@ interface CustomTooltipProps {
   payload?: { value: number; payload: DatoDia }[];
   label?: string;
   topMotivoPorDia?: Record<string, string>;
+  totalSolicitudes?: number;
 }
 
-const CustomTooltip = ({ active, payload, label, topMotivoPorDia }: CustomTooltipProps) => {
+const CustomTooltip = ({ active, payload, label, topMotivoPorDia, totalSolicitudes }: CustomTooltipProps) => {
   if (!active || !payload?.length) return null;
+  const cantidad = payload[0].value;
   const motivo = label && topMotivoPorDia ? topMotivoPorDia[label] : undefined;
+  const pct = totalSolicitudes && totalSolicitudes > 0
+    ? Math.round((cantidad / totalSolicitudes) * 100)
+    : undefined;
   return (
     <div className="chart-tooltip">
       <p style={{ color: "var(--tooltip-text)", fontWeight: 700, marginBottom: 4 }}>{label}</p>
       <p style={{ color: "var(--tooltip-muted)" }}>
         Registros:{" "}
         <span style={{ color: "var(--tooltip-text)", fontWeight: 700 }}>
-          {payload[0].value.toLocaleString("es-AR")}
+          {cantidad.toLocaleString("es-AR")}
         </span>
+        {pct !== undefined && (
+          <span style={{ color: "var(--tooltip-muted)", fontWeight: 400 }}>
+            {" "}· <strong style={{ color: "var(--tooltip-text)" }}>{pct}%</strong> del total
+          </span>
+        )}
       </p>
       {motivo && (
         <p style={{ color: "var(--tooltip-muted)", marginTop: 6, paddingTop: 6, borderTop: "1px solid var(--tooltip-border)", fontSize: 11 }}>
@@ -59,7 +70,7 @@ function colorPorIntensidad(valor: number, max: number): string {
   return "#bfdbfe";
 }
 
-export function GraficoHeatmap({ datos, topMotivoPorDia }: GraficoHeatmapProps) {
+export function GraficoHeatmap({ datos, topMotivoPorDia, totalSolicitudes }: GraficoHeatmapProps) {
   if (datos.length < 7) return null;
 
   const max = Math.max(...datos.map((d) => d.cantidad));
@@ -97,7 +108,7 @@ export function GraficoHeatmap({ datos, topMotivoPorDia }: GraficoHeatmapProps) 
             axisLine={false}
             width={80}
           />
-          <Tooltip content={<CustomTooltip topMotivoPorDia={topMotivoPorDia} />} cursor={{ fill: "rgba(148,163,184,0.08)" }} />
+          <Tooltip content={<CustomTooltip topMotivoPorDia={topMotivoPorDia} totalSolicitudes={totalSolicitudes} />} cursor={{ fill: "rgba(148,163,184,0.08)" }} />
           <Bar dataKey="cantidad" radius={[0, 6, 6, 0]}>
             {datos.map((entry, i) => (
               <Cell key={i} fill={colorPorIntensidad(entry.cantidad, max)} />

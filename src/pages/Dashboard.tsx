@@ -791,6 +791,7 @@ export default function Dashboard() {
               <GraficoHeatmap
                 datos={datosFiltrados!.porDiaSemana}
                 topMotivoPorDia={topMotivoPorDia}
+                totalSolicitudes={datosFiltrados!.totalSolicitudes}
               />
             )}
 
