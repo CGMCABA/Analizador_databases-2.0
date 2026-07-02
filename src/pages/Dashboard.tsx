@@ -876,7 +876,6 @@ export default function Dashboard() {
 
             <LineaDeTiempo
               solicitudes={datosFiltrados!.solicitudes}
-              porMes={datos.porMes}
               porDiaSemana={datosFiltrados!.porDiaSemana}
               meses={datos.meses}
               totalSolicitudes={datosFiltrados!.totalSolicitudes}

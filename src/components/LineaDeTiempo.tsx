@@ -1,11 +1,7 @@
 import { useMemo, useState, useEffect, useRef } from "react";
-import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid,
-  Tooltip as RechartsTooltip, ResponsiveContainer,
-} from "recharts";
 import { Solicitud } from "@/lib/excelParser";
 import { useDarkMode } from "@/hooks/useDarkMode";
-import { Clock, CalendarDays, TrendingUp } from "lucide-react";
+import { Clock, CalendarDays } from "lucide-react";
 
 const MESES_ES = [
   "Enero","Febrero","Marzo","Abril","Mayo","Junio",
@@ -31,11 +27,10 @@ const DIAS_CABECERA = ["L", "M", "X", "J", "V", "S", "D"];
 const DIAS_SEMANA_JS = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
 const ORDEN_DIAS = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
 
-type Vista = "calendario" | "semana" | "tendencia";
+type Vista = "calendario" | "semana";
 
 interface LineaDeTiempoProps {
   solicitudes: Solicitud[];
-  porMes: { mes: string; cantidad: number; resueltas: number }[];
   porDiaSemana: { dia: string; cantidad: number }[];
   meses: string[];
   totalSolicitudes: number;
@@ -81,39 +76,8 @@ function buildMonthGrid(ym: string) {
   return { cells, year: y, month: m };
 }
 
-interface CustomTooltipAreaProps {
-  active?: boolean;
-  payload?: { value: number; name: string; color: string }[];
-  label?: string;
-}
-
-function CustomTooltipArea({ active, payload, label }: CustomTooltipAreaProps) {
-  if (!active || !payload?.length) return null;
-  const total = payload.find(p => p.name === "total")?.value ?? 0;
-  const resueltas = payload.find(p => p.name === "resueltas")?.value ?? 0;
-  const tasa = total > 0 ? Math.round((resueltas / total) * 100) : 0;
-  return (
-    <div className="chart-tooltip">
-      <p style={{ color: "var(--tooltip-text)", fontWeight: 600, marginBottom: 6 }}>{label}</p>
-      <div className="flex items-center gap-2 mb-1">
-        <div className="w-2.5 h-2.5 rounded-full bg-blue-400 shrink-0" />
-        <span style={{ color: "var(--tooltip-muted)" }}>Total:</span>
-        <span style={{ color: "var(--tooltip-text)", fontWeight: 600 }}>{total.toLocaleString("es-AR")}</span>
-      </div>
-      <div className="flex items-center gap-2 mb-1">
-        <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 shrink-0" />
-        <span style={{ color: "var(--tooltip-muted)" }}>Resueltas:</span>
-        <span style={{ color: "var(--tooltip-text)", fontWeight: 600 }}>{resueltas.toLocaleString("es-AR")}</span>
-      </div>
-      <p style={{ color: "var(--tooltip-muted)", fontSize: 11, marginTop: 6, paddingTop: 6, borderTop: "1px solid var(--tooltip-border)" }}>
-        Tasa: <strong style={{ color: "#f59e0b" }}>{tasa}%</strong>
-      </p>
-    </div>
-  );
-}
-
 export function LineaDeTiempo({
-  solicitudes, porMes, porDiaSemana, meses, totalSolicitudes,
+  solicitudes, porDiaSemana, meses, totalSolicitudes,
 }: LineaDeTiempoProps) {
   const [montado, setMontado] = useState(false);
   useEffect(() => { setMontado(true); }, []);
@@ -186,19 +150,10 @@ export function LineaDeTiempo({
   const promedioDia = totalDias / Math.max(semanaOrdenada.length, 1);
 
   const hasFechas = calData.sortedYMs.length > 0;
-  const hasArea = porMes.length > 0;
-
-  const porMesAbrev = porMes.map(m => ({
-    mes: m.mes.slice(0, 3),
-    mesCompleto: m.mes,
-    total: m.cantidad,
-    resueltas: m.resueltas,
-  }));
 
   const TABS: { id: Vista; label: string; icon: React.ElementType }[] = [
     { id: "calendario", label: "Calendario", icon: CalendarDays },
     { id: "semana",     label: "Día de semana", icon: Clock },
-    { id: "tendencia",  label: "Tendencia mensual", icon: TrendingUp },
   ];
 
   const handleCeldaHover = (
@@ -230,7 +185,7 @@ export function LineaDeTiempo({
               </h3>
             </div>
             <p className="text-xs text-slate-400 dark:text-slate-500 ml-6">
-              Distribución temporal de actividad · días, semana y tendencia mensual
+              Distribución diaria por calendario · patrones semanales y motivo frecuente
             </p>
           </div>
           <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700/50 rounded-lg p-1 shrink-0 self-start sm:self-center">
@@ -434,79 +389,7 @@ export function LineaDeTiempo({
           </div>
         )}
 
-        {vista === "tendencia" && (
-          <div className="pb-5">
-            {!hasArea ? (
-              <div className="flex items-center justify-center h-32 text-slate-400 text-sm">
-                No hay datos mensuales disponibles
-              </div>
-            ) : (
-              <>
-                <div className="flex items-center gap-4 mb-4 flex-wrap">
-                  <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
-                    <span className="w-3 h-3 rounded-sm" style={{ background: "rgba(59,130,246,0.6)" }} />
-                    Total registros
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
-                    <span className="w-3 h-3 rounded-sm" style={{ background: "rgba(16,185,129,0.6)" }} />
-                    Resueltas
-                  </div>
-                </div>
-                <ResponsiveContainer width="100%" height={320}>
-                  <AreaChart data={porMesAbrev} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
-                    <defs>
-                      <linearGradient id="ltGradTotal" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.35} />
-                        <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.02} />
-                      </linearGradient>
-                      <linearGradient id="ltGradResueltas" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#10b981" stopOpacity={0.35} />
-                        <stop offset="100%" stopColor="#10b981" stopOpacity={0.02} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--recharts-grid)" />
-                    <XAxis
-                      dataKey="mes"
-                      tick={{ fontSize: 11, fill: "var(--recharts-axis)" }}
-                      tickLine={false}
-                      axisLine={{ stroke: "var(--recharts-grid)" }}
-                    />
-                    <YAxis
-                      tick={{ fontSize: 11, fill: "var(--recharts-axis)" }}
-                      tickLine={false}
-                      axisLine={false}
-                      width={35}
-                    />
-                    <RechartsTooltip
-                      content={<CustomTooltipArea />}
-                      cursor={{ stroke: "var(--recharts-grid)", strokeWidth: 1 }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="total"
-                      name="total"
-                      stroke="#3b82f6"
-                      strokeWidth={2.5}
-                      fill="url(#ltGradTotal)"
-                      dot={{ fill: "#3b82f6", r: 4, strokeWidth: 2, stroke: isDark ? "#1e293b" : "#fff" }}
-                      activeDot={{ r: 6, fill: "#3b82f6" }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="resueltas"
-                      name="resueltas"
-                      stroke="#10b981"
-                      strokeWidth={2.5}
-                      fill="url(#ltGradResueltas)"
-                      dot={{ fill: "#10b981", r: 4, strokeWidth: 2, stroke: isDark ? "#1e293b" : "#fff" }}
-                      activeDot={{ r: 6, fill: "#10b981" }}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </>
-            )}
-          </div>
-        )}
+
       </div>
 
       {tooltip && (
