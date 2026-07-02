@@ -119,7 +119,7 @@ function PanelDetalle({
             </span>
           </div>
           <span className="text-slate-500 dark:text-slate-400 text-xs">
-            {calle.cantidad} menciones · representa el {pctTotal}% del total de registros
+            {calle.cantidad} menciones · presente en el {pctTotal}% de los registros
           </span>
         </div>
         <button
@@ -204,10 +204,10 @@ export function GraficoCalles({ datos, totalSolicitudes }: GraficoCallesProps) {
         <div>
           <h3 className="font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
             <MapPin className="h-4 w-4 text-blue-500" />
-            Calles con más registros
+            Calles más mencionadas en los registros
           </h3>
           <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-            {datos.length} calles distintas · hacé clic en una barra para ver el desglose
+            {datos.length} calles distintas · cada registro puede mencionar hasta 3 · hacé clic en una barra para ver el desglose
           </p>
         </div>
         <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-0.5 gap-0.5 shrink-0">
@@ -243,7 +243,7 @@ export function GraficoCalles({ datos, totalSolicitudes }: GraficoCallesProps) {
                 {d.nombre.length > 24 ? d.nombre.slice(0, 23) + "…" : d.nombre}
               </div>
               <div className="text-xs text-slate-500 dark:text-slate-400">{d.cantidad} menciones</div>
-              <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">{pct}% del total</div>
+              <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">en el {pct}% de los registros</div>
             </button>
           );
         })}
@@ -308,9 +308,6 @@ export function GraficoCalles({ datos, totalSolicitudes }: GraficoCallesProps) {
         />
       )}
 
-      <p className="text-xs text-slate-400 dark:text-slate-500 mt-3 text-center">
-        Nota: un registro puede mencionar hasta 3 calles, por lo que el total de menciones puede superar el total de registros.
-      </p>
     </div>
   );
 }
