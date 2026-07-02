@@ -902,9 +902,7 @@ export default function Dashboard() {
 
             <LineaDeTiempo
               solicitudes={datosFiltrados!.solicitudes}
-              porDiaSemana={datosFiltrados!.porDiaSemana}
               meses={datos.meses}
-              totalSolicitudes={datosFiltrados!.totalSolicitudes}
             />
 
             {((datosFiltrados?.porTiempoRespuestaArea ?? []).length >= 2 || (datosFiltrados?.tiempoRespuestaPorMotivo ?? []).length >= 2) && (
