@@ -1,5 +1,7 @@
 import * as XLSX from "xlsx";
 import { clasificarColumnas } from "./columnClassifier";
+import { detectarConceptos } from "./semantica/detectarConceptos";
+import type { ConceptoSemantico, DiagnosticoSemantico } from "./semantica/conceptos";
 import {
   esResuelta,
   canonicalizarInterseccion,
@@ -171,6 +173,7 @@ export interface DatosDashboard {
   colLinea: string | null;
   colCalle1: string | null;
   registros: RegistroGenerico[];
+  mapaSemantico?: DiagnosticoSemantico;
 }
 
 const MESES_ABREV: Record<string, string> = {
@@ -378,14 +381,6 @@ function leerWorkbook(buffer: ArrayBuffer): XLSX.WorkBook {
   return XLSX.read(buffer, { type: "array" });
 }
 
-function encontrarCol(headers: string[], ...terminos: string[]): number {
-  for (let i = 0; i < headers.length; i++) {
-    const h = headers[i].toLowerCase().trim();
-    if (terminos.some((t) => h.includes(t.toLowerCase()))) return i;
-  }
-  return -1;
-}
-
 export function parsearExcel(buffer: ArrayBuffer): DatosDashboard {
   const workbook = leerWorkbook(buffer);
   const solicitudes: Solicitud[] = [];
@@ -424,6 +419,7 @@ export function parsearExcel(buffer: ArrayBuffer): DatosDashboard {
   let tieneHoraDerivacion = false;
   let idxProgramacionGlobal = -1;
   let tieneColumnaProgramacion = false;
+  let diagnosticoSemantico: DiagnosticoSemantico | null = null;
   let etiquetaStatus = "Resuelto";
   let colLinea: string | null = null;
   let colCalle1: string | null = null;
@@ -453,8 +449,31 @@ export function parsearExcel(buffer: ArrayBuffer): DatosDashboard {
     if (columnasGlobales.length === 0) {
       columnasGlobales = clasificarColumnas(headers, rows.slice(1) as unknown[][]);
 
+      // ── Motor Semántico ───────────────────────────────────────────────────
+      diagnosticoSemantico = detectarConceptos(columnasGlobales, rows.slice(1) as unknown[][]);
+      const idx = (c: ConceptoSemantico): number =>
+        diagnosticoSemantico!.mapa[c]?.indice ?? -1;
+
+      if (import.meta.env?.DEV) {
+        console.group("[SemanticMotor] Diagnóstico de columnas");
+        console.table(
+          Object.entries(diagnosticoSemantico.mapa).map(([concepto, asig]) => ({
+            Concepto: concepto,
+            Columna: asig?.columnaOriginal ?? "—",
+            Confianza: asig?.confianza ?? 0,
+            Fuente: asig?.fuenteDeteccion ?? "—",
+            Tensión: asig?.evidencia.tensionDetectada ? "⚠️" : "—",
+          }))
+        );
+        if (diagnosticoSemantico.columnasSinConcepto.length > 0) {
+          console.warn("[SemanticMotor] Sin concepto:", diagnosticoSemantico.columnasSinConcepto);
+        }
+        console.groupEnd();
+      }
+
       tieneColumnaStatus = columnasGlobales.some((c) => c.tipo === "status");
-      tieneColumnasCalles = columnasGlobales.some((c) => c.tipo === "direccion");
+      tieneColumnasCalles =
+        idx("CallePrincipal") >= 0 || columnasGlobales.some((c) => c.tipo === "direccion");
 
       // Fill-rate check: if status column exists but has <5% data, suppress resolution UI
       if (tieneColumnaStatus) {
@@ -470,23 +489,25 @@ export function parsearExcel(buffer: ArrayBuffer): DatosDashboard {
       }
 
       const categoricas = columnasGlobales.filter((c) => c.tipo === "categorica");
-      tieneColumnaLinea = categoricas.some((c) =>
-        c.nombre.toLowerCase().includes("linea") ||
-        c.nombre.toLowerCase().includes("línea")
-      );
 
-      const colMotivoDet = encontrarCol(headers, "motivo");
-      const colAreaDet = encontrarCol(headers, "area asignada", "área asignada", "area");
+      // Semantic: primary category and secondary/area columns
+      const colMotivoDet = idx("Categoria");
+      const colAreaDet = idx("ResponsableOperativo");
 
-      const colFechaDetectada = columnasGlobales.find((c) => c.tipo === "fecha");
-      idxFechaGlobal = colFechaDetectada ? colFechaDetectada.indice : encontrarCol(headers, "fecha");
+      // Semantic: fecha column (structural fallback when semantic misses it)
+      idxFechaGlobal = idx("FechaPrincipal");
+      if (idxFechaGlobal < 0) {
+        idxFechaGlobal = columnasGlobales.find((c) => c.tipo === "fecha")?.indice ?? -1;
+      }
 
-      idxIdGlobal = encontrarCol(headers, "id");
-      idxDescGlobal = encontrarCol(headers, "descripcion", "descripción");
-      idxTiempoGlobal = encontrarCol(headers, "tiempo de respuesta");
+      // Semantic: id, description, response time
+      idxIdGlobal = idx("Identificador");
+      idxDescGlobal = idx("TextoLibre");
+      idxTiempoGlobal = idx("TiempoRespuestaMin");
 
-      idxResueltoGlobal = encontrarCol(headers, "resuelto");
-      idxResolucionGlobal = encontrarCol(headers, "resolución", "resolucion");
+      // Semantic: status columns (structural fallback)
+      idxResueltoGlobal = idx("Estado");
+      idxResolucionGlobal = idx("ResultadoIntervencion");
       const colsStatus = columnasGlobales.filter((c) => c.tipo === "status");
       if (idxResueltoGlobal < 0 && colsStatus.length > 0) {
         idxResueltoGlobal = colsStatus[0].indice;
@@ -496,25 +517,38 @@ export function parsearExcel(buffer: ArrayBuffer): DatosDashboard {
       }
 
       if (tieneColumnaStatus) {
-        const tieneNombreResuelto = encontrarCol(headers, "resuelto") >= 0;
-        etiquetaStatus = tieneNombreResuelto ? "Resuelto" : "Finalizado";
+        const nombreEstado = idxResueltoGlobal >= 0 ? headers[idxResueltoGlobal].toLowerCase() : "";
+        etiquetaStatus = nombreEstado.includes("resuelto") ? "Resuelto" : "Finalizado";
       }
 
-      const colLineaDetectada = categoricas.find(
-        (c) =>
-          c.nombre.toLowerCase().includes("linea") ||
-          c.nombre.toLowerCase().includes("línea")
-      );
-      idxLineaGlobal = colLineaDetectada
-        ? colLineaDetectada.indice
-        : encontrarCol(headers, "linea", "línea");
-      colLinea = colLineaDetectada?.nombre ?? (idxLineaGlobal >= 0 ? headers[idxLineaGlobal] : null);
+      // Semantic: linea / cobertura column (structural fallback)
+      tieneColumnaLinea = idx("Cobertura") >= 0;
+      idxLineaGlobal = idx("Cobertura");
+      colLinea = idxLineaGlobal >= 0 ? headers[idxLineaGlobal] : null;
+      if (!tieneColumnaLinea) {
+        const colLineaDetectada = categoricas.find(
+          (c) =>
+            c.nombre.toLowerCase().includes("linea") ||
+            c.nombre.toLowerCase().includes("línea")
+        );
+        if (colLineaDetectada) {
+          tieneColumnaLinea = true;
+          idxLineaGlobal = colLineaDetectada.indice;
+          colLinea = colLineaDetectada.nombre;
+        }
+      }
 
-      const calles = columnasGlobales.filter((c) => c.tipo === "direccion");
-      idxCalle1Global = calles[0]?.indice ?? encontrarCol(headers, "calle 1", "calle1");
-      idxCalle2Global = calles[1]?.indice ?? encontrarCol(headers, "calle 2", "calle2");
-      idxCalle3Global = calles[2]?.indice ?? encontrarCol(headers, "calle 3", "calle3");
-      colCalle1 = calles[0]?.nombre ?? (idxCalle1Global >= 0 ? headers[idxCalle1Global] : null);
+      // Semantic: calle columns (structural fallback)
+      idxCalle1Global = idx("CallePrincipal");
+      idxCalle2Global = idx("CalleSecundaria");
+      idxCalle3Global = idx("CalleTerciaria");
+      if (idxCalle1Global < 0) {
+        const calles = columnasGlobales.filter((c) => c.tipo === "direccion");
+        idxCalle1Global = calles[0]?.indice ?? -1;
+        idxCalle2Global = calles[1]?.indice ?? -1;
+        idxCalle3Global = calles[2]?.indice ?? -1;
+      }
+      colCalle1 = idxCalle1Global >= 0 ? headers[idxCalle1Global] : null;
 
       if (colMotivoDet >= 0) {
         idxPrimariaGlobal = colMotivoDet;
@@ -573,30 +607,36 @@ export function parsearExcel(buffer: ArrayBuffer): DatosDashboard {
         }
       }
 
-      // Detect hora columns: ingreso (primary) and derivación (secondary)
-      const colsHora = columnasGlobales.filter((c) => c.tipo === "hora");
-      const colHoraIngreso = colsHora.find((c) => {
-        const n = c.nombre.toLowerCase();
-        return n.includes("ingreso") || n.includes("entrada");
-      });
-      const colHoraDerivacion = colsHora.find((c) => {
-        const n = c.nombre.toLowerCase();
-        return (
-          n.includes("derivaci") ||
-          n.includes("salida") ||
-          n.includes("egreso") ||
-          n.includes("despacho") ||
-          n.includes("derivado")
-        );
-      });
-      // Fallback: if no explicit labels, use first as ingreso and second as derivación
-      idxHoraGlobal = (colHoraIngreso ?? colsHora[0])?.indice ?? -1;
-      idxHoraDerivacionGlobal =
-        colHoraDerivacion?.indice ??
-        (colsHora.length >= 2 ? colsHora.find((c) => c.indice !== idxHoraGlobal)?.indice ?? -1 : -1);
-      tieneHoraDerivacion = idxHoraDerivacionGlobal >= 0 && idxHoraDerivacionGlobal !== idxHoraGlobal;
+      // Semantic: hora columns (structural fallback preserving ingreso/derivación heuristic)
+      idxHoraGlobal = idx("HoraPrincipal");
+      idxHoraDerivacionGlobal = idx("HoraDerivacion");
+      if (idxHoraGlobal < 0) {
+        const colsHora = columnasGlobales.filter((c) => c.tipo === "hora");
+        const colHoraIngreso = colsHora.find((c) => {
+          const n = c.nombre.toLowerCase();
+          return n.includes("ingreso") || n.includes("entrada");
+        });
+        const colHoraDerivacion = colsHora.find((c) => {
+          const n = c.nombre.toLowerCase();
+          return (
+            n.includes("derivaci") ||
+            n.includes("salida") ||
+            n.includes("egreso") ||
+            n.includes("despacho") ||
+            n.includes("derivado")
+          );
+        });
+        idxHoraGlobal = (colHoraIngreso ?? colsHora[0])?.indice ?? -1;
+        idxHoraDerivacionGlobal =
+          colHoraDerivacion?.indice ??
+          (colsHora.length >= 2
+            ? colsHora.find((c) => c.indice !== idxHoraGlobal)?.indice ?? -1
+            : -1);
+      }
+      tieneHoraDerivacion =
+        idxHoraDerivacionGlobal >= 0 && idxHoraDerivacionGlobal !== idxHoraGlobal;
 
-      // Detect programacion column (Programado / No Programado split)
+      // Detect programacion column — structural type, no semantic concept yet
       const colsProg = columnasGlobales.filter((c) => c.tipo === "programacion");
       if (colsProg.length > 0) {
         idxProgramacionGlobal = colsProg[0].indice;
@@ -1199,5 +1239,6 @@ export function parsearExcel(buffer: ArrayBuffer): DatosDashboard {
     colLinea,
     colCalle1,
     registros,
+    mapaSemantico: diagnosticoSemantico ?? undefined,
   };
 }
