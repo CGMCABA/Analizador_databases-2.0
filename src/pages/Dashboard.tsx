@@ -280,6 +280,28 @@ export default function Dashboard() {
     [datosFiltrados, perfil]
   );
 
+  const topMotivoPorDia = useMemo<Record<string, string>>(() => {
+    if (!datosFiltrados) return {};
+    const DIAS_SEMANA_JS = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
+    const mapa = new Map<string, Map<string, number>>();
+    for (const s of datosFiltrados.solicitudes) {
+      const p = s.fecha.split("/");
+      if (p.length !== 3) continue;
+      const date = new Date(Number(p[2]), Number(p[1]) - 1, Number(p[0]));
+      if (isNaN(date.getTime())) continue;
+      const dia = DIAS_SEMANA_JS[date.getDay()];
+      const mm = mapa.get(dia) ?? new Map<string, number>();
+      mm.set(s.motivo, (mm.get(s.motivo) ?? 0) + 1);
+      mapa.set(dia, mm);
+    }
+    const resultado: Record<string, string> = {};
+    mapa.forEach((motivoMap, dia) => {
+      const top = Array.from(motivoMap.entries()).sort((a, b) => b[1] - a[1])[0];
+      if (top) resultado[dia] = top[0];
+    });
+    return resultado;
+  }, [datosFiltrados]);
+
   return (
     <div
       className="min-h-screen bg-[#f0f2f5] dark:bg-[#0c1525] transition-colors duration-300"
@@ -766,7 +788,10 @@ export default function Dashboard() {
             })()}
 
             {(datosFiltrados?.porDiaSemana ?? []).length >= 7 && (
-              <GraficoHeatmap datos={datosFiltrados!.porDiaSemana} />
+              <GraficoHeatmap
+                datos={datosFiltrados!.porDiaSemana}
+                topMotivoPorDia={topMotivoPorDia}
+              />
             )}
 
             {(datosFiltrados?.porHora ?? []).length > 0 && (

@@ -18,16 +18,19 @@ interface DatoDia {
 
 interface GraficoHeatmapProps {
   datos: DatoDia[];
+  topMotivoPorDia?: Record<string, string>;
 }
 
 interface CustomTooltipProps {
   active?: boolean;
   payload?: { value: number; payload: DatoDia }[];
   label?: string;
+  topMotivoPorDia?: Record<string, string>;
 }
 
-const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+const CustomTooltip = ({ active, payload, label, topMotivoPorDia }: CustomTooltipProps) => {
   if (!active || !payload?.length) return null;
+  const motivo = label && topMotivoPorDia ? topMotivoPorDia[label] : undefined;
   return (
     <div className="chart-tooltip">
       <p style={{ color: "var(--tooltip-text)", fontWeight: 700, marginBottom: 4 }}>{label}</p>
@@ -37,6 +40,12 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
           {payload[0].value.toLocaleString("es-AR")}
         </span>
       </p>
+      {motivo && (
+        <p style={{ color: "var(--tooltip-muted)", marginTop: 6, paddingTop: 6, borderTop: "1px solid var(--tooltip-border)", fontSize: 11 }}>
+          Motivo más frecuente:{" "}
+          <strong style={{ color: "var(--tooltip-text)" }}>{motivo}</strong>
+        </p>
+      )}
     </div>
   );
 };
@@ -50,7 +59,7 @@ function colorPorIntensidad(valor: number, max: number): string {
   return "#bfdbfe";
 }
 
-export function GraficoHeatmap({ datos }: GraficoHeatmapProps) {
+export function GraficoHeatmap({ datos, topMotivoPorDia }: GraficoHeatmapProps) {
   if (datos.length < 7) return null;
 
   const max = Math.max(...datos.map((d) => d.cantidad));
@@ -88,7 +97,7 @@ export function GraficoHeatmap({ datos }: GraficoHeatmapProps) {
             axisLine={false}
             width={80}
           />
-          <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(148,163,184,0.08)" }} />
+          <Tooltip content={<CustomTooltip topMotivoPorDia={topMotivoPorDia} />} cursor={{ fill: "rgba(148,163,184,0.08)" }} />
           <Bar dataKey="cantidad" radius={[0, 6, 6, 0]}>
             {datos.map((entry, i) => (
               <Cell key={i} fill={colorPorIntensidad(entry.cantidad, max)} />
