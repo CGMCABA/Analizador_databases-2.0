@@ -721,7 +721,7 @@ export default function Dashboard() {
               </div>
             )}
 
-            <InsightsPanel datos={datosFiltrados!} perfil={perfil!} mesFiltro={mesFiltro} />
+            <InsightsPanel datos={datosFiltrados!} mesFiltro={mesFiltro} />
 
             {perfil && <ResumenTemporal perfil={perfil} />}
 

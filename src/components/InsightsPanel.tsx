@@ -1,11 +1,9 @@
 import { useMemo } from "react";
 import { DatosDashboard } from "@/lib/excelParser";
-import type { PerfilDataset } from "@/lib/insights/tipos";
 import { Lightbulb, TrendingUp, TrendingDown, Minus, Clock, MapPin, Tag, Calendar, AlertTriangle } from "lucide-react";
 
 interface InsightsPanelProps {
   datos: DatosDashboard;
-  perfil: PerfilDataset;
   mesFiltro: string;
 }
 
@@ -49,44 +47,13 @@ function pct(parte: number, total: number) {
   return total > 0 ? Math.round((parte / total) * 100) : 0;
 }
 
-export function InsightsPanel({ datos, perfil, mesFiltro }: InsightsPanelProps) {
+export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
   const insights = useMemo<InsightVisual[]>(() => {
     const lista: InsightVisual[] = [];
     const total = datos.totalSolicitudes;
     if (total === 0) return lista;
 
-    // ── Motor de insights genérico (capacidades + características del dataset) ──
-    // Cubre: concentración excesiva en cualquier columna categórica, cambios
-    // significativos de volumen vs. promedio reciente, y recurrencia (patrones).
-    // `perfil` se calcula una sola vez en Dashboard.tsx y se reutiliza acá y en
-    // generarRecomendaciones, en vez de recalcularse en cada consumidor.
-    for (const i of perfil.insights) {
-      lista.push({
-        icono:
-          i.tipo === "tendencia"
-            ? (i.valor ?? 0) > 0
-              ? "tendencia_up"
-              : "tendencia_down"
-            : "categoria",
-        texto: i.texto,
-        detalle: i.detalle,
-        color: i.severidad === "critico" ? "red" : i.severidad === "atencion" ? "amber" : "blue",
-      });
-    }
-
-    if (perfil.patrones.length > 0) {
-      const top = perfil.patrones[0];
-      lista.push({
-        icono: "lugar",
-        texto: `Patrón recurrente detectado: ${top.descripcion}`,
-        detalle: `Fuerza del patrón: ${Math.round(top.fuerza * 100)}%`,
-        color: "red",
-      });
-    }
-
-    // ── Reglas específicas de dominio "solicitudes" ──────────────────────────
-    // Pendientes de generalizar al motor en una fase posterior (junto con el
-    // refactor de semaforoRecomendaciones.ts).
+    // ── Reglas descriptivas de dominio (distribución del dataset) ───────────
 
     // Categoría dominante (descriptivo, no es alerta — la alerta de concentración la da el motor)
     if (datos.porMotivo.length > 0 && datos.colCategorica1) {
@@ -219,7 +186,7 @@ export function InsightsPanel({ datos, perfil, mesFiltro }: InsightsPanelProps) 
     }
 
     return lista.slice(0, 9);
-  }, [datos, perfil, mesFiltro]);
+  }, [datos, mesFiltro]);
 
   if (insights.length === 0) return null;
 
