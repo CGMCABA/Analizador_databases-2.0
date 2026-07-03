@@ -1,7 +1,9 @@
 import type { DatosDashboard } from "../excelParser";
+import { activa } from "../capacidades";
+import { utilizable } from "../calidad";
 import type {
   AnalisisDisponible,
-  CapacidadesDataset,
+  CapacidadesPerfil,
   CaracteristicasDataset,
   PerfilColumna,
   PerfilDataset,
@@ -20,7 +22,7 @@ import {
 
 // ── Capa 1: capacidades (qué tipos de columna están presentes) ──────────────
 
-function calcularCapacidades(datos: DatosDashboard): CapacidadesDataset {
+function calcularCapacidades(datos: DatosDashboard): CapacidadesPerfil {
   const categoricas = datos.columnas.filter((c) => c.tipo === "categorica");
   const numericas = datos.columnas.filter((c) => c.tipo === "numerica");
   const texto = datos.columnas.filter((c) => c.tipo === "texto_libre");
@@ -28,8 +30,8 @@ function calcularCapacidades(datos: DatosDashboard): CapacidadesDataset {
   return {
     tieneFechas: datos.meses.length > 0,
     tieneCategorias: categoricas.length > 0,
-    tieneEstados: datos.tieneColumnaStatus,
-    tieneUbicaciones: datos.tieneColumnasCalles,
+    tieneEstados: activa(datos.capacidades, "Estado") && utilizable(datos.calidad, "Estado"),
+    tieneUbicaciones: activa(datos.capacidades, "GeograficaCalles"),
     tieneNumericos: numericas.length > 0,
     tieneTextoLibre: texto.length > 0,
     tieneMultiplesCategorias: categoricas.length >= 2,
@@ -121,8 +123,8 @@ interface ReglaAnalisis {
   id: string;
   nombre: string;
   descripcion: string;
-  requiere: (cap: CapacidadesDataset) => boolean;
-  score: (datos: DatosDashboard, cap: CapacidadesDataset, carac: CaracteristicasDataset) => number;
+  requiere: (cap: CapacidadesPerfil) => boolean;
+  score: (datos: DatosDashboard, cap: CapacidadesPerfil, carac: CaracteristicasDataset) => number;
   motivo: (datos: DatosDashboard, carac: CaracteristicasDataset) => string;
 }
 
@@ -209,7 +211,7 @@ const CATALOGO_ANALISIS: ReglaAnalisis[] = [
 
 function calcularAnalisisDisponibles(
   datos: DatosDashboard,
-  cap: CapacidadesDataset,
+  cap: CapacidadesPerfil,
   carac: CaracteristicasDataset
 ): AnalisisDisponible[] {
   return CATALOGO_ANALISIS.filter((r) => r.requiere(cap))

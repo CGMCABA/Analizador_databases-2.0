@@ -9,6 +9,7 @@ export type ConceptoSemantico =
   | "Subcategoria"
   | "Severidad"
   | "TipoEvento"
+  | "Programacion"
   | "Estado"
   | "ResultadoIntervencion"
   | "ResponsableOperativo"

@@ -38,6 +38,8 @@ import { SemaforoOperacional } from "@/components/SemaforoOperacional";
 import { RecomendacionesOperativas } from "@/components/RecomendacionesOperativas";
 import { ComparacionPeriodos } from "@/components/ComparacionPeriodos";
 import { compararPeriodos, ComparacionResultado } from "@/lib/compararPeriodos";
+import { activa } from "@/lib/capacidades";
+import { utilizable } from "@/lib/calidad";
 import { VentanaPredictiva } from "@/components/VentanaPredictiva";
 
 function SeparadorCapa({
@@ -331,7 +333,7 @@ export default function Dashboard() {
                 </select>
               </div>
             )}
-            {datos && datos.tieneColumnasCalles && datos.porCalle.length > 0 && (
+            {datos && activa(datos.capacidades, "GeograficaCalles") && datos.porCalle.length > 0 && (
               <div className="presentation-hide flex items-center gap-1.5 bg-white/10 rounded-lg px-2 py-1.5">
                 <MapPin className="h-3.5 w-3.5 text-slate-300 shrink-0" />
                 <select
@@ -474,7 +476,7 @@ export default function Dashboard() {
 
             <CalidadDataset
               calidadDataset={datos.calidadDataset}
-              tieneColumnaProgramacion={datos.tieneColumnaProgramacion}
+              tieneColumnaProgramacion={activa(datos.capacidades, "Programacion")}
               etiquetaStatus={datos.etiquetaStatus}
             />
 
@@ -490,12 +492,12 @@ export default function Dashboard() {
                       Columnas detectadas: {datos.columnas.filter((c) => c.tipo !== "ignorar").length}
                     </span>
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      {datos.tieneColumnaStatus && (
+                      {activa(datos.capacidades, "Estado") && utilizable(datos.calidad, "Estado") && (
                         <span className="flex items-center gap-1 text-xs text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 px-2 py-0.5 rounded-full">
                           <CheckCircle2 className="h-3 w-3" /> {datos.etiquetaStatus === "Resuelto" ? "Resolución" : "Finalización"}
                         </span>
                       )}
-                      {datos.tieneColumnasCalles && (
+                      {activa(datos.capacidades, "GeograficaCalles") && (
                         <span className="flex items-center gap-1 text-xs text-violet-700 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/30 border border-violet-200 dark:border-violet-800 px-2 py-0.5 rounded-full">
                           <MapPin className="h-3 w-3" /> Mapa
                         </span>
@@ -556,7 +558,7 @@ export default function Dashboard() {
 
             <SeparadorCapa etiqueta="Pasado" pregunta="¿Qué pasó y por qué?" acento="slate" />
 
-            {datos.tieneColumnaStatus ? (
+            {activa(datos.capacidades, "Estado") && utilizable(datos.calidad, "Estado") ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
                   {
@@ -702,7 +704,7 @@ export default function Dashboard() {
               </div>
             )}
 
-            {datos.tieneColumnaProgramacion && (
+            {activa(datos.capacidades, "Programacion") && (
               <div className="grid grid-cols-2 gap-4">
                 <MetricCard
                   titulo="No Programados"
@@ -728,12 +730,12 @@ export default function Dashboard() {
             <GraficoBarras
               datos={datos.porMes}
               mesFiltro={mesFiltro}
-              mostrarResolucion={datos.tieneColumnaStatus}
-              mostrarProgramacion={datos.tieneColumnaProgramacion}
+              mostrarResolucion={activa(datos.capacidades, "Estado") && utilizable(datos.calidad, "Estado")}
+              mostrarProgramacion={activa(datos.capacidades, "Programacion")}
               etiquetaStatus={datos.etiquetaStatus}
             />
 
-            {(datosFiltrados?.porMotivo ?? []).length > 0 && (
+            {activa(datos.capacidades, "Categoria") && (datosFiltrados?.porMotivo ?? []).length > 0 && (
               <GraficoRankingH
                 datos={datosFiltrados!.porMotivo}
                 titulo={`Ranking por ${datos.colCategorica1 ?? "Categoría Principal"}`}
@@ -744,14 +746,14 @@ export default function Dashboard() {
               />
             )}
 
-            {datos.tieneColumnaStatus && (
+            {activa(datos.capacidades, "Estado") && utilizable(datos.calidad, "Estado") && (
               <GraficoResolucion
                 porMotivo={datosFiltrados?.resolucionPorMotivo ?? []}
                 porArea={datosFiltrados?.resolucionPorArea ?? []}
               />
             )}
 
-            {!mesFiltro && datos.meses.length >= 2 && (datosFiltrados?.porMotivo ?? []).length >= 2 && (
+            {!mesFiltro && activa(datos.capacidades, "CruceCategoriaMes") && (datosFiltrados?.porMotivo ?? []).length >= 2 && (
               <GraficoCruce
                 solicitudes={datosFiltrados!.solicitudes}
                 meses={datos.meses}
@@ -795,7 +797,7 @@ export default function Dashboard() {
               />
             )}
 
-            {(datosFiltrados?.porHora ?? []).length > 0 && (
+            {activa(datos.capacidades, "Horaria") && (datosFiltrados?.porHora ?? []).length > 0 && (
               <GraficoHorario
                 datos={datosFiltrados!.porHora}
                 totalSolicitudes={datosFiltrados!.totalSolicitudes}
@@ -828,7 +830,7 @@ export default function Dashboard() {
                     />
                   </div>
                 )}
-                {datos.tieneColumnaLinea && (datosFiltrados?.porLinea ?? []).length > 0 && (
+                {activa(datos.capacidades, "Cobertura") && (datosFiltrados?.porLinea ?? []).length > 0 && (
                   <div className={(datosFiltrados?.porArea ?? []).length > 0 ? "lg:col-span-3" : "lg:col-span-5"}>
                     <GraficoLineas datos={datosFiltrados!.porLinea ?? []} />
                   </div>
@@ -848,7 +850,7 @@ export default function Dashboard() {
               />
             ))}
 
-            {datos.tieneColumnaLinea && (datosFiltrados?.porLinea ?? []).length >= 2 && (datosFiltrados?.porMotivo ?? []).length >= 2 && (
+            {activa(datos.capacidades, "CruceCategoriaCobertura") && (datosFiltrados?.porLinea ?? []).length >= 2 && (datosFiltrados?.porMotivo ?? []).length >= 2 && (
               <GraficoCruceLinea
                 registros={datosFiltrados!.registros}
                 porMotivo={datosFiltrados!.porMotivo}
@@ -858,7 +860,7 @@ export default function Dashboard() {
               />
             )}
 
-            {datos.tieneColumnasCalles && perfil && (
+            {activa(datos.capacidades, "GeograficaCalles") && perfil && (
               <ResumenGeografico
                 porCalle={datosFiltrados?.porCalle ?? []}
                 totalSolicitudes={datosFiltrados?.totalSolicitudes ?? 0}
@@ -866,14 +868,14 @@ export default function Dashboard() {
               />
             )}
 
-            {datos.tieneColumnasCalles && (
+            {activa(datos.capacidades, "GeograficaCalles") && (
               <GraficoCalles
                 datos={datosFiltrados?.porCalle ?? []}
                 totalSolicitudes={datosFiltrados?.totalSolicitudes ?? 0}
               />
             )}
 
-            {datos.tieneColumnasCalles && (datosFiltrados?.porCalle1Ranking ?? []).length >= 2 && (datosFiltrados?.porMotivo ?? []).length >= 2 && (
+            {activa(datos.capacidades, "CruceCategoriaCalle") && (datosFiltrados?.porCalle1Ranking ?? []).length >= 2 && (datosFiltrados?.porMotivo ?? []).length >= 2 && (
               <details className="group print:hidden">
                 <summary className="presentation-hide flex items-center gap-2 cursor-pointer select-none px-1 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 list-none hover:text-slate-800 dark:hover:text-slate-100">
                   <span className="transition-transform group-open:rotate-90 text-slate-400">▶</span>
@@ -891,7 +893,7 @@ export default function Dashboard() {
               </details>
             )}
 
-            {datos.tieneColumnasCalles && (
+            {activa(datos.capacidades, "GeograficaCalles") && (
               <div className="print:hidden">
                 <GraficoMapa
                   segmentos={datosFiltrados?.porSegmento ?? []}
@@ -905,7 +907,7 @@ export default function Dashboard() {
               meses={datos.meses}
             />
 
-            {((datosFiltrados?.porTiempoRespuestaArea ?? []).length >= 2 || (datosFiltrados?.tiempoRespuestaPorMotivo ?? []).length >= 2) && (
+            {activa(datos.capacidades, "TiempoRespuesta") && ((datosFiltrados?.porTiempoRespuestaArea ?? []).length >= 2 || (datosFiltrados?.tiempoRespuestaPorMotivo ?? []).length >= 2) && (
               <div className={
                 (datosFiltrados?.porTiempoRespuestaArea ?? []).length >= 2 && (datosFiltrados?.tiempoRespuestaPorMotivo ?? []).length >= 2
                   ? "grid grid-cols-1 lg:grid-cols-2 gap-4"
@@ -924,7 +926,7 @@ export default function Dashboard() {
               </div>
             )}
 
-            {datos.tieneHoraDerivacion && (
+            {activa(datos.capacidades, "DerivacionInterna") && (
               <PanelTiempoRespuestaInterno
                 promedioGeneral={datosFiltrados?.tiempoRespuestaInternoPromedio ?? 0}
                 porMotivo={datosFiltrados?.tiempoRespuestaInternoPorMotivo ?? []}

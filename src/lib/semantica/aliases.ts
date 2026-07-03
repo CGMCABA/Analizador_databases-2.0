@@ -59,8 +59,8 @@ function esNumeroEnteroPositivo(v: string): boolean {
 
 const VALORES_TIPO_EVENTO = [
   "alerta", "incidente", "solicitud", "reclamo", "consulta", "denuncia",
-  "infraccion", "accidente", "programado", "no programado",
-  "programada", "no programada",
+  "infraccion", "accidente",
+  // "programado*" removidos: son concepto Programacion, no TipoEvento
 ];
 
 const VALORES_ESTADO = [
@@ -232,6 +232,40 @@ export const REGLAS_DETECCION: ReglaDeteccion[] = [
       incluyeAlguno(h, ["operativo", "sitio", "duracion", "duración", "intervencion", "intervención"]) &&
       incluyeAlguno(h, ["tiempo", "minutos", "min"]),
     // matchValores ELIMINADO: misma razón que TiempoRespuestaMin.
+  },
+
+  // ── Planificación del evento ──────────────────────────────────────────────
+  {
+    // Programacion detecta columnas binarias Programado/No Programado.
+    // ANTES de TipoEvento (prioridad 40) para reclamar columnas P/NP antes
+    // de que TipoEvento las absorba por matchValores.
+    // matchNombre solo activa con "programaci*" / "planificaci*" (inequívocos).
+    // "modalidad" y "tipo" se resuelven exclusivamente por matchValores con
+    // ambos lados requeridos, para evitar falsos positivos.
+    concepto: "Programacion",
+    prioridad: 38,
+    aliases: [
+      "programacion", "programación",
+      "tipo programacion", "tipo_programacion",
+      "planificacion", "planificación",
+    ],
+    matchNombre: (h) =>
+      incluyeAlguno(h, ["programaci", "planificaci"]),
+    matchValores: (muestras, unicos) => {
+      if (unicos > 4) return false;
+      const norm = muestras.map((v) => normalizar(v));
+      const tieneProgram = norm.some(
+        (v) =>
+          v === "programado" || v === "programados" || v === "programada" ||
+          v === "p" || v.startsWith("programado")
+      );
+      const tieneNoProgram = norm.some(
+        (v) =>
+          v === "no programado" || v === "no programados" || v === "no programada" ||
+          v === "np" || v === "n/p" || v.startsWith("no program")
+      );
+      return tieneProgram && tieneNoProgram;
+    },
   },
 
   // ── Clasificación del evento ──────────────────────────────────────────────

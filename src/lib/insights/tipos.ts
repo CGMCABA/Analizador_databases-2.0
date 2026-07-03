@@ -3,12 +3,12 @@
  * toma como única entrada un DatosDashboard ya calculado por excelParser.ts/filtrarDatos.ts
  * y razona estadísticamente sobre sus agregados (porMes, distribucionesCategoricas, etc.).
  *
- * Modelo: Excel → DatosDashboard → CapacidadesDataset → PerfilColumna[] →
+ * Modelo: Excel → DatosDashboard → CapacidadesPerfil → PerfilColumna[] →
  *         CaracteristicasDataset → AnalisisDisponibles → Insights/Anomalias/Patrones
  */
 
 /** Capa 1: qué tipos de dato están presentes (estructura, no comportamiento). */
-export interface CapacidadesDataset {
+export interface CapacidadesPerfil {
   tieneFechas: boolean;
   tieneCategorias: boolean;
   tieneEstados: boolean;
@@ -87,7 +87,7 @@ export interface Patron {
 }
 
 export interface PerfilDataset {
-  capacidades: CapacidadesDataset;
+  capacidades: CapacidadesPerfil;
 
   columnasFecha: string[];
   columnasNumericas: string[];

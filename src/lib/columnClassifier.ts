@@ -79,7 +79,7 @@ export function clasificarColumnas(
 
     // ── Detect programacion column BEFORE categorica ──────────────────────────
     // Detection by column name (most reliable, no value scan needed)
-    if (tiene(h, ["programaci", "tipo evento"])) return make("programacion");
+    if (tiene(h, ["programaci"])) return make("programacion");
 
     // Detection by name + value combination (requires ≤5 unique values)
     if (total >= 3 && cantidadUnicos >= 1 && cantidadUnicos <= 5) {
@@ -100,11 +100,11 @@ export function clasificarColumnas(
       const tieneP = valoresLower.some((v) => v === "p");
       const tieneNP = valoresLower.some((v) => v === "np");
 
-      // "modalidad" header + programado values → programacion
-      if (tiene(h, ["modalidad"]) && tieneProgram) return make("programacion");
+      // "modalidad" header + both sides of P/NP present → programacion
+      if (tiene(h, ["modalidad"]) && tieneProgram && tieneNoProgram) return make("programacion");
 
-      // Exact "tipo" header + values match one of the patterns → programacion
-      if (h === "tipo" && (tieneProgram || tieneNoProgram)) return make("programacion");
+      // Exact "tipo" header + both sides present → programacion
+      if (h === "tipo" && tieneProgram && tieneNoProgram) return make("programacion");
 
       // Values alone: BOTH sides must be present (avoids single-sided false positives)
       if (tieneProgram && tieneNoProgram) return make("programacion");

@@ -2,6 +2,10 @@ import * as XLSX from "xlsx";
 import { clasificarColumnas } from "./columnClassifier";
 import { detectarConceptos } from "./semantica/detectarConceptos";
 import type { ConceptoSemantico, DiagnosticoSemantico } from "./semantica/conceptos";
+import { derivarCapacidades } from "./capacidades";
+import type { CapacidadesDataset } from "./capacidades";
+import { calcularCalidad } from "./calidad";
+import type { CalidadAnaliticaDataset } from "./calidad";
 import {
   esResuelta,
   canonicalizarInterseccion,
@@ -165,8 +169,6 @@ export interface DatosDashboard {
   tipoDato: TipoDato;
   tieneColumnaStatus: boolean;
   etiquetaStatus: string;
-  tieneColumnasCalles: boolean;
-  tieneColumnaLinea: boolean;
   tieneColumnaProgramacion: boolean;
   totalProgramados: number;
   totalNoProgramados: number;
@@ -174,6 +176,18 @@ export interface DatosDashboard {
   colCalle1: string | null;
   registros: RegistroGenerico[];
   mapaSemantico?: DiagnosticoSemantico;
+  /**
+   * Capacidades analíticas del dataset, derivadas del mapa semántico.
+   * Calculadas una sola vez sobre el dataset completo en parsearExcel().
+   * No cambian con filtros de UI. Ver src/lib/capacidades.ts.
+   */
+  capacidades: CapacidadesDataset;
+  /**
+   * Calidad analítica del dataset: ¿tienen las capacidades suficientes datos
+   * para que el análisis sea útil? Complementa capacidades (estructura) con
+   * volumen, cardinalidad y fill-rate. Ver src/lib/calidad.ts.
+   */
+  calidad: CalidadAnaliticaDataset;
 }
 
 const MESES_ABREV: Record<string, string> = {
@@ -1179,6 +1193,28 @@ export function parsearExcel(buffer: ArrayBuffer): DatosDashboard {
     })
     .filter((d) => d.datos.length >= 2);
 
+  // ── Capacidades del dataset ────────────────────────────────────────────────────
+  // nMeses = porMes.length: meses del dataset COMPLETO antes de cualquier filtro.
+  // Contrato: nunca pasar meses filtrados por la UI. Ver capacidades.ts.
+  const capacidades = derivarCapacidades(
+    diagnosticoSemantico?.mapa ?? {},
+    porMes.length,
+  );
+
+  const calidad = calcularCalidad({
+    porMotivo,
+    porHora,
+    porDiaSemana,
+    porLinea,
+    porCalle1Ranking,
+    porTiempoRespuestaArea,
+    tiempoRespuestaPorMotivo,
+    meses: ordenMeses,
+    calidadDataset,
+    crucesCronicos: top20CrucesCronicos,
+    indiceFragilidad,
+  });
+
   // ── Tiempo de respuesta interno (hora de derivación − hora de ingreso) ────────
   const {
     promedio: tiempoRespuestaInternoPromedio,
@@ -1231,8 +1267,6 @@ export function parsearExcel(buffer: ArrayBuffer): DatosDashboard {
     tipoDato,
     tieneColumnaStatus,
     etiquetaStatus,
-    tieneColumnasCalles,
-    tieneColumnaLinea,
     tieneColumnaProgramacion,
     totalProgramados,
     totalNoProgramados,
@@ -1240,5 +1274,7 @@ export function parsearExcel(buffer: ArrayBuffer): DatosDashboard {
     colCalle1,
     registros,
     mapaSemantico: diagnosticoSemantico ?? undefined,
+    capacidades,
+    calidad,
   };
 }
