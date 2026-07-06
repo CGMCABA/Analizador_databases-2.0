@@ -4,7 +4,7 @@ import { filtrarDatos } from "@/lib/filtrarDatos";
 import { construirUrlExportXlsx } from "@/lib/googleSheetsUrl";
 import { perfilarDataset } from "@/lib/insights/perfilDataset";
 import { calcularSemaforo, generarRecomendaciones } from "@/lib/semaforoRecomendaciones";
-import { etiquetaTipo } from "@/lib/columnClassifier";
+
 import { PaginaInicio } from "@/components/PaginaInicio";
 import { MetricCard } from "@/components/MetricCard";
 import { GraficoBarras } from "@/components/GraficoBarras";
@@ -27,13 +27,13 @@ import { InsightsPanel } from "@/components/InsightsPanel";
 import { HallazgosPrincipales } from "@/components/HallazgosPrincipales";
 import { GraficoCruceHeatmap } from "@/components/GraficoCruceHeatmap";
 import { useDarkMode } from "@/hooks/useDarkMode";
-import { ClipboardList, Sun, Moon, Filter, Printer, Monitor, X, CheckCircle2, Tag, MapPin, BarChart2, Info, Ban, GitCompareArrows, FileSpreadsheet, AlertCircle } from "lucide-react";
+import { ClipboardList, Sun, Moon, Filter, Printer, Monitor, X, MapPin, Ban, GitCompareArrows, FileSpreadsheet, AlertCircle, TrendingUp, BarChart3, CheckCircle2, Clock, FilterX, type LucideIcon } from "lucide-react";
 import { PresentacionDiapositivas } from "@/components/PresentacionDiapositivas";
 import { GraficoTiempoRespuesta } from "@/components/GraficoTiempoRespuesta";
 import { PanelTiempoRespuestaInterno } from "@/components/PanelTiempoRespuestaInterno";
 import { PanelFalsosPositivos } from "@/components/PanelFalsosPositivos";
 import { ZonasDeAtencion } from "@/components/ZonasDeAtencion";
-import { CalidadDataset } from "@/components/CalidadDataset";
+import { OrientacionDataset } from "@/components/OrientacionDataset";
 import { SemaforoOperacional } from "@/components/SemaforoOperacional";
 import { RecomendacionesOperativas } from "@/components/RecomendacionesOperativas";
 import { ComparacionPeriodos } from "@/components/ComparacionPeriodos";
@@ -41,6 +41,7 @@ import { compararPeriodos, ComparacionResultado } from "@/lib/compararPeriodos";
 import { activa } from "@/lib/capacidades";
 import { utilizable } from "@/lib/calidad";
 import { VentanaPredictiva } from "@/components/VentanaPredictiva";
+import { PlaceholderAnalisis } from "@/components/PlaceholderAnalisis";
 
 function SeparadorCapa({
   etiqueta,
@@ -84,18 +85,27 @@ function SeparadorCapa({
   );
 }
 
-const TIPO_COLOR: Record<string, string> = {
-  categorica: "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800",
-  status: "bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800",
-  fecha: "bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800",
-  hora: "bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800",
-  programacion: "bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-800",
-  direccion: "bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 border border-violet-200 dark:border-violet-800",
-  numerica: "bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-400 border border-cyan-200 dark:border-cyan-800",
-  texto_libre: "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600",
-  id: "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-600",
-  ignorar: "bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700",
-};
+
+function SeccionPasado({
+  icono: Icono,
+  titulo,
+  subtitulo,
+}: {
+  icono: LucideIcon;
+  titulo: string;
+  subtitulo?: string;
+}) {
+  return (
+    <div className="presentation-hide print:hidden flex items-center gap-2.5 pt-2 pb-0.5">
+      <Icono className="h-4 w-4 text-slate-400 dark:text-slate-500 shrink-0" />
+      <p className="text-sm font-semibold text-slate-600 dark:text-slate-300 shrink-0">{titulo}</p>
+      {subtitulo && (
+        <p className="text-xs italic text-slate-400 dark:text-slate-500 shrink-0">{subtitulo}</p>
+      )}
+      <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const [datos, setDatos] = useState<DatosDashboard | null>(null);
@@ -105,7 +115,6 @@ export default function Dashboard() {
   const [mesFiltro, setMesFiltro] = useState<string>("");
   const [calleFiltro, setCalleFiltro] = useState<string>("");
   const [modoPresentation, setModoPresentation] = useState(false);
-  const [bannerExpandido, setBannerExpandido] = useState(false);
   const [bannerCuarentenaVisible, setBannerCuarentenaVisible] = useState(false);
   const { isDark, toggle } = useDarkMode();
 
@@ -190,7 +199,6 @@ export default function Dashboard() {
       setNombreArchivo(nombre);
       setMesFiltro("");
       setCalleFiltro("");
-      setBannerExpandido(false);
       setBannerCuarentenaVisible((resultado.calidadDataset.registrosSinFechaValida ?? 0) > 0);
     } catch (e) {
       console.error("[Dashboard] Error al parsear Excel:", e);
@@ -463,77 +471,7 @@ export default function Dashboard() {
               Archivo: {nombreArchivo}{mesFiltro ? ` · Mes: ${mesFiltro}` : ""}{calleFiltro ? ` · Calle: ${calleFiltro}` : ""}
             </div>
 
-            {perfil && (
-              <HallazgosPrincipales
-                perfil={perfil}
-                onVerComparacion={() => {
-                  const ultimo = datos.meses[datos.meses.length - 1];
-                  const penultimo = datos.meses[datos.meses.length - 2];
-                  if (ultimo && penultimo) ejecutarComparacionMeses(penultimo, ultimo);
-                }}
-              />
-            )}
-
-            <CalidadDataset
-              calidadDataset={datos.calidadDataset}
-              tieneColumnaProgramacion={activa(datos.capacidades, "Programacion")}
-              etiquetaStatus={datos.etiquetaStatus}
-            />
-
-            {datos.columnas.length > 0 && (
-              <div className="presentation-hide bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-4 print:hidden">
-                <button
-                  onClick={() => setBannerExpandido((v) => !v)}
-                  className="w-full flex items-center justify-between gap-3 text-left"
-                >
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Info className="h-4 w-4 text-blue-500 shrink-0" />
-                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                      Columnas detectadas: {datos.columnas.filter((c) => c.tipo !== "ignorar").length}
-                    </span>
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      {activa(datos.capacidades, "Estado") && utilizable(datos.calidad, "Estado") && (
-                        <span className="flex items-center gap-1 text-xs text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 px-2 py-0.5 rounded-full">
-                          <CheckCircle2 className="h-3 w-3" /> {datos.etiquetaStatus === "Resuelto" ? "Resolución" : "Finalización"}
-                        </span>
-                      )}
-                      {activa(datos.capacidades, "GeograficaCalles") && (
-                        <span className="flex items-center gap-1 text-xs text-violet-700 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/30 border border-violet-200 dark:border-violet-800 px-2 py-0.5 rounded-full">
-                          <MapPin className="h-3 w-3" /> Mapa
-                        </span>
-                      )}
-                      {datos.distribucionesCategoricas.length > 0 && (
-                        <span className="flex items-center gap-1 text-xs text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 px-2 py-0.5 rounded-full">
-                          <Tag className="h-3 w-3" /> {datos.distribucionesCategoricas.length} categorías
-                        </span>
-                      )}
-                      <span className="flex items-center gap-1 text-xs text-cyan-700 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-900/30 border border-cyan-200 dark:border-cyan-800 px-2 py-0.5 rounded-full">
-                        <BarChart2 className="h-3 w-3" /> {datos.totalSolicitudes.toLocaleString("es-AR")} registros
-                      </span>
-                    </div>
-                  </div>
-                  <span className="text-xs text-slate-400 dark:text-slate-500 shrink-0">
-                    {bannerExpandido ? "Ocultar ▲" : "Ver detalles ▼"}
-                  </span>
-                </button>
-                {bannerExpandido && (
-                  <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700 flex flex-wrap gap-1.5">
-                    {datos.columnas
-                      .filter((c) => c.tipo !== "ignorar")
-                      .map((col) => (
-                        <span
-                          key={col.nombre}
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${TIPO_COLOR[col.tipo] ?? TIPO_COLOR.texto_libre}`}
-                          title={`${etiquetaTipo(col.tipo)} · ${col.cantidadUnicos} valores únicos`}
-                        >
-                          {col.nombre}
-                          <span className="opacity-60 text-[10px]">({etiquetaTipo(col.tipo)})</span>
-                        </span>
-                      ))}
-                  </div>
-                )}
-              </div>
-            )}
+            <OrientacionDataset datos={datos} nombreArchivo={nombreArchivo} />
 
             {bannerCuarentenaVisible && (datos.calidadDataset.registrosSinFechaValida ?? 0) > 0 && (
               <div className="presentation-hide flex items-start gap-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl px-4 py-4 print:hidden">
@@ -558,8 +496,11 @@ export default function Dashboard() {
 
             <SeparadorCapa etiqueta="Pasado" pregunta="¿Qué pasó y por qué?" acento="slate" />
 
+            {/* ─── A. Evolución temporal ────────────────────────────── */}
+            <SeccionPasado icono={TrendingUp} titulo="Evolución temporal" subtitulo="¿cómo evolucionó el volumen?" />
+
             {activa(datos.capacidades, "Estado") && utilizable(datos.calidad, "Estado") ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[
                   {
                     titulo: "Total Registros",
@@ -567,26 +508,6 @@ export default function Dashboard() {
                     subtitulo: mesFiltro ? `registros en ${mesFiltro}` : "registros totales",
                     color: "blue" as const, icono: "chart" as const,
                     delta: mesFiltro ? undefined : deltaTotal,
-                    subtituloMes: mesFiltro ? undefined : ultimoMes?.mes,
-                  },
-                  {
-                    titulo: datos.etiquetaStatus === "Resuelto" ? "Resueltas" : "Finalizadas",
-                    valor: (datosFiltrados?.totalResueltas ?? 0).toLocaleString("es-AR"),
-                    subtitulo: mesFiltro
-                      ? `${datos.etiquetaStatus === "Resuelto" ? "resueltas" : "finalizadas"} en ${mesFiltro}`
-                      : datos.etiquetaStatus === "Resuelto" ? "con resolución positiva" : "con cierre positivo",
-                    color: "green" as const, icono: "check" as const,
-                    delta: mesFiltro ? undefined : deltaResueltas,
-                    subtituloMes: mesFiltro ? undefined : ultimoMes?.mes,
-                  },
-                  {
-                    titulo: datos.etiquetaStatus === "Resuelto" ? "Sin Resolver" : "Sin Finalizar",
-                    valor: (datosFiltrados?.totalNoResueltas ?? 0).toLocaleString("es-AR"),
-                    subtitulo: mesFiltro
-                      ? `${datos.etiquetaStatus === "Resuelto" ? "sin resolver" : "sin finalizar"} en ${mesFiltro}`
-                      : "pendientes o sin dato",
-                    color: "red" as const, icono: "x" as const,
-                    delta: mesFiltro ? undefined : deltaNoResueltas,
                     subtituloMes: mesFiltro ? undefined : ultimoMes?.mes,
                   },
                   {
@@ -723,8 +644,6 @@ export default function Dashboard() {
               </div>
             )}
 
-            <InsightsPanel datos={datosFiltrados!} mesFiltro={mesFiltro} />
-
             {perfil && <ResumenTemporal perfil={perfil} />}
 
             <GraficoBarras
@@ -735,23 +654,18 @@ export default function Dashboard() {
               etiquetaStatus={datos.etiquetaStatus}
             />
 
-            {activa(datos.capacidades, "Categoria") && (datosFiltrados?.porMotivo ?? []).length > 0 && (
-              <GraficoRankingH
-                datos={datosFiltrados!.porMotivo}
-                titulo={`Ranking por ${datos.colCategorica1 ?? "Categoría Principal"}`}
-                subtitulo="Valores ordenados por volumen — categoría principal de análisis"
-                totalGlobal={datosFiltrados!.totalSolicitudes}
-                acento="blue"
-                limiteInicial={10}
+            {perfil && (
+              <HallazgosPrincipales
+                perfil={perfil}
+                onVerComparacion={() => {
+                  const ultimo = datos.meses[datos.meses.length - 1];
+                  const penultimo = datos.meses[datos.meses.length - 2];
+                  if (ultimo && penultimo) ejecutarComparacionMeses(penultimo, ultimo);
+                }}
               />
             )}
 
-            {activa(datos.capacidades, "Estado") && utilizable(datos.calidad, "Estado") && (
-              <GraficoResolucion
-                porMotivo={datosFiltrados?.resolucionPorMotivo ?? []}
-                porArea={datosFiltrados?.resolucionPorArea ?? []}
-              />
-            )}
+            <InsightsPanel datos={datosFiltrados!} mesFiltro={mesFiltro} soloAlertas />
 
             {!mesFiltro && activa(datos.capacidades, "CruceCategoriaMes") && (datosFiltrados?.porMotivo ?? []).length >= 2 && (
               <GraficoCruce
@@ -762,55 +676,33 @@ export default function Dashboard() {
               />
             )}
 
-            {(() => {
-              // La entrada "... por mes" de crucesAutomaticos es la misma matriz
-              // (categoría×mes) que ya muestra GraficoCruce de forma interactiva
-              // — se descarta acá, en presentación, sin tocar excelParser.ts.
-              const crucesSinMes = (datosFiltrados?.crucesAutomaticos ?? []).filter(
-                (c) => !c.titulo.toLowerCase().includes("mes")
-              );
-              if (crucesSinMes.length === 0) return null;
-              return (
-                <details className="group print:hidden">
-                  <summary className="presentation-hide flex items-center gap-2 cursor-pointer select-none px-1 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 list-none hover:text-slate-800 dark:hover:text-slate-100">
-                    <span className="transition-transform group-open:rotate-90 text-slate-400">▶</span>
-                    Ver patrones temporales avanzados (categoría × hora / día)
-                  </summary>
-                  <div className="mt-2 space-y-4">
-                    {crucesSinMes.map((cruce, idx) => (
-                      <GraficoCruceHeatmap
-                        key={`${cruce.tipo}-${idx}`}
-                        cruce={cruce}
-                        totalSolicitudes={datosFiltrados!.totalSolicitudes}
-                      />
-                    ))}
-                  </div>
-                </details>
-              );
-            })()}
-
-            {(datosFiltrados?.porDiaSemana ?? []).length >= 7 && (
-              <GraficoHeatmap
-                datos={datosFiltrados!.porDiaSemana}
-                topMotivoPorDia={topMotivoPorDia}
-                totalSolicitudes={datosFiltrados!.totalSolicitudes}
+            {mesFiltro && activa(datos.capacidades, "CruceCategoriaMes") && datos.porMotivo.length >= 2 && (
+              <PlaceholderAnalisis
+                icono={FilterX}
+                titulo="Análisis por mes no disponible con filtro activo"
+                descripcion={`Este gráfico necesita todos los meses para mostrar la evolución por categoría. Estás viendo solo ${mesFiltro}.`}
+                variante="filtro"
+                accion={{ label: "Quitar filtro de mes", onClick: () => setMesFiltro("") }}
               />
             )}
 
-            {activa(datos.capacidades, "Horaria") && (datosFiltrados?.porHora ?? []).length > 0 && (
-              <GraficoHorario
-                datos={datosFiltrados!.porHora}
-                totalSolicitudes={datosFiltrados!.totalSolicitudes}
+            {datos.meses.length >= 1 && (datosFiltrados?.solicitudes ?? []).length > 0 && (
+              <LineaDeTiempo
+                solicitudes={datosFiltrados!.solicitudes}
+                meses={datos.meses}
               />
             )}
 
-            {(datosFiltrados?.porInterseccion ?? []).length > 0 && (
+            {/* ─── B. Distribución ─────────────────────────────────── */}
+            <SeccionPasado icono={BarChart3} titulo="Distribución" subtitulo="¿qué ocurre más y en qué categorías?" />
+
+            {activa(datos.capacidades, "Categoria") && (datosFiltrados?.porMotivo ?? []).length > 0 && (
               <GraficoRankingH
-                datos={datosFiltrados!.porInterseccion}
-                titulo="Intersecciones más cargadas"
-                subtitulo="Combinación de calles con mayor cantidad de registros"
+                datos={datosFiltrados!.porMotivo}
+                titulo={`Ranking por ${datos.colCategorica1 ?? "Categoría Principal"}`}
+                subtitulo="Valores ordenados por volumen — categoría principal de análisis"
                 totalGlobal={datosFiltrados!.totalSolicitudes}
-                acento="violet"
+                acento="blue"
                 limiteInicial={10}
               />
             )}
@@ -860,28 +752,158 @@ export default function Dashboard() {
               />
             )}
 
-            {activa(datos.capacidades, "GeograficaCalles") && perfil && (
-              <ResumenGeografico
-                porCalle={datosFiltrados?.porCalle ?? []}
-                totalSolicitudes={datosFiltrados?.totalSolicitudes ?? 0}
-                perfil={perfil}
+            {/* ─── C. Calidad de atención ──────────────────────────── */}
+            <SeccionPasado icono={CheckCircle2} titulo="Calidad de atención" subtitulo="¿se resuelve bien y rápido?" />
+
+            {((activa(datos.capacidades, "Estado") && utilizable(datos.calidad, "Estado")) ||
+              activa(datos.capacidades, "TiempoRespuesta") ||
+              activa(datos.capacidades, "DerivacionInterna")) ? (
+              <>
+                {activa(datos.capacidades, "Estado") && utilizable(datos.calidad, "Estado") && (
+                  <GraficoResolucion
+                    porMotivo={datosFiltrados?.resolucionPorMotivo ?? []}
+                    porArea={datosFiltrados?.resolucionPorArea ?? []}
+                  />
+                )}
+
+                {activa(datos.capacidades, "TiempoRespuesta") && ((datosFiltrados?.porTiempoRespuestaArea ?? []).length >= 2 || (datosFiltrados?.tiempoRespuestaPorMotivo ?? []).length >= 2) && (
+                  <div className={
+                    (datosFiltrados?.porTiempoRespuestaArea ?? []).length >= 2 && (datosFiltrados?.tiempoRespuestaPorMotivo ?? []).length >= 2
+                      ? "grid grid-cols-1 lg:grid-cols-2 gap-4"
+                      : ""
+                  }>
+                    {(datosFiltrados?.porTiempoRespuestaArea ?? []).length >= 2 && (
+                      <GraficoTiempoRespuesta datos={datosFiltrados!.porTiempoRespuestaArea} />
+                    )}
+                    {(datosFiltrados?.tiempoRespuestaPorMotivo ?? []).length >= 2 && (
+                      <GraficoTiempoRespuesta
+                        datos={datosFiltrados!.tiempoRespuestaPorMotivo}
+                        titulo={`Tiempo de respuesta por ${datos.colCategorica1 ?? "categoría"}`}
+                        subtitulo={`Promedio de tiempo en minutos · por tipo de ${datos.colCategorica1 ?? "categoría"} · top 15`}
+                      />
+                    )}
+                  </div>
+                )}
+
+                {activa(datos.capacidades, "DerivacionInterna") && (
+                  <PanelTiempoRespuestaInterno
+                    promedioGeneral={datosFiltrados?.tiempoRespuestaInternoPromedio ?? 0}
+                    porMotivo={datosFiltrados?.tiempoRespuestaInternoPorMotivo ?? []}
+                    porArea={datosFiltrados?.tiempoRespuestaInternoPorArea ?? []}
+                    distribucion={datosFiltrados?.distribucionTiempoRespuestaInterno ?? []}
+                    etiquetaMotivo={datos.colCategorica1 ?? "Categoría"}
+                  />
+                )}
+              </>
+            ) : (
+              <PlaceholderAnalisis
+                icono={AlertCircle}
+                titulo="Sin datos de resolución ni tiempos de atención"
+                descripcion="Para ver este análisis el archivo necesita una columna de estado/resolución, tiempo de respuesta o derivación interna."
+                variante="ausente"
               />
             )}
 
+            {/* ─── D. Geografía ────────────────────────────────────── */}
             {activa(datos.capacidades, "GeograficaCalles") && (
-              <GraficoCalles
-                datos={datosFiltrados?.porCalle ?? []}
-                totalSolicitudes={datosFiltrados?.totalSolicitudes ?? 0}
-              />
+              <>
+                <SeccionPasado icono={MapPin} titulo="Geografía" subtitulo="¿dónde se concentra el problema?" />
+
+                {perfil && (
+                  <ResumenGeografico
+                    porCalle={datosFiltrados?.porCalle ?? []}
+                    totalSolicitudes={datosFiltrados?.totalSolicitudes ?? 0}
+                    perfil={perfil}
+                  />
+                )}
+
+                <GraficoCalles
+                  datos={datosFiltrados?.porCalle ?? []}
+                  totalSolicitudes={datosFiltrados?.totalSolicitudes ?? 0}
+                />
+
+                {(datosFiltrados?.porInterseccion ?? []).length > 0 && (
+                  <GraficoRankingH
+                    datos={datosFiltrados!.porInterseccion}
+                    titulo="Intersecciones más cargadas"
+                    subtitulo="Combinación de calles con mayor cantidad de registros"
+                    totalGlobal={datosFiltrados!.totalSolicitudes}
+                    acento="violet"
+                    limiteInicial={10}
+                  />
+                )}
+
+                <div className="print:hidden">
+                  <GraficoMapa
+                    intersecciones={datosFiltrados?.porInterseccion ?? []}
+                    totalSolicitudes={datosFiltrados?.totalSolicitudes ?? 0}
+                  />
+                </div>
+              </>
             )}
 
-            {activa(datos.capacidades, "CruceCategoriaCalle") && (datosFiltrados?.porCalle1Ranking ?? []).length >= 2 && (datosFiltrados?.porMotivo ?? []).length >= 2 && (
-              <details className="group print:hidden">
-                <summary className="presentation-hide flex items-center gap-2 cursor-pointer select-none px-1 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 list-none hover:text-slate-800 dark:hover:text-slate-100">
-                  <span className="transition-transform group-open:rotate-90 text-slate-400">▶</span>
-                  Ver matriz calle × motivo (detalle avanzado)
-                </summary>
-                <div className="mt-2">
+            {/* ─── E. Patrones temporales ──────────────────────────── */}
+            {activa(datos.capacidades, "TemporalBasica") && (
+              <>
+                <SeccionPasado icono={Clock} titulo="Patrones temporales" subtitulo="¿cuándo ocurre?" />
+
+                {(datosFiltrados?.porDiaSemana ?? []).length >= 7 && (
+                  <GraficoHeatmap
+                    datos={datosFiltrados!.porDiaSemana}
+                    topMotivoPorDia={topMotivoPorDia}
+                    totalSolicitudes={datosFiltrados!.totalSolicitudes}
+                  />
+                )}
+
+                {activa(datos.capacidades, "TemporalBasica") &&
+                  (datosFiltrados?.porDiaSemana ?? []).length > 0 &&
+                  (datosFiltrados?.porDiaSemana ?? []).length < 7 && (
+                  <p className="presentation-hide print:hidden text-xs text-slate-400 dark:text-slate-500 italic px-1">
+                    El mapa de calor por día requiere datos de los 7 días de la semana — este período cubre {(datosFiltrados?.porDiaSemana ?? []).length} día{(datosFiltrados?.porDiaSemana ?? []).length !== 1 ? "s" : ""}.
+                  </p>
+                )}
+
+                {activa(datos.capacidades, "Horaria") && (datosFiltrados?.porHora ?? []).length > 0 && (
+                  <GraficoHorario
+                    datos={datosFiltrados!.porHora}
+                    totalSolicitudes={datosFiltrados!.totalSolicitudes}
+                  />
+                )}
+
+                {(() => {
+                  const crucesSinMes = (datosFiltrados?.crucesAutomaticos ?? []).filter(
+                    (c) => !c.titulo.toLowerCase().includes("mes")
+                  );
+                  if (crucesSinMes.length === 0) return null;
+                  return (
+                    <details className="group print:hidden">
+                      <summary className="presentation-hide flex items-center gap-2 cursor-pointer select-none px-1 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 list-none hover:text-slate-800 dark:hover:text-slate-100">
+                        <span className="transition-transform group-open:rotate-90 text-slate-400">▶</span>
+                        Ver patrones temporales avanzados (categoría × hora / día)
+                      </summary>
+                      <div className="mt-2 space-y-4">
+                        {crucesSinMes.map((cruce, idx) => (
+                          <GraficoCruceHeatmap
+                            key={`${cruce.tipo}-${idx}`}
+                            cruce={cruce}
+                            totalSolicitudes={datosFiltrados!.totalSolicitudes}
+                          />
+                        ))}
+                      </div>
+                    </details>
+                  );
+                })()}
+              </>
+            )}
+
+            {/* ─── F. Datos complementarios ────────────────────────── */}
+            <details className="group print:hidden">
+              <summary className="presentation-hide flex items-center gap-2 cursor-pointer select-none px-1 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 list-none hover:text-slate-800 dark:hover:text-slate-100">
+                <span className="transition-transform group-open:rotate-90 text-slate-400">▶</span>
+                Datos complementarios
+              </summary>
+              <div className="mt-2 space-y-4">
+                {activa(datos.capacidades, "CruceCategoriaCalle") && (datosFiltrados?.porCalle1Ranking ?? []).length >= 2 && (datosFiltrados?.porMotivo ?? []).length >= 2 && (
                   <GraficoCruceCalle
                     registros={datosFiltrados!.registros}
                     porMotivo={datosFiltrados!.porMotivo}
@@ -889,79 +911,46 @@ export default function Dashboard() {
                     colNombreFila={datos.colCalle1}
                     colNombreMotivo={datos.colCategorica1}
                   />
-                </div>
-              </details>
-            )}
-
-            {activa(datos.capacidades, "GeograficaCalles") && (
-              <div className="print:hidden">
-                <GraficoMapa
-                  segmentos={datosFiltrados?.porSegmento ?? []}
-                  totalSolicitudes={datosFiltrados?.totalSolicitudes ?? 0}
-                />
-              </div>
-            )}
-
-            <LineaDeTiempo
-              solicitudes={datosFiltrados!.solicitudes}
-              meses={datos.meses}
-            />
-
-            {activa(datos.capacidades, "TiempoRespuesta") && ((datosFiltrados?.porTiempoRespuestaArea ?? []).length >= 2 || (datosFiltrados?.tiempoRespuestaPorMotivo ?? []).length >= 2) && (
-              <div className={
-                (datosFiltrados?.porTiempoRespuestaArea ?? []).length >= 2 && (datosFiltrados?.tiempoRespuestaPorMotivo ?? []).length >= 2
-                  ? "grid grid-cols-1 lg:grid-cols-2 gap-4"
-                  : ""
-              }>
-                {(datosFiltrados?.porTiempoRespuestaArea ?? []).length >= 2 && (
-                  <GraficoTiempoRespuesta datos={datosFiltrados!.porTiempoRespuestaArea} />
                 )}
-                {(datosFiltrados?.tiempoRespuestaPorMotivo ?? []).length >= 2 && (
-                  <GraficoTiempoRespuesta
-                    datos={datosFiltrados!.tiempoRespuestaPorMotivo}
-                    titulo={`Tiempo de respuesta por ${datos.colCategorica1 ?? "categoría"}`}
-                    subtitulo={`Promedio de tiempo en minutos · por tipo de ${datos.colCategorica1 ?? "categoría"} · top 15`}
+
+                {(datosFiltrados?.registros ?? []).length > 0 && datos.columnas.length > 0 && (
+                  <TablaDetalle
+                    registros={datosFiltrados!.registros}
+                    columnas={datos.columnas}
+                    meses={datos.meses}
                   />
                 )}
               </div>
-            )}
-
-            {activa(datos.capacidades, "DerivacionInterna") && (
-              <PanelTiempoRespuestaInterno
-                promedioGeneral={datosFiltrados?.tiempoRespuestaInternoPromedio ?? 0}
-                porMotivo={datosFiltrados?.tiempoRespuestaInternoPorMotivo ?? []}
-                porArea={datosFiltrados?.tiempoRespuestaInternoPorArea ?? []}
-                distribucion={datosFiltrados?.distribucionTiempoRespuestaInterno ?? []}
-                etiquetaMotivo={datos.colCategorica1 ?? "Categoría"}
-              />
-            )}
-
-            {(datosFiltrados?.registros ?? []).length > 0 && datos.columnas.length > 0 && (
-              <TablaDetalle
-                registros={datosFiltrados!.registros}
-                columnas={datos.columnas}
-                meses={datos.meses}
-              />
-            )}
+            </details>
 
             {/* ─── PRESENTE ─────────────────────────────────────────────── */}
             <SeparadorCapa etiqueta="Presente" pregunta="¿Dónde estamos parados y qué es urgente?" acento="amber" />
 
             {semaforo && <SemaforoOperacional resultado={semaforo} />}
 
-            {!mesFiltro && (
+            {mesFiltro ? (
+              <PlaceholderAnalisis
+                icono={FilterX}
+                titulo="Zonas de atención no disponibles con filtro de mes activo"
+                descripcion={`Este análisis detecta patrones crónicos sobre el dataset completo. Estás viendo solo ${mesFiltro}.`}
+                variante="filtro"
+                accion={{ label: "Quitar filtro de mes", onClick: () => setMesFiltro("") }}
+              />
+            ) : (
               <ZonasDeAtencion
                 indiceFragilidad={datosFiltrados?.indiceFragilidad ?? []}
                 crucesCronicos={datosFiltrados?.crucesCronicos ?? []}
               />
             )}
 
-            <PanelFalsosPositivos
-              totalFalsosPositivos={datosFiltrados?.totalFalsosPositivos ?? 0}
-              tasaFalsosPositivos={datosFiltrados?.tasaFalsosPositivos ?? 0}
-              totalSolicitudes={datosFiltrados?.totalSolicitudes ?? 0}
-              tiposFalsosPositivos={datosFiltrados?.tiposFalsosPositivos ?? []}
-            />
+            {(datosFiltrados?.totalFalsosPositivos ?? 0) > 0 && (
+              <PanelFalsosPositivos
+                totalFalsosPositivos={datosFiltrados!.totalFalsosPositivos}
+                tasaFalsosPositivos={datosFiltrados!.tasaFalsosPositivos}
+                totalSolicitudes={datosFiltrados!.totalSolicitudes}
+                tiposFalsosPositivos={datosFiltrados!.tiposFalsosPositivos}
+              />
+            )}
 
             {/* ─── FUTURO ───────────────────────────────────────────────── */}
             <SeparadorCapa etiqueta="Futuro" pregunta="¿Qué conviene hacer ahora?" acento="teal" />
@@ -970,8 +959,22 @@ export default function Dashboard() {
               <RecomendacionesOperativas recomendaciones={recomendaciones} />
             )}
 
-            {datos.tipoDato === "solicitudes" && datos.porMes.length >= 2 && (
+            {datos.tipoDato === "solicitudes" && datos.porMes.length >= 2 ? (
               <VentanaPredictiva datos={datos} />
+            ) : datos.tipoDato !== "solicitudes" ? (
+              <PlaceholderAnalisis
+                icono={TrendingUp}
+                titulo="Proyección no disponible para este tipo de dataset"
+                descripcion="La ventana predictiva aplica solo a solicitudes de servicio, no a registros de sucesos o eventos."
+                variante="ausente"
+              />
+            ) : (
+              <PlaceholderAnalisis
+                icono={Clock}
+                titulo="Se necesitan al menos 2 meses para proyectar"
+                descripcion="El modelo predictivo requiere una tendencia histórica. Aparecerá automáticamente cuando el dataset tenga más meses."
+                variante="temporal"
+              />
             )}
           </div>
         )}

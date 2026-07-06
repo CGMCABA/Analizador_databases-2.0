@@ -5,6 +5,7 @@ import { Lightbulb, TrendingUp, TrendingDown, Minus, Clock, MapPin, Tag, Calenda
 interface InsightsPanelProps {
   datos: DatosDashboard;
   mesFiltro: string;
+  soloAlertas?: boolean;
 }
 
 interface InsightVisual {
@@ -12,6 +13,7 @@ interface InsightVisual {
   texto: string;
   detalle?: string;
   color: "blue" | "green" | "red" | "amber" | "violet" | "slate";
+  esAlerta: boolean;
 }
 
 const ICONO_MAP = {
@@ -47,7 +49,7 @@ function pct(parte: number, total: number) {
   return total > 0 ? Math.round((parte / total) * 100) : 0;
 }
 
-export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
+export function InsightsPanel({ datos, mesFiltro, soloAlertas = false }: InsightsPanelProps) {
   const insights = useMemo<InsightVisual[]>(() => {
     const lista: InsightVisual[] = [];
     const total = datos.totalSolicitudes;
@@ -64,6 +66,7 @@ export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
         texto: `El tipo más frecuente es "${top.nombre}"`,
         detalle: `${top.cantidad.toLocaleString("es-AR")} registros — ${p}% del total`,
         color: "blue",
+        esAlerta: false,
       });
     }
 
@@ -76,6 +79,7 @@ export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
         texto: `La hora pico es las ${String(pico.hora).padStart(2, "0")}:00 hs`,
         detalle: `${pico.cantidad.toLocaleString("es-AR")} registros en esa franja (${p}% del total)`,
         color: "amber",
+        esAlerta: false,
       });
     }
 
@@ -88,6 +92,7 @@ export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
         texto: `El día con mayor actividad es ${pico.dia}`,
         detalle: `${pico.cantidad.toLocaleString("es-AR")} registros (${p}% del total)`,
         color: "violet",
+        esAlerta: false,
       });
     }
 
@@ -100,6 +105,7 @@ export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
         texto: `La intersección más congestionada: ${top.nombre}`,
         detalle: `${top.cantidad.toLocaleString("es-AR")} registros (${p}% del total)`,
         color: "violet",
+        esAlerta: false,
       });
     }
 
@@ -112,6 +118,7 @@ export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
         texto: `Categoría secundaria dominante: "${top.nombre}"`,
         detalle: `${top.cantidad.toLocaleString("es-AR")} registros — ${p}% (${datos.colCategorica2})`,
         color: "blue",
+        esAlerta: false,
       });
     }
 
@@ -123,6 +130,7 @@ export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
         texto: `Tasa de ${esResuelto ? "resolución" : "finalización"} baja: ${datos.tasaResolucion}%`,
         detalle: `${datos.totalNoResueltas.toLocaleString("es-AR")} casos sin ${esResuelto ? "resolver" : "finalizar"} de ${datos.totalSolicitudes.toLocaleString("es-AR")} totales.`,
         color: "red",
+        esAlerta: true,
       });
     }
 
@@ -133,6 +141,7 @@ export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
         texto: `Alta tasa de falsos positivos: ${datos.tasaFalsosPositivos}% del total`,
         detalle: `${datos.totalFalsosPositivos.toLocaleString("es-AR")} registros cerrados sin evento real. Revisar procesos de cierre operativo.`,
         color: "amber",
+        esAlerta: true,
       });
     }
 
@@ -144,6 +153,7 @@ export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
         texto: `Zona de mayor fragilidad operativa: ${top.zona}`,
         detalle: `Score ${top.puntuacion.toFixed(2)} — ${top.volumen.toLocaleString("es-AR")} registros, ${top.tasaRecurrencia}% recurrente.`,
         color: "red",
+        esAlerta: true,
       });
     }
 
@@ -155,6 +165,7 @@ export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
         texto: `${pctNoP}% de sucesos son No Programados`,
         detalle: `${datos.totalNoProgramados.toLocaleString("es-AR")} reactivos · ${datos.totalProgramados.toLocaleString("es-AR")} planificados de ${total.toLocaleString("es-AR")} totales.`,
         color: "blue",
+        esAlerta: false,
       });
 
       if (datos.calidadDataset.pctSinHora > 10) {
@@ -163,6 +174,7 @@ export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
           texto: `${datos.calidadDataset.pctSinHora}% de No Programados sin hora`,
           detalle: "La hora de los sucesos reactivos es crítica para el análisis de pico operativo. Revisá el proceso de carga.",
           color: "red",
+          esAlerta: true,
         });
       }
     }
@@ -181,6 +193,7 @@ export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
           texto: `Demora crítica en "${masLento.area}"`,
           detalle: `Promedio ${formatear(masLento.promedio)} vs. ${formatear(promedioGlobal)} global — ${Math.round(masLento.promedio / promedioGlobal)}x más lento.`,
           color: "amber",
+          esAlerta: true,
         });
       }
     }
@@ -188,7 +201,9 @@ export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
     return lista.slice(0, 9);
   }, [datos, mesFiltro]);
 
-  if (insights.length === 0) return null;
+  const visibles = soloAlertas ? insights.filter((i) => i.esAlerta) : insights;
+
+  if (visibles.length === 0) return null;
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 animate-fade-in-up delay-75">
@@ -204,7 +219,7 @@ export function InsightsPanel({ datos, mesFiltro }: InsightsPanelProps) {
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {insights.map((insight, idx) => {
+        {visibles.map((insight, idx) => {
           const Icono = ICONO_MAP[insight.icono];
           return (
             <div
