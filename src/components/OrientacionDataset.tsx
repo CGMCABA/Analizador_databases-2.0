@@ -137,7 +137,7 @@ export function OrientacionDataset({ datos, nombreArchivo }: Props) {
     <div className="presentation-hide print:hidden bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden animate-fade-in-up">
 
       {/* ── Header: badge · volumen · período ─────────────────────────────── */}
-      <div className="flex items-center justify-between flex-wrap gap-3 px-5 py-4 border-b border-slate-100 dark:border-slate-700">
+      <div className="flex items-center justify-between flex-wrap gap-3 px-5 py-3 border-b border-slate-100 dark:border-slate-700">
         <div className="flex items-center gap-3">
           <span className={`text-[11px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-full ${badge.cls}`}>
             {badge.label}
@@ -158,7 +158,7 @@ export function OrientacionDataset({ datos, nombreArchivo }: Props) {
       </div>
 
       {/* ── Capacidades: chips activos y bloqueados ───────────────────────── */}
-      <div className="px-5 py-3.5 border-b border-slate-100 dark:border-slate-700">
+      <div className="px-5 py-2.5 border-b border-slate-100 dark:border-slate-700">
         <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2.5">
           Análisis disponibles
         </p>
@@ -198,7 +198,7 @@ export function OrientacionDataset({ datos, nombreArchivo }: Props) {
       </div>
 
       {/* ── Footer: score de calidad · botones de expansión ──────────────── */}
-      <div className="flex items-center justify-between flex-wrap gap-3 px-5 py-3">
+      <div className="flex items-center justify-between flex-wrap gap-3 px-5 py-2">
         <div className="flex items-center gap-2">
           <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
             Amplitud

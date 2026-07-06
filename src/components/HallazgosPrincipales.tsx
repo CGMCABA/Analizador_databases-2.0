@@ -290,12 +290,6 @@ export function HallazgosPrincipales({ perfil, onVerComparacion }: HallazgosPrin
         </button>
       )}
 
-      {sugerencias.length > 0 && (
-        <p className="text-xs text-slate-400 dark:text-slate-500 mt-4 pt-3 border-t border-slate-100 dark:border-slate-700">
-          Para profundizar:{" "}
-          {sugerencias.map((s) => ETIQUETA_ANALISIS[s.id] ?? s.nombre).join(" · ")}
-        </p>
-      )}
     </div>
   );
 }

@@ -12,7 +12,6 @@ import { GraficoResolucion } from "@/components/GraficoResolucion";
 import { GraficoLineas } from "@/components/GraficoLineas";
 import { GraficoCalles } from "@/components/GraficoCalles";
 import { ResumenGeografico } from "@/components/ResumenGeografico";
-import { ResumenTemporal } from "@/components/ResumenTemporal";
 import { GraficoMapa } from "@/components/GraficoMapa";
 import { GraficoHeatmap } from "@/components/GraficoHeatmap";
 import { GraficoHorario } from "@/components/GraficoHorario";
@@ -643,8 +642,6 @@ export default function Dashboard() {
                 />
               </div>
             )}
-
-            {perfil && <ResumenTemporal perfil={perfil} />}
 
             <GraficoBarras
               datos={datos.porMes}
