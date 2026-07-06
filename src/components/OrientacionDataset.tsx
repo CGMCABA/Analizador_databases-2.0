@@ -134,10 +134,10 @@ export function OrientacionDataset({ datos, nombreArchivo }: Props) {
   const columnasIgnoradas = datos.columnas.filter((c) => c.tipo === "ignorar");
 
   return (
-    <div className="presentation-hide print:hidden bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden animate-fade-in-up">
+    <div className="presentation-hide print:hidden bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] overflow-hidden animate-fade-in-up">
 
       {/* ── Header: badge · volumen · período ─────────────────────────────── */}
-      <div className="flex items-center justify-between flex-wrap gap-3 px-5 py-3 border-b border-slate-100 dark:border-slate-700">
+      <div className="flex items-center justify-between flex-wrap gap-3 px-5 py-3 border-b border-slate-100 dark:border-[#1f2535]">
         <div className="flex items-center gap-3">
           <span className={`text-[11px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-full ${badge.cls}`}>
             {badge.label}
@@ -158,7 +158,7 @@ export function OrientacionDataset({ datos, nombreArchivo }: Props) {
       </div>
 
       {/* ── Capacidades: chips activos y bloqueados ───────────────────────── */}
-      <div className="px-5 py-2.5 border-b border-slate-100 dark:border-slate-700">
+      <div className="px-5 py-2.5 border-b border-slate-100 dark:border-[#1f2535]">
         <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2.5">
           Análisis disponibles
         </p>
@@ -221,7 +221,7 @@ export function OrientacionDataset({ datos, nombreArchivo }: Props) {
             <button
               onClick={() => setExpandidoColumnas((v) => !v)}
               aria-expanded={expandidoColumnas}
-              className="flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+              className="flex items-center gap-1.5 text-xs text-[#c8a84b] hover:text-[#d4b96a] transition-colors"
             >
               <Table2 className="h-3.5 w-3.5" />
               {columnasUtiles.length} columnas
@@ -235,7 +235,7 @@ export function OrientacionDataset({ datos, nombreArchivo }: Props) {
           <button
             onClick={() => setExpandidoCalidad((v) => !v)}
             aria-expanded={expandidoCalidad}
-            className="flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+            className="flex items-center gap-1.5 text-xs text-[#c8a84b] hover:text-[#d4b96a] transition-colors"
           >
             Ver calidad
             <ChevronDown
@@ -249,7 +249,7 @@ export function OrientacionDataset({ datos, nombreArchivo }: Props) {
 
       {/* ── Expansión: columnas detectadas ───────────────────────────────── */}
       {expandidoColumnas && columnasUtiles.length > 0 && (
-        <div className="border-t border-slate-100 dark:border-slate-700 px-5 py-3.5 bg-slate-50 dark:bg-slate-800/50">
+        <div className="border-t border-slate-100 dark:border-[#1f2535] px-5 py-3.5 bg-slate-50 dark:bg-[#0d0f14]">
           <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2.5">
             Columnas interpretadas
           </p>
@@ -278,7 +278,7 @@ export function OrientacionDataset({ datos, nombreArchivo }: Props) {
 
       {/* ── Expansión: CalidadDataset (card exterior suprimida) ───────────── */}
       {expandidoCalidad && (
-        <div className="border-t border-slate-100 dark:border-slate-700 [&>div]:rounded-none [&>div]:shadow-none [&>div]:border-0">
+        <div className="border-t border-slate-100 dark:border-[#1f2535] [&>div]:rounded-none [&>div]:shadow-none [&>div]:border-0">
           <CalidadDataset
             calidadDataset={datos.calidadDataset}
             tieneColumnaProgramacion={activa(datos.capacidades, "Programacion")}

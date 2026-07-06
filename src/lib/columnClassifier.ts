@@ -174,7 +174,7 @@ export function etiquetaTipo(tipo: TipoColumna): string {
     case "id": return "Identificador";
     case "fecha": return "Fecha";
     case "hora": return "Hora";
-    case "programacion": return "Tipo Evento";
+    case "programacion": return "Programación";
     case "categorica": return "Categoría";
     case "status": return "Estado";
     case "numerica": return "Numérica";

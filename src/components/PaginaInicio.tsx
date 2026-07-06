@@ -53,8 +53,8 @@ function guardarUrls(urls: UrlGuardada[]) {
 const PILARES = [
   {
     icon: Database,
-    color: "text-blue-400",
-    bg: "bg-blue-500/10 border-blue-500/20",
+    color: "text-[#c8a84b]",
+    bg: "bg-[rgba(200,168,75,0.10)] border-[rgba(200,168,75,0.22)]",
     titulo: "Normalización del dato",
     desc: "Unificación automática de formatos y períodos. Base sólida para análisis comparativo a lo largo del tiempo.",
   },
@@ -67,8 +67,8 @@ const PILARES = [
   },
   {
     icon: BarChart3,
-    color: "text-cyan-400",
-    bg: "bg-cyan-500/10 border-cyan-500/20",
+    color: "text-slate-300",
+    bg: "bg-slate-500/10 border-slate-500/20",
     titulo: "Dashboards ejecutivos",
     desc: "Vistas orientadas a la decisión: zonas críticas, eficiencia operativa y calidad del reporte.",
   },
@@ -185,7 +185,7 @@ export function PaginaInicio({ onUrl, onBuffer, onError, cargando, error }: Pagi
       <div
         className="relative px-8 py-20 text-center overflow-hidden"
         style={{
-          background: "linear-gradient(135deg, #0b1828 0%, #1a2b4a 55%, #1e3d72 100%)",
+          background: "linear-gradient(135deg, #08090c 0%, #111318 55%, #1a1f2e 100%)",
         }}
       >
         <div
@@ -198,14 +198,14 @@ export function PaginaInicio({ onUrl, onBuffer, onError, cargando, error }: Pagi
         />
 
         <div className="relative max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-blue-400/15 border border-blue-400/30 text-blue-300 text-xs font-semibold uppercase tracking-widest px-4 py-1.5 rounded-full mb-7">
-            <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
+          <div className="inline-flex items-center gap-2 text-[#64748b] text-[10px] font-semibold tracking-[.14em] uppercase mb-7">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#c8a84b] animate-pulse" />
             Análisis de Datos Operativos
           </div>
 
           <h1 className="text-4xl md:text-[3.25rem] font-black text-white leading-[1.1] mb-5">
             Transformación de Datos Operativos
-            <span className="block text-blue-300 mt-1">en Inteligencia Urbana</span>
+            <span className="block text-[#c8a84b] mt-1">en Inteligencia Urbana</span>
           </h1>
 
           <p className="text-slate-300 text-base md:text-lg leading-relaxed max-w-2xl mx-auto">
@@ -217,16 +217,11 @@ export function PaginaInicio({ onUrl, onBuffer, onError, cargando, error }: Pagi
       </div>
 
       {/* ── 4 Pilares ─────────────────────────────────────────── */}
-      <div className="bg-white dark:bg-[#0c1525] border-b border-slate-200 dark:border-slate-800 px-6 py-10">
-        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
-          {PILARES.map(({ icon: Icon, color, bg, titulo, desc }) => (
-            <div
-              key={titulo}
-              className="flex flex-col gap-3 p-5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50"
-            >
-              <div className={`h-10 w-10 rounded-xl flex items-center justify-center border ${bg}`}>
-                <Icon className={`h-5 w-5 ${color}`} />
-              </div>
+      <div className="bg-white dark:bg-[#131720] border-y border-slate-200 dark:border-[#1f2535]">
+        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 divide-x divide-slate-100 dark:divide-[#1f2535]">
+          {PILARES.map(({ icon: Icon, color, titulo, desc }) => (
+            <div key={titulo} className="flex flex-col gap-3 px-6 py-8">
+              <Icon className={`h-5 w-5 ${color}`} />
               <div>
                 <p className="text-sm font-bold text-slate-800 dark:text-slate-100 mb-1.5 leading-snug">
                   {titulo}
@@ -239,7 +234,7 @@ export function PaginaInicio({ onUrl, onBuffer, onError, cargando, error }: Pagi
       </div>
 
       {/* ── Indicadores estratégicos ───────────────────────────── */}
-      <div className="bg-slate-50 dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-800 px-6 py-8">
+      <div className="bg-slate-50 dark:bg-[#131720] border-b border-slate-200 dark:border-slate-800 px-6 py-8">
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.18em] mb-4">
             Indicadores estratégicos detectados automáticamente
@@ -259,7 +254,7 @@ export function PaginaInicio({ onUrl, onBuffer, onError, cargando, error }: Pagi
       </div>
 
       {/* ── Carga de datos ────────────────────────────────────── */}
-      <div className="px-6 py-14 bg-white dark:bg-[#0c1525]">
+      <div className="px-6 py-14 bg-white dark:bg-[#0d0f14]">
         <div className="max-w-2xl mx-auto flex flex-col items-center gap-5">
           <div className="text-center">
             <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-1">
@@ -281,8 +276,8 @@ export function PaginaInicio({ onUrl, onBuffer, onError, cargando, error }: Pagi
             onClick={() => !cargando && inputArchivoRef.current?.click()}
             className={`w-full rounded-2xl border-2 border-dashed p-7 flex flex-col items-center gap-2 text-center transition-colors cursor-pointer ${
               arrastrando
-                ? "border-blue-500 bg-blue-50 dark:bg-blue-500/10"
-                : "border-slate-300 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-500"
+                ? "border-[#c8a84b] bg-[rgba(200,168,75,0.06)] dark:bg-[rgba(200,168,75,0.06)]"
+                : "border-slate-300 dark:border-[#2e3852] hover:border-[#c8a84b]/60 dark:hover:border-[#c8a84b]/60"
             } ${cargando ? "opacity-60 cursor-not-allowed" : ""}`}
           >
             <input
@@ -293,7 +288,7 @@ export function PaginaInicio({ onUrl, onBuffer, onError, cargando, error }: Pagi
               disabled={cargando}
               className="hidden"
             />
-            <FileSpreadsheet className="h-7 w-7 text-blue-500 dark:text-blue-400" />
+            <FileSpreadsheet className="h-7 w-7 text-[#c8a84b]" />
             <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
               Arrastrá tu archivo Excel acá
             </p>
@@ -311,9 +306,9 @@ export function PaginaInicio({ onUrl, onBuffer, onError, cargando, error }: Pagi
           <div className="w-full grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-start">
 
             {/* ── Columna izquierda: URL input + guardadas ──── */}
-            <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-5 flex flex-col gap-4">
+            <div className="rounded-2xl border border-slate-200 dark:border-[#252d3d] bg-slate-50 dark:bg-[#1a1f2e] p-5 flex flex-col gap-4">
               <div className="flex items-center gap-2">
-                <Link2 className="h-5 w-5 text-blue-500 dark:text-blue-400 shrink-0" />
+                <Link2 className="h-5 w-5 text-[#c8a84b] shrink-0" />
                 <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
                   Desde URL de Google Sheet
                 </span>
@@ -325,7 +320,7 @@ export function PaginaInicio({ onUrl, onBuffer, onError, cargando, error }: Pagi
                 value={nombreInput}
                 onChange={(e) => setNombreInput(e.target.value)}
                 placeholder="Nombre (ej: Sucesos Enero 2026)"
-                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[rgba(200,168,75,0.40)]"
               />
 
               {/* Input de URL */}
@@ -335,13 +330,13 @@ export function PaginaInicio({ onUrl, onBuffer, onError, cargando, error }: Pagi
                 onChange={(e) => setUrlInput(e.target.value)}
                 placeholder="https://docs.google.com/spreadsheets/d/..."
                 onKeyDown={(e) => e.key === "Enter" && handleCargar()}
-                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-[rgba(200,168,75,0.40)]"
               />
 
               <button
                 onClick={handleCargar}
                 disabled={cargando || !urlInput.trim()}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-sm flex items-center justify-center gap-2"
+                className="w-full bg-[#c8a84b] hover:bg-[#d4b96a] disabled:bg-slate-600 disabled:cursor-not-allowed text-[#0a0c10] font-bold px-4 py-2.5 rounded-xl text-sm transition-colors shadow-sm flex items-center justify-center gap-2"
               >
                 {cargando ? (
                   <>
@@ -358,7 +353,7 @@ export function PaginaInicio({ onUrl, onBuffer, onError, cargando, error }: Pagi
 
               {/* ── URLs guardadas ──── */}
               {guardadas.length > 0 && (
-                <div className="border-t border-slate-200 dark:border-slate-700 pt-3 mt-1">
+                <div className="border-t border-slate-200 dark:border-[#252d3d] pt-3 mt-1">
                   <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em] mb-2">
                     Archivos recientes
                   </p>
@@ -374,7 +369,7 @@ export function PaginaInicio({ onUrl, onBuffer, onError, cargando, error }: Pagi
                           <button
                             onClick={() => cargarDesdeUrl(g.url, g.nombre)}
                             disabled={cargando}
-                            className="flex-1 text-left text-sm font-medium text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 truncate disabled:opacity-50"
+                            className="flex-1 text-left text-sm font-medium text-slate-700 dark:text-slate-200 hover:text-[#c8a84b] dark:hover:text-[#d4b96a] truncate disabled:opacity-50"
                             title={g.url}
                           >
                             {g.nombre}
@@ -386,7 +381,7 @@ export function PaginaInicio({ onUrl, onBuffer, onError, cargando, error }: Pagi
                             className="opacity-0 group-hover:opacity-100 transition-opacity"
                             title="Abrir Sheet"
                           >
-                            <ExternalLink className="h-3.5 w-3.5 text-slate-400 hover:text-blue-500" />
+                            <ExternalLink className="h-3.5 w-3.5 text-slate-400 hover:text-[#c8a84b]" />
                           </a>
                           <button
                             onClick={() => eliminarGuardada(g.id)}
@@ -410,7 +405,7 @@ export function PaginaInicio({ onUrl, onBuffer, onError, cargando, error }: Pagi
             </div>
 
             {/* ── Columna derecha: Google Drive ──── */}
-            <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-5 flex flex-col gap-3">
+            <div className="rounded-2xl border border-slate-200 dark:border-[#252d3d] bg-slate-50 dark:bg-[#1a1f2e] p-5 flex flex-col gap-3">
               <div className="flex items-center gap-2">
                 <svg viewBox="0 0 87.3 78" className="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg">
                   <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/>
@@ -442,7 +437,7 @@ export function PaginaInicio({ onUrl, onBuffer, onError, cargando, error }: Pagi
       </div>
 
       {/* ── Frase de cierre ───────────────────────────────────── */}
-      <div className="px-6 py-8 text-center border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40">
+      <div className="px-6 py-8 text-center border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#131720]">
         <blockquote className="max-w-xl mx-auto">
           <p className="text-slate-500 dark:text-slate-400 text-sm italic leading-relaxed">
             "Los datos ya existían. Lo que faltaba era estructura,

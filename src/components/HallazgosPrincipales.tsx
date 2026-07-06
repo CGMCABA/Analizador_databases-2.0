@@ -187,7 +187,7 @@ const ESTILO_CATEGORIA: Record<
   concentracion: { borde: "border-l-red-500", icono: AlertCircle, iconoColor: "text-red-500 dark:text-red-400" },
   tendencia: { borde: "border-l-amber-500", icono: TrendingUp, iconoColor: "text-amber-500 dark:text-amber-400" },
   recurrencia: { borde: "border-l-violet-500", icono: RefreshCw, iconoColor: "text-violet-500 dark:text-violet-400" },
-  anomalia: { borde: "border-l-blue-400", icono: AlertTriangle, iconoColor: "text-blue-500 dark:text-blue-400" },
+  anomalia: { borde: "border-l-slate-400", icono: AlertTriangle, iconoColor: "text-slate-400" },
 };
 
 // Traducción id interno → frase de acción para el usuario final. El score que ordena
@@ -220,11 +220,11 @@ export function HallazgosPrincipales({ perfil, onVerComparacion }: HallazgosPrin
     perfil.caracteristicas.tendenciaGeneral !== "estable";
 
   return (
-    <div className="presentation-hide bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 print:hidden">
+    <div className="presentation-hide bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] p-5 print:hidden">
       <div className="flex items-center justify-between gap-3 flex-wrap mb-4">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 bg-blue-100 dark:bg-blue-900/40 rounded-lg shrink-0">
-            <Search className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+          <div className="p-1.5 bg-[rgba(200,168,75,0.10)] rounded-lg shrink-0">
+            <Search className="h-4 w-4 text-[#c8a84b]" />
           </div>
           <h2 className="font-semibold text-slate-800 dark:text-slate-100">Hallazgos Principales</h2>
         </div>
@@ -278,7 +278,7 @@ export function HallazgosPrincipales({ perfil, onVerComparacion }: HallazgosPrin
       {mostrarCTAComparacion && (
         <button
           onClick={onVerComparacion}
-          className="mt-4 w-full flex items-center justify-between gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg px-3 py-2 text-left hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
+          className="mt-4 w-full flex items-center justify-between gap-2 bg-amber-50 dark:bg-[rgba(245,158,11,0.08)] border border-amber-200 dark:border-amber-800/50 rounded-lg px-3 py-2 text-left hover:dark:bg-[rgba(245,158,11,0.12)] transition-colors"
         >
           <span className="flex items-center gap-2 text-xs text-amber-700 dark:text-amber-400">
             <Zap className="h-3.5 w-3.5 shrink-0" />

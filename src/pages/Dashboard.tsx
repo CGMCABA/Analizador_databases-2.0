@@ -26,7 +26,7 @@ import { InsightsPanel } from "@/components/InsightsPanel";
 import { HallazgosPrincipales } from "@/components/HallazgosPrincipales";
 import { GraficoCruceHeatmap } from "@/components/GraficoCruceHeatmap";
 import { useDarkMode } from "@/hooks/useDarkMode";
-import { ClipboardList, Sun, Moon, Filter, Printer, Monitor, X, MapPin, Ban, GitCompareArrows, FileSpreadsheet, AlertCircle, TrendingUp, BarChart3, CheckCircle2, Clock, FilterX, type LucideIcon } from "lucide-react";
+import { Sun, Moon, Filter, Printer, Monitor, X, MapPin, Ban, GitCompareArrows, FileSpreadsheet, AlertCircle, TrendingUp, BarChart3, CheckCircle2, Clock, FilterX, type LucideIcon } from "lucide-react";
 import { PresentacionDiapositivas } from "@/components/PresentacionDiapositivas";
 import { GraficoTiempoRespuesta } from "@/components/GraficoTiempoRespuesta";
 import { PanelTiempoRespuestaInterno } from "@/components/PanelTiempoRespuestaInterno";
@@ -51,26 +51,14 @@ function SeparadorCapa({
   pregunta: string;
   acento: "slate" | "amber" | "teal";
 }) {
+  const _acento = acento; // conservado para compatibilidad de prop; todos los capítulos usan identidad dorada CGM
+  void _acento;
   const colores = {
-    slate: {
-      label: "text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700",
-      dot: "bg-slate-400 dark:bg-slate-500",
-      pregunta: "text-slate-500 dark:text-slate-400",
-      gradFrom: "from-slate-200 dark:from-slate-700",
-    },
-    amber: {
-      label: "text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800",
-      dot: "bg-amber-400 dark:bg-amber-500",
-      pregunta: "text-amber-600 dark:text-amber-500",
-      gradFrom: "from-amber-300 dark:from-amber-700",
-    },
-    teal: {
-      label: "text-teal-700 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 border border-teal-200 dark:border-teal-800",
-      dot: "bg-teal-400 dark:bg-teal-500",
-      pregunta: "text-teal-600 dark:text-teal-500",
-      gradFrom: "from-teal-300 dark:from-teal-700",
-    },
-  }[acento];
+    label: "text-[#c8a84b] bg-[rgba(200,168,75,0.10)] border border-[rgba(200,168,75,0.35)]",
+    dot:   "bg-[#c8a84b]",
+    pregunta: "text-[#d4b96a]",
+    gradFrom: "from-[#c8a84b]/50",
+  };
 
   return (
     <div className="presentation-hide print:hidden flex items-center gap-3 pt-4 pb-1">
@@ -313,15 +301,19 @@ export default function Dashboard() {
 
   return (
     <div
-      className="min-h-screen bg-[#f0f2f5] dark:bg-[#0c1525] transition-colors duration-300"
+      className="min-h-screen bg-[#f0f2f5] dark:bg-[#0d0f14] transition-colors duration-300"
       data-presentation={modoPresentation ? "true" : undefined}
     >
-      <header className="bg-[#1a2b4a] text-white shadow-lg print-header">
+      <header className="bg-[#0a0c10] text-white shadow-lg border-b-2 border-[#c8a84b] print-header">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-3 flex-wrap">
-          <ClipboardList className="h-7 w-7 text-[#4fc3f7] shrink-0" />
+          <div className="flex flex-col shrink-0">
+            <span className="text-[17px] font-black tracking-[.15em] text-[#c8a84b] leading-none uppercase">CGM</span>
+            <span className="text-[9px] text-slate-500 tracking-[.06em] uppercase mt-0.5">Centro de Monitoreo y Gestión de la Movilidad</span>
+          </div>
+          <div className="w-px h-7 bg-slate-700 shrink-0" />
           <div>
-            <h1 className="text-xl font-bold tracking-tight">Dashboard de Reportes</h1>
-            <p className="text-xs text-slate-300 mt-0.5">Inteligencia Urbana Operativa</p>
+            <h1 className="text-sm font-semibold tracking-tight text-white">Dashboard de Reportes</h1>
+            <p className="text-[10px] text-slate-400 mt-0.5">Inteligencia Urbana Operativa</p>
           </div>
           <div className="ml-auto flex items-center gap-2 flex-wrap print:hidden">
             {datos && (

@@ -14,13 +14,13 @@ const ICONOS: Record<IconoTipo, React.ElementType> = {
 };
 
 const COLORES: Record<ColorTipo, { iconBg: string; icon: string; border: string; text: string }> = {
-  blue:   { iconBg: "bg-blue-100 dark:bg-blue-900/40",   icon: "text-blue-600 dark:text-blue-400",   border: "border-blue-100 dark:border-blue-800",   text: "text-blue-700 dark:text-blue-400" },
-  green:  { iconBg: "bg-green-100 dark:bg-green-900/40", icon: "text-green-600 dark:text-green-400", border: "border-green-100 dark:border-green-800", text: "text-green-700 dark:text-green-400" },
-  red:    { iconBg: "bg-red-100 dark:bg-red-900/40",     icon: "text-red-600 dark:text-red-400",     border: "border-red-100 dark:border-red-800",     text: "text-red-700 dark:text-red-400" },
-  cyan:   { iconBg: "bg-cyan-100 dark:bg-cyan-900/40",   icon: "text-cyan-600 dark:text-cyan-400",   border: "border-cyan-100 dark:border-cyan-800",   text: "text-cyan-700 dark:text-cyan-400" },
-  indigo: { iconBg: "bg-indigo-100 dark:bg-indigo-900/40", icon: "text-indigo-600 dark:text-indigo-400", border: "border-indigo-100 dark:border-indigo-800", text: "text-indigo-700 dark:text-indigo-400" },
-  violet: { iconBg: "bg-violet-100 dark:bg-violet-900/40", icon: "text-violet-600 dark:text-violet-400", border: "border-violet-100 dark:border-violet-800", text: "text-violet-700 dark:text-violet-400" },
-  amber:  { iconBg: "bg-amber-100 dark:bg-amber-900/40",  icon: "text-amber-600 dark:text-amber-400",  border: "border-amber-100 dark:border-amber-800",  text: "text-amber-700 dark:text-amber-400" },
+  blue:   { iconBg: "bg-[rgba(200,168,75,0.10)]", icon: "text-[#c8a84b]",   border: "border-[#252d3d]", text: "text-slate-200" },
+  green:  { iconBg: "bg-green-900/30",             icon: "text-green-400",   border: "border-[#252d3d]", text: "text-green-400" },
+  red:    { iconBg: "bg-red-900/30",               icon: "text-red-400",     border: "border-[#252d3d]", text: "text-red-400" },
+  cyan:   { iconBg: "bg-[rgba(200,168,75,0.08)]",  icon: "text-[#d4b96a]",   border: "border-[#252d3d]", text: "text-slate-200" },
+  indigo: { iconBg: "bg-violet-900/30",            icon: "text-violet-400",  border: "border-[#252d3d]", text: "text-violet-400" },
+  violet: { iconBg: "bg-violet-900/30",            icon: "text-violet-400",  border: "border-[#252d3d]", text: "text-violet-400" },
+  amber:  { iconBg: "bg-amber-900/30",             icon: "text-amber-400",   border: "border-[#252d3d]", text: "text-amber-400" },
 };
 
 interface MetricCardProps {
@@ -60,10 +60,10 @@ export function MetricCard({ titulo, valor, subtitulo, color, icono, delta, subt
   };
 
   return (
-    <div className={`bg-white dark:bg-slate-800 rounded-xl border ${c.border} shadow-sm p-5 flex flex-col gap-3 h-full transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md group`}>
+    <div className={`bg-white dark:bg-[#1a1f2e] rounded-xl border ${c.border} p-5 flex flex-col gap-3 h-full`}>
       <div className="flex items-center justify-between">
         <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{titulo}</span>
-        <div className={`${c.iconBg} p-2 rounded-lg ring-2 ring-transparent group-hover:ring-offset-1 group-hover:ring-current transition-all duration-200 ${c.icon}`}>
+        <div className={`${c.iconBg} p-2 rounded-lg ${c.icon}`}>
           <Icono className={`h-4 w-4 ${c.icon}`} />
         </div>
       </div>

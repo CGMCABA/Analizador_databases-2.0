@@ -206,13 +206,11 @@ export function InsightsPanel({ datos, mesFiltro, soloAlertas = false }: Insight
   if (visibles.length === 0) return null;
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 animate-fade-in-up delay-75">
+    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] p-5 animate-fade-in-up delay-75">
       <div className="flex items-center gap-2 mb-4">
-        <div className="p-1.5 bg-yellow-100 dark:bg-yellow-900/40 rounded-lg shrink-0">
-          <Lightbulb className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-        </div>
+        <Lightbulb className="h-4 w-4 text-[#c8a84b] shrink-0" />
         <div>
-          <h3 className="font-semibold text-slate-800 dark:text-slate-100">Insights automáticos</h3>
+          <h3 className="font-semibold text-slate-800 dark:text-slate-100">Alertas operativas</h3>
           <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
             Observaciones generadas del análisis de los datos
           </p>
