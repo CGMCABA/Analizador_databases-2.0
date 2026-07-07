@@ -26,7 +26,7 @@ import { InsightsPanel } from "@/components/InsightsPanel";
 import { HallazgosPrincipales } from "@/components/HallazgosPrincipales";
 import { GraficoCruceHeatmap } from "@/components/GraficoCruceHeatmap";
 import { useDarkMode } from "@/hooks/useDarkMode";
-import { Sun, Moon, Filter, Printer, Monitor, X, MapPin, Ban, GitCompareArrows, FileSpreadsheet, AlertCircle, TrendingUp, BarChart3, CheckCircle2, Clock, FilterX, type LucideIcon } from "lucide-react";
+import { Sun, Moon, Filter, Printer, Monitor, X, MapPin, Ban, GitCompareArrows, FileSpreadsheet, AlertCircle, TrendingUp, BarChart3, CheckCircle2, Clock, FilterX, LayoutDashboard, Briefcase, type LucideIcon } from "lucide-react";
 import { PresentacionDiapositivas } from "@/components/PresentacionDiapositivas";
 import { GraficoTiempoRespuesta } from "@/components/GraficoTiempoRespuesta";
 import { PanelTiempoRespuestaInterno } from "@/components/PanelTiempoRespuestaInterno";
@@ -102,6 +102,7 @@ export default function Dashboard() {
   const [mesFiltro, setMesFiltro] = useState<string>("");
   const [calleFiltro, setCalleFiltro] = useState<string>("");
   const [modoPresentation, setModoPresentation] = useState(false);
+  const [modoEjecutivo, setModoEjecutivo] = useState(false);
   const [bannerCuarentenaVisible, setBannerCuarentenaVisible] = useState(false);
   const { isDark, toggle } = useDarkMode();
 
@@ -119,13 +120,14 @@ export default function Dashboard() {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         if (modoPresentation) setModoPresentation(false);
+        if (modoEjecutivo) setModoEjecutivo(false);
         if (modalComparacion) setModalComparacion(false);
         if (modoComparacion) setModoComparacion(false);
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [modoPresentation, modalComparacion, modoComparacion]);
+  }, [modoPresentation, modoEjecutivo, modalComparacion, modoComparacion]);
 
   // Acepta mesA/mesB opcionales para poder dispararse directo (ej. desde el CTA de
   // HallazgosPrincipales con los últimos 2 meses) sin pasar por el modal de selección.
@@ -226,6 +228,7 @@ export default function Dashboard() {
     setError("");
     setMesFiltro("");
     setCalleFiltro("");
+    setModoEjecutivo(false);
   };
 
   const datosFiltrados = useMemo<DatosDashboard | null>(() => {
@@ -392,6 +395,34 @@ export default function Dashboard() {
                 Cargar otro archivo
               </button>
             )}
+            {datos && (
+              <div className="presentation-hide flex items-center gap-0.5 bg-white/10 rounded-lg p-0.5">
+                <button
+                  onClick={() => setModoEjecutivo(false)}
+                  title="Vista operativa completa"
+                  className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-md font-semibold transition-colors ${
+                    !modoEjecutivo
+                      ? "bg-white/15 text-white"
+                      : "text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  <LayoutDashboard className="h-3.5 w-3.5" />
+                  Operativo
+                </button>
+                <button
+                  onClick={() => setModoEjecutivo(true)}
+                  title="Vista ejecutiva — KPIs, hallazgos y recomendaciones"
+                  className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-md font-semibold transition-colors ${
+                    modoEjecutivo
+                      ? "bg-[#c8a84b] text-[#0a0c10]"
+                      : "text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  <Briefcase className="h-3.5 w-3.5" />
+                  Ejecutivo
+                </button>
+              </div>
+            )}
             <button
               onClick={() => setModoPresentation((v) => !v)}
               disabled={!datos}
@@ -426,7 +457,38 @@ export default function Dashboard() {
             cargando={cargando}
             error={error}
           />
+        ) : modoEjecutivo ? (
+          // ── MODO EJECUTIVO ─────────────────────────────────────────────────
+          // Componentes A (esenciales): KPIs · Hallazgos · Semáforo · Recomendaciones · Mapa
+          // Componentes B (útiles, colapsados): InsightsPanel · IndiceFragilidad · GraficoBarras
+          // Componentes C (ocultos): OrientacionDataset · CalidadDataset · TablaDetalle
+          //   · GraficoHorario · GraficoHeatmap · GraficoCruce* · ComparacionPeriodos
+          //   · LineaDeTiempo · ResumenTemporal · VentanaPredictiva · PanelEventosCronicos
+          //   · PanelFalsosPositivos · PanelTiempoRespuestaInterno · ZonasDeAtencion
+          // Fase 7.0-B: construir el layout ejecutivo aquí
+          <div id="ejecutivo-content" className="space-y-6">
+            <div className="flex items-center gap-3 py-1">
+              <div className="p-2 bg-[rgba(200,168,75,0.10)] rounded-lg shrink-0">
+                <Briefcase className="h-4 w-4 text-[#c8a84b]" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-800 dark:text-slate-100">Modo Ejecutivo</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {nombreArchivo} · Vista sintetizada para reuniones y presentaciones
+                </p>
+              </div>
+            </div>
+            <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] p-8 text-center">
+              <p className="text-sm text-slate-400 dark:text-slate-500">
+                Layout ejecutivo completo — Fase 7.0-B
+              </p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">
+                Se construirá aquí: ResumenEjecutivoTexto · KPIs · Semáforo · Hallazgos + Mapa · Recomendaciones
+              </p>
+            </div>
+          </div>
         ) : (
+          // ── MODO OPERATIVO ─────────────────────────────────────────────────
           <div id="dashboard-content" className="space-y-6">
             <div className="presentation-hide flex items-center justify-between flex-wrap gap-3 print:hidden">
               <div>
