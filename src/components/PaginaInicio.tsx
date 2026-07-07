@@ -320,7 +320,7 @@ export function PaginaInicio({ onUrl, onBuffer, onError, cargando, error }: Pagi
                 value={nombreInput}
                 onChange={(e) => setNombreInput(e.target.value)}
                 placeholder="Nombre (ej: Sucesos Enero 2026)"
-                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[rgba(200,168,75,0.40)]"
+                className="w-full bg-white dark:bg-[#0d0f14] border border-slate-200 dark:border-[#2e3852] rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[rgba(200,168,75,0.40)]"
               />
 
               {/* Input de URL */}
@@ -363,7 +363,7 @@ export function PaginaInicio({ onUrl, onBuffer, onError, cargando, error }: Pagi
                       .map((g) => (
                         <div
                           key={g.id}
-                          className="flex items-center gap-2 group rounded-lg px-2.5 py-2 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
+                          className="flex items-center gap-2 group rounded-lg px-2.5 py-2 hover:bg-slate-100 dark:hover:bg-[#1a1f2e] transition-colors"
                         >
                           <Star className="h-3.5 w-3.5 text-amber-400 shrink-0" />
                           <button

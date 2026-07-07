@@ -30,11 +30,11 @@ const COLOR_MAP: Record<EstadoSemaforo, {
     badge: "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300",
   },
   nd: {
-    bg: "bg-slate-50 dark:bg-slate-800",
-    border: "border-slate-200 dark:border-slate-700",
+    bg: "bg-slate-50 dark:bg-[#1a1f2e]",
+    border: "border-slate-200 dark:border-[#2e3852]",
     dot: "#94a3b8",
     etiqueta: "text-slate-500 dark:text-slate-400",
-    badge: "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400",
+    badge: "bg-slate-100 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400",
   },
 };
 
@@ -96,10 +96,10 @@ function EjeCard({ eje, titulo, Icono }: { eje: EjeSemaforo; titulo: string; Ico
 
 export function SemaforoOperacional({ resultado }: SemaforoOperacionalProps) {
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-md p-5 animate-fade-in-up delay-75">
+    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] p-5 animate-fade-in-up delay-75">
       <div className="flex items-center gap-2 mb-4">
-        <div className="p-1.5 bg-slate-100 dark:bg-slate-700 rounded-lg shrink-0">
-          <ShieldCheck className="h-4 w-4 text-slate-600 dark:text-slate-300" />
+        <div className="p-1.5 bg-[rgba(200,168,75,0.10)] rounded-lg shrink-0">
+          <ShieldCheck className="h-4 w-4 text-[#c8a84b]" />
         </div>
         <div>
           <h3 className="font-semibold text-slate-800 dark:text-slate-100">Semáforo Operacional</h3>
