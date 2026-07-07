@@ -26,8 +26,7 @@ import { InsightsPanel } from "@/components/InsightsPanel";
 import { HallazgosPrincipales } from "@/components/HallazgosPrincipales";
 import { GraficoCruceHeatmap } from "@/components/GraficoCruceHeatmap";
 import { useDarkMode } from "@/hooks/useDarkMode";
-import { Sun, Moon, Filter, Printer, Monitor, X, MapPin, Ban, GitCompareArrows, FileSpreadsheet, AlertCircle, TrendingUp, BarChart3, CheckCircle2, Clock, FilterX, LayoutDashboard, Briefcase, type LucideIcon } from "lucide-react";
-import { PresentacionDiapositivas } from "@/components/PresentacionDiapositivas";
+import { Sun, Moon, Filter, X, MapPin, Ban, GitCompareArrows, FileSpreadsheet, AlertCircle, TrendingUp, BarChart3, CheckCircle2, Clock, FilterX, LayoutDashboard, Briefcase, type LucideIcon } from "lucide-react";
 import { GraficoTiempoRespuesta } from "@/components/GraficoTiempoRespuesta";
 import { PanelTiempoRespuestaInterno } from "@/components/PanelTiempoRespuestaInterno";
 import { PanelFalsosPositivos } from "@/components/PanelFalsosPositivos";
@@ -102,7 +101,6 @@ export default function Dashboard() {
   const [error, setError] = useState<string>("");
   const [mesFiltro, setMesFiltro] = useState<string>("");
   const [calleFiltro, setCalleFiltro] = useState<string>("");
-  const [modoPresentation, setModoPresentation] = useState(false);
   const [modoEjecutivo, setModoEjecutivo] = useState(false);
   const [bannerCuarentenaVisible, setBannerCuarentenaVisible] = useState(false);
   const { isDark, toggle } = useDarkMode();
@@ -120,7 +118,6 @@ export default function Dashboard() {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        if (modoPresentation) setModoPresentation(false);
         if (modoEjecutivo) setModoEjecutivo(false);
         if (modalComparacion) setModalComparacion(false);
         if (modoComparacion) setModoComparacion(false);
@@ -128,7 +125,7 @@ export default function Dashboard() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [modoPresentation, modoEjecutivo, modalComparacion, modoComparacion]);
+  }, [modoEjecutivo, modalComparacion, modoComparacion]);
 
   // Acepta mesA/mesB opcionales para poder dispararse directo (ej. desde el CTA de
   // HallazgosPrincipales con los últimos 2 meses) sin pasar por el modal de selección.
@@ -306,7 +303,6 @@ export default function Dashboard() {
   return (
     <div
       className="min-h-screen bg-[#f0f2f5] dark:bg-[#0d0f14] transition-colors duration-300"
-      data-presentation={modoPresentation ? "true" : undefined}
     >
       <header className="bg-[#0a0c10] text-white shadow-lg border-b-2 border-[#c8a84b] print-header">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-3 flex-wrap">
@@ -364,16 +360,6 @@ export default function Dashboard() {
             </button>
             {datos && (
               <button
-                onClick={() => window.print()}
-                title="Imprimir / Guardar como PDF"
-                className="presentation-hide flex items-center gap-1.5 text-sm bg-white/10 hover:bg-white/20 transition-colors px-3 py-1.5 rounded-md font-medium"
-              >
-                <Printer className="h-3.5 w-3.5" />
-                <span>Exportar PDF</span>
-              </button>
-            )}
-            {datos && (
-              <button
                 onClick={() => {
                   setModalComparacion(true);
                   setModoSeleccion("meses");
@@ -397,7 +383,7 @@ export default function Dashboard() {
               </button>
             )}
             {datos && (
-              <div className="presentation-hide flex items-center gap-0.5 bg-white/10 rounded-lg p-0.5">
+              <div className="flex items-center gap-0.5 bg-white/10 rounded-lg p-0.5">
                 <button
                   onClick={() => setModoEjecutivo(false)}
                   title="Vista operativa completa"
@@ -424,27 +410,6 @@ export default function Dashboard() {
                 </button>
               </div>
             )}
-            <button
-              onClick={() => setModoPresentation((v) => !v)}
-              disabled={!datos}
-              title={
-                !datos
-                  ? "Cargá un archivo para usar el modo presentación"
-                  : modoPresentation
-                  ? "Salir del modo presentación"
-                  : "Activar modo presentación"
-              }
-              className={`flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
-                modoPresentation
-                  ? "bg-amber-400 hover:bg-amber-300 text-slate-900"
-                  : "bg-white/10 hover:bg-white/20"
-              }`}
-            >
-              {modoPresentation
-                ? <><X className="h-3.5 w-3.5" /><span>Salir</span></>
-                : <><Monitor className="h-3.5 w-3.5" /><span>Modo Presentación</span></>
-              }
-            </button>
           </div>
         </div>
       </header>
@@ -619,9 +584,8 @@ export default function Dashboard() {
                   )}
                   {tieneMapa && datosFiltrados && (
                     <GraficoMapa
-                      solicitudes={datosFiltrados.solicitudes}
-                      porCalle={datosFiltrados.porCalle}
-                      porInterseccion={datosFiltrados.porInterseccion}
+                      intersecciones={datosFiltrados.porInterseccion}
+                      totalSolicitudes={datosFiltrados.totalSolicitudes}
                     />
                   )}
                 </div>
@@ -1177,15 +1141,6 @@ export default function Dashboard() {
           </div>
         )}
       </main>
-
-      {modoPresentation && datosFiltrados && (
-        <PresentacionDiapositivas
-          datos={datosFiltrados}
-          perfil={perfil!}
-          nombreArchivo={nombreArchivo}
-          onCerrar={() => setModoPresentation(false)}
-        />
-      )}
 
       {modoComparacion && comparacionResultado && (
         <ComparacionPeriodos
