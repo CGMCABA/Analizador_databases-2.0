@@ -41,6 +41,7 @@ import { activa } from "@/lib/capacidades";
 import { utilizable } from "@/lib/calidad";
 import { VentanaPredictiva } from "@/components/VentanaPredictiva";
 import { PlaceholderAnalisis } from "@/components/PlaceholderAnalisis";
+import { ResumenEjecutivoTexto } from "@/components/ResumenEjecutivoTexto";
 
 function SeparadorCapa({
   etiqueta,
@@ -478,14 +479,16 @@ export default function Dashboard() {
                 </p>
               </div>
             </div>
-            <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] p-8 text-center">
-              <p className="text-sm text-slate-400 dark:text-slate-500">
-                Layout ejecutivo completo — Fase 7.0-B
-              </p>
-              <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">
-                Se construirá aquí: ResumenEjecutivoTexto · KPIs · Semáforo · Hallazgos + Mapa · Recomendaciones
-              </p>
-            </div>
+            {datosFiltrados && perfil && semaforo && (
+              <ResumenEjecutivoTexto
+                datos={datosFiltrados}
+                perfil={perfil}
+                semaforo={semaforo}
+                recomendaciones={recomendaciones}
+                nombreArchivo={nombreArchivo}
+                mesFiltro={mesFiltro}
+              />
+            )}
           </div>
         ) : (
           // ── MODO OPERATIVO ─────────────────────────────────────────────────
