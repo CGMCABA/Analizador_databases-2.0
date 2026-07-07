@@ -38,9 +38,11 @@ import { ComparacionPeriodos } from "@/components/ComparacionPeriodos";
 import { compararPeriodos, ComparacionResultado } from "@/lib/compararPeriodos";
 import { activa } from "@/lib/capacidades";
 import { utilizable } from "@/lib/calidad";
+import { excluirMeses } from "@/lib/excluirMeses";
 import { VentanaPredictiva } from "@/components/VentanaPredictiva";
 import { PlaceholderAnalisis } from "@/components/PlaceholderAnalisis";
 import { ResumenEjecutivoTexto } from "@/components/ResumenEjecutivoTexto";
+import { GestorMeses } from "@/components/GestorMeses";
 
 function SeparadorCapa({
   etiqueta,
@@ -102,6 +104,7 @@ export default function Dashboard() {
   const [mesFiltro, setMesFiltro] = useState<string>("");
   const [calleFiltro, setCalleFiltro] = useState<string>("");
   const [modoEjecutivo, setModoEjecutivo] = useState(false);
+  const [mesesExcluidos, setMesesExcluidos] = useState<string[]>([]);
   const [bannerCuarentenaVisible, setBannerCuarentenaVisible] = useState(false);
   const { isDark, toggle } = useDarkMode();
 
@@ -227,13 +230,35 @@ export default function Dashboard() {
     setMesFiltro("");
     setCalleFiltro("");
     setModoEjecutivo(false);
+    setMesesExcluidos([]);
   };
 
-  const datosFiltrados = useMemo<DatosDashboard | null>(() => {
+  const toggleMes = useCallback(
+    (mes: string) => {
+      const activosDespues = (datos?.meses ?? []).length - mesesExcluidos.length;
+      const estaExcluido = mesesExcluidos.includes(mes);
+      // No permitir excluir el último mes activo
+      if (!estaExcluido && activosDespues <= 1) return;
+      // Si el mes filtrado queda excluido, limpiar el filtro
+      if (!estaExcluido && mesFiltro === mes) setMesFiltro("");
+      setMesesExcluidos((prev) =>
+        estaExcluido ? prev.filter((m) => m !== mes) : [...prev, mes]
+      );
+    },
+    [mesesExcluidos, mesFiltro, datos?.meses]
+  );
+
+  // Aplica exclusión de meses antes de cualquier filtro de mes/calle
+  const datosBase = useMemo<DatosDashboard | null>(() => {
     if (!datos) return null;
-    if (!mesFiltro && !calleFiltro) return datos;
-    return filtrarDatos(datos, { mes: mesFiltro || undefined, calle: calleFiltro || undefined });
-  }, [datos, mesFiltro, calleFiltro]);
+    return excluirMeses(datos, mesesExcluidos);
+  }, [datos, mesesExcluidos]);
+
+  const datosFiltrados = useMemo<DatosDashboard | null>(() => {
+    if (!datosBase) return null;
+    if (!mesFiltro && !calleFiltro) return datosBase;
+    return filtrarDatos(datosBase, { mes: mesFiltro || undefined, calle: calleFiltro || undefined });
+  }, [datosBase, mesFiltro, calleFiltro]);
 
   const ultimoMes = datos?.porMes?.[datos.porMes.length - 1];
   const penultimoMes = datos?.porMes?.[datos.porMes.length - 2];
@@ -326,11 +351,18 @@ export default function Dashboard() {
                   style={{ colorScheme: "dark" }}
                 >
                   <option value="" className="bg-slate-800 text-white">Todos los meses</option>
-                  {datos.meses.map((m) => (
-                    <option key={m} value={m} className="bg-slate-800 text-white">{m}</option>
-                  ))}
+                  {datos.meses
+                    .filter((m) => !mesesExcluidos.includes(m))
+                    .map((m) => (
+                      <option key={m} value={m} className="bg-slate-800 text-white">{m}</option>
+                    ))}
                 </select>
               </div>
+            )}
+            {mesesExcluidos.length > 0 && (
+              <span className="presentation-hide flex items-center gap-1 text-[10px] font-bold tracking-wide text-amber-400 bg-amber-400/10 border border-amber-400/30 px-2 py-1 rounded-md">
+                {mesesExcluidos.length} mes{mesesExcluidos.length > 1 ? "es" : ""} excluido{mesesExcluidos.length > 1 ? "s" : ""}
+              </span>
             )}
             {datos && activa(datos.capacidades, "GeograficaCalles") && datos.porCalle.length > 0 && (
               <div className="presentation-hide flex items-center gap-1.5 bg-white/10 rounded-lg px-2 py-1.5">
@@ -423,7 +455,15 @@ export default function Dashboard() {
             cargando={cargando}
             error={error}
           />
-        ) : modoEjecutivo ? (
+        ) : (
+          <div className="space-y-5">
+            <GestorMeses
+              datos={datos}
+              mesesExcluidos={mesesExcluidos}
+              onToggleMes={toggleMes}
+              onResetExclusiones={() => setMesesExcluidos([])}
+            />
+            {modoEjecutivo ? (
           // ── MODO EJECUTIVO ─────────────────────────────────────────────────
           // VISIBLES (A): ResumenEjecutivoTexto · KPIs · SemaforoOperacional
           //               HallazgosPrincipales · GraficoMapa · RecomendacionesOperativas
@@ -1137,6 +1177,8 @@ export default function Dashboard() {
                 descripcion="El modelo predictivo requiere una tendencia histórica. Aparecerá automáticamente cuando el dataset tenga más meses."
                 variante="temporal"
               />
+            )}
+          </div>
             )}
           </div>
         )}
