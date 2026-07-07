@@ -460,25 +460,44 @@ export default function Dashboard() {
           />
         ) : modoEjecutivo ? (
           // ── MODO EJECUTIVO ─────────────────────────────────────────────────
-          // Componentes A (esenciales): KPIs · Hallazgos · Semáforo · Recomendaciones · Mapa
-          // Componentes B (útiles, colapsados): InsightsPanel · IndiceFragilidad · GraficoBarras
-          // Componentes C (ocultos): OrientacionDataset · CalidadDataset · TablaDetalle
-          //   · GraficoHorario · GraficoHeatmap · GraficoCruce* · ComparacionPeriodos
-          //   · LineaDeTiempo · ResumenTemporal · VentanaPredictiva · PanelEventosCronicos
-          //   · PanelFalsosPositivos · PanelTiempoRespuestaInterno · ZonasDeAtencion
-          // Fase 7.0-B: construir el layout ejecutivo aquí
-          <div id="ejecutivo-content" className="space-y-6">
-            <div className="flex items-center gap-3 py-1">
-              <div className="p-2 bg-[rgba(200,168,75,0.10)] rounded-lg shrink-0">
-                <Briefcase className="h-4 w-4 text-[#c8a84b]" />
+          // VISIBLES (A): ResumenEjecutivoTexto · KPIs · SemaforoOperacional
+          //               HallazgosPrincipales · GraficoMapa · RecomendacionesOperativas
+          // OCULTOS  (C): OrientacionDataset · CalidadDataset · GraficoBarras
+          //               GraficoLineas · GraficoHorario · GraficoHeatmap · GraficoCruce*
+          //               GraficoCalles · GraficoRankingH · GraficoResolucion
+          //               GraficoTiempoRespuesta · TablaDetalle · LineaDeTiempo
+          //               VentanaPredictiva · PanelEventosCronicos · PanelFalsosPositivos
+          //               PanelTiempoRespuestaInterno · ZonasDeAtencion · InsightsPanel
+          <div id="ejecutivo-content" className="space-y-5">
+
+            {/* ── Barra de contexto ────────────────────────────────────────── */}
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2.5">
+                <div className="p-1.5 bg-[rgba(200,168,75,0.10)] rounded-lg shrink-0">
+                  <Briefcase className="h-4 w-4 text-[#c8a84b]" />
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-800 dark:text-slate-100 text-sm leading-snug">
+                    {nombreArchivo}
+                  </p>
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500">
+                    {datos.meses.length} {datos.meses.length === 1 ? "mes" : "meses"} · {datos.totalSolicitudes.toLocaleString("es-AR")} registros
+                    {mesFiltro ? ` · Filtrando: ${mesFiltro}` : ""}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="font-semibold text-slate-800 dark:text-slate-100">Modo Ejecutivo</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  {nombreArchivo} · Vista sintetizada para reuniones y presentaciones
-                </p>
-              </div>
+              {mesFiltro && (
+                <button
+                  onClick={() => setMesFiltro("")}
+                  className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center gap-1 bg-slate-100 dark:bg-[#252d3d] px-2.5 py-1 rounded-md border border-slate-200 dark:border-[#2e3852] transition-colors"
+                >
+                  <FilterX className="h-3 w-3" />
+                  Quitar filtro
+                </button>
+              )}
             </div>
+
+            {/* ── Resumen ejecutivo texto ──────────────────────────────────── */}
             {datosFiltrados && perfil && semaforo && (
               <ResumenEjecutivoTexto
                 datos={datosFiltrados}
@@ -489,6 +508,131 @@ export default function Dashboard() {
                 mesFiltro={mesFiltro}
               />
             )}
+
+            {/* ── KPIs ─────────────────────────────────────────────────────── */}
+            {datosFiltrados && (() => {
+              const total = datosFiltrados.totalSolicitudes;
+              const horaPico = datosFiltrados.porHora.length > 0
+                ? [...datosFiltrados.porHora].sort((a, b) => b.cantidad - a.cantidad)[0]
+                : null;
+              const diaPico = datosFiltrados.porDiaSemana.length > 0
+                ? [...datosFiltrados.porDiaSemana].sort((a, b) => b.cantidad - a.cantidad)[0]
+                : null;
+              const topMotivo = datosFiltrados.porMotivo[0] ?? null;
+              const topInt = datosFiltrados.porInterseccion[0] ?? null;
+
+              const cards = [
+                {
+                  titulo: "Total Registros",
+                  valor: total.toLocaleString("es-AR"),
+                  subtitulo: mesFiltro ? `registros en ${mesFiltro}` : "registros totales",
+                  color: "blue" as const, icono: "chart" as const,
+                  delta: mesFiltro ? undefined : deltaTotal,
+                  subtituloMes: mesFiltro ? undefined : ultimoMes?.mes,
+                },
+                datos.tieneColumnaStatus
+                  ? {
+                      titulo: datos.etiquetaStatus === "Resuelto" ? "Tasa de Resolución" : "Tasa de Finalización",
+                      valor: `${datosFiltrados.tasaResolucion}%`,
+                      subtitulo: datosFiltrados.tasaResolucion >= 75 ? "dentro de parámetro" : datosFiltrados.tasaResolucion >= 50 ? "requiere seguimiento" : "requiere atención urgente",
+                      color: datosFiltrados.tasaResolucion >= 75 ? "green" as const : datosFiltrados.tasaResolucion >= 50 ? "amber" as const : "red" as const,
+                      icono: "activity" as const,
+                      delta: mesFiltro ? undefined : deltaTasa,
+                      subtituloMes: mesFiltro ? undefined : ultimoMes?.mes,
+                    }
+                  : horaPico
+                  ? {
+                      titulo: "Hora pico",
+                      valor: `${String(horaPico.hora).padStart(2, "0")}:00 hs`,
+                      subtitulo: `${horaPico.cantidad.toLocaleString("es-AR")} registros en esa franja`,
+                      color: "amber" as const, icono: "activity" as const,
+                    }
+                  : null,
+                horaPico && datos.tieneColumnaStatus
+                  ? {
+                      titulo: "Hora pico",
+                      valor: `${String(horaPico.hora).padStart(2, "0")}:00 hs`,
+                      subtitulo: `${horaPico.cantidad.toLocaleString("es-AR")} registros en esa franja`,
+                      color: "amber" as const, icono: "activity" as const,
+                    }
+                  : diaPico
+                  ? {
+                      titulo: "Día más activo",
+                      valor: diaPico.dia,
+                      subtitulo: `${diaPico.cantidad.toLocaleString("es-AR")} registros`,
+                      color: "indigo" as const, icono: "calendar" as const,
+                    }
+                  : null,
+                topInt
+                  ? {
+                      titulo: "Intersección principal",
+                      valor: topInt.cantidad.toLocaleString("es-AR"),
+                      subtitulo: topInt.nombre,
+                      color: "violet" as const, icono: "tag" as const,
+                    }
+                  : topMotivo
+                  ? {
+                      titulo: `Tipo más frecuente`,
+                      valor: `${total > 0 ? Math.round((topMotivo.cantidad / total) * 100) : 0}%`,
+                      subtitulo: topMotivo.nombre,
+                      color: "cyan" as const, icono: "tag" as const,
+                    }
+                  : null,
+              ].filter(Boolean) as NonNullable<typeof cards[number]>[];
+
+              return (
+                <div className={`grid gap-4 grid-cols-2 ${cards.length >= 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>
+                  {cards.slice(0, 4).map((card, i) => (
+                    <div key={card.titulo} className="animate-fade-in-up" style={{ animationDelay: `${i * 60}ms` }}>
+                      <MetricCard
+                        titulo={card.titulo}
+                        valor={card.valor}
+                        subtitulo={card.subtitulo}
+                        color={card.color}
+                        icono={card.icono}
+                        delta={"delta" in card ? card.delta : undefined}
+                        subtituloMes={"subtituloMes" in card ? card.subtituloMes : undefined}
+                      />
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+
+            {/* ── Semáforo operacional ─────────────────────────────────────── */}
+            {semaforo && <SemaforoOperacional resultado={semaforo} />}
+
+            {/* ── Hallazgos + Mapa ─────────────────────────────────────────── */}
+            {(() => {
+              const tieneMapa = activa(datos.capacidades, "GeograficaCalles") && (datosFiltrados?.porCalle ?? []).length > 0;
+              return (
+                <div className={tieneMapa ? "grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-5 items-start" : ""}>
+                  {perfil && (
+                    <HallazgosPrincipales
+                      perfil={perfil}
+                      onVerComparacion={() => {
+                        const ultimo = datos.meses[datos.meses.length - 1];
+                        const penultimo = datos.meses[datos.meses.length - 2];
+                        if (ultimo && penultimo) ejecutarComparacionMeses(penultimo, ultimo);
+                      }}
+                    />
+                  )}
+                  {tieneMapa && datosFiltrados && (
+                    <GraficoMapa
+                      solicitudes={datosFiltrados.solicitudes}
+                      porCalle={datosFiltrados.porCalle}
+                      porInterseccion={datosFiltrados.porInterseccion}
+                    />
+                  )}
+                </div>
+              );
+            })()}
+
+            {/* ── Recomendaciones ──────────────────────────────────────────── */}
+            {recomendaciones.length > 0 && (
+              <RecomendacionesOperativas recomendaciones={recomendaciones} />
+            )}
+
           </div>
         ) : (
           // ── MODO OPERATIVO ─────────────────────────────────────────────────
