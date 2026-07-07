@@ -17,7 +17,6 @@ import {
   Star,
   Loader2,
 } from "lucide-react";
-import { DriveFilePicker } from "@/components/DriveFilePicker";
 import { esUrlGoogleSheetValida } from "@/lib/googleSheetsUrl";
 
 interface PaginaInicioProps {
@@ -261,7 +260,7 @@ export function PaginaInicio({ onUrl, onBuffer, onError, cargando, error }: Pagi
               Cargá tus datos operativos
             </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              Subí un archivo local, pegá la URL de un Google Sheet, o elegí un archivo desde Drive.
+              Subí un archivo local o pegá la URL de un Google Sheet.
             </p>
           </div>
 
@@ -298,133 +297,98 @@ export function PaginaInicio({ onUrl, onBuffer, onError, cargando, error }: Pagi
           </div>
 
           <div className="w-full flex items-center gap-3">
-            <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
+            <div className="flex-1 h-px bg-slate-200 dark:bg-[#252d3d]" />
             <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 shrink-0">o</span>
-            <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
+            <div className="flex-1 h-px bg-slate-200 dark:bg-[#252d3d]" />
           </div>
 
-          <div className="w-full grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-start">
+          {/* ── URL de Google Sheet ──── */}
+          <div className="w-full rounded-2xl border border-slate-200 dark:border-[#252d3d] bg-slate-50 dark:bg-[#1a1f2e] p-5 flex flex-col gap-4">
+            <div className="flex items-center gap-2">
+              <Link2 className="h-5 w-5 text-[#c8a84b] shrink-0" />
+              <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                Desde URL de Google Sheet
+              </span>
+            </div>
 
-            {/* ── Columna izquierda: URL input + guardadas ──── */}
-            <div className="rounded-2xl border border-slate-200 dark:border-[#252d3d] bg-slate-50 dark:bg-[#1a1f2e] p-5 flex flex-col gap-4">
-              <div className="flex items-center gap-2">
-                <Link2 className="h-5 w-5 text-[#c8a84b] shrink-0" />
-                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                  Desde URL de Google Sheet
-                </span>
-              </div>
+            <input
+              type="text"
+              value={nombreInput}
+              onChange={(e) => setNombreInput(e.target.value)}
+              placeholder="Nombre (ej: Sucesos Enero 2026)"
+              className="w-full bg-white dark:bg-[#0d0f14] border border-slate-200 dark:border-[#2e3852] rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[rgba(200,168,75,0.40)]"
+            />
 
-              {/* Input de nombre */}
-              <input
-                type="text"
-                value={nombreInput}
-                onChange={(e) => setNombreInput(e.target.value)}
-                placeholder="Nombre (ej: Sucesos Enero 2026)"
-                className="w-full bg-white dark:bg-[#0d0f14] border border-slate-200 dark:border-[#2e3852] rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[rgba(200,168,75,0.40)]"
-              />
+            <input
+              type="url"
+              value={urlInput}
+              onChange={(e) => setUrlInput(e.target.value)}
+              placeholder="https://docs.google.com/spreadsheets/d/..."
+              onKeyDown={(e) => e.key === "Enter" && handleCargar()}
+              className="w-full bg-white dark:bg-[#0d0f14] border border-slate-200 dark:border-[#2e3852] rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-[rgba(200,168,75,0.40)]"
+            />
 
-              {/* Input de URL */}
-              <input
-                type="url"
-                value={urlInput}
-                onChange={(e) => setUrlInput(e.target.value)}
-                placeholder="https://docs.google.com/spreadsheets/d/..."
-                onKeyDown={(e) => e.key === "Enter" && handleCargar()}
-                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-[rgba(200,168,75,0.40)]"
-              />
-
-              <button
-                onClick={handleCargar}
-                disabled={cargando || !urlInput.trim()}
-                className="w-full bg-[#c8a84b] hover:bg-[#d4b96a] disabled:bg-slate-600 disabled:cursor-not-allowed text-[#0a0c10] font-bold px-4 py-2.5 rounded-xl text-sm transition-colors shadow-sm flex items-center justify-center gap-2"
-              >
-                {cargando ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Cargando...
-                  </>
-                ) : (
-                  <>
-                    <FileSpreadsheet className="h-4 w-4" />
-                    Cargar y analizar
-                  </>
-                )}
-              </button>
-
-              {/* ── URLs guardadas ──── */}
-              {guardadas.length > 0 && (
-                <div className="border-t border-slate-200 dark:border-[#252d3d] pt-3 mt-1">
-                  <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em] mb-2">
-                    Archivos recientes
-                  </p>
-                  <div className="flex flex-col gap-1.5 max-h-48 overflow-y-auto">
-                    {guardadas
-                      .sort((a, b) => b.creadoEn - a.creadoEn)
-                      .map((g) => (
-                        <div
-                          key={g.id}
-                          className="flex items-center gap-2 group rounded-lg px-2.5 py-2 hover:bg-slate-100 dark:hover:bg-[#1a1f2e] transition-colors"
-                        >
-                          <Star className="h-3.5 w-3.5 text-amber-400 shrink-0" />
-                          <button
-                            onClick={() => cargarDesdeUrl(g.url, g.nombre)}
-                            disabled={cargando}
-                            className="flex-1 text-left text-sm font-medium text-slate-700 dark:text-slate-200 hover:text-[#c8a84b] dark:hover:text-[#d4b96a] truncate disabled:opacity-50"
-                            title={g.url}
-                          >
-                            {g.nombre}
-                          </button>
-                          <a
-                            href={g.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="opacity-0 group-hover:opacity-100 transition-opacity"
-                            title="Abrir Sheet"
-                          >
-                            <ExternalLink className="h-3.5 w-3.5 text-slate-400 hover:text-[#c8a84b]" />
-                          </a>
-                          <button
-                            onClick={() => eliminarGuardada(g.id)}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity"
-                            title="Eliminar"
-                          >
-                            <Trash2 className="h-3.5 w-3.5 text-slate-400 hover:text-red-500" />
-                          </button>
-                        </div>
-                      ))}
-                  </div>
-                </div>
+            <button
+              onClick={handleCargar}
+              disabled={cargando || !urlInput.trim()}
+              className="w-full bg-[#c8a84b] hover:bg-[#d4b96a] disabled:bg-slate-600 disabled:cursor-not-allowed text-[#0a0c10] font-bold px-4 py-2.5 rounded-xl text-sm transition-colors shadow-sm flex items-center justify-center gap-2"
+            >
+              {cargando ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Cargando...
+                </>
+              ) : (
+                <>
+                  <FileSpreadsheet className="h-4 w-4" />
+                  Cargar y analizar
+                </>
               )}
-            </div>
+            </button>
 
-            {/* Separador central */}
-            <div className="flex md:flex-col items-center justify-center gap-2 py-2 md:py-6">
-              <div className="flex-1 md:flex-none h-px md:h-16 md:w-px w-16 bg-slate-200 dark:bg-slate-700" />
-              <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 shrink-0">o</span>
-              <div className="flex-1 md:flex-none h-px md:h-16 md:w-px w-16 bg-slate-200 dark:bg-slate-700" />
-            </div>
-
-            {/* ── Columna derecha: Google Drive ──── */}
-            <div className="rounded-2xl border border-slate-200 dark:border-[#252d3d] bg-slate-50 dark:bg-[#1a1f2e] p-5 flex flex-col gap-3">
-              <div className="flex items-center gap-2">
-                <svg viewBox="0 0 87.3 78" className="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg">
-                  <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/>
-                  <path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0-1.2 4.5h27.5z" fill="#00ac47"/>
-                  <path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335"/>
-                  <path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/>
-                  <path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/>
-                  <path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 27h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/>
-                </svg>
-                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                  Desde Google Drive
-                </span>
+            {guardadas.length > 0 && (
+              <div className="border-t border-slate-200 dark:border-[#252d3d] pt-3 mt-1">
+                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.15em] mb-2">
+                  Archivos recientes
+                </p>
+                <div className="flex flex-col gap-1.5 max-h-48 overflow-y-auto">
+                  {guardadas
+                    .sort((a, b) => b.creadoEn - a.creadoEn)
+                    .map((g) => (
+                      <div
+                        key={g.id}
+                        className="flex items-center gap-2 group rounded-lg px-2.5 py-2 hover:bg-slate-100 dark:hover:bg-[#252d3d] transition-colors"
+                      >
+                        <Star className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+                        <button
+                          onClick={() => cargarDesdeUrl(g.url, g.nombre)}
+                          disabled={cargando}
+                          className="flex-1 text-left text-sm font-medium text-slate-700 dark:text-slate-200 hover:text-[#c8a84b] dark:hover:text-[#d4b96a] truncate disabled:opacity-50"
+                          title={g.url}
+                        >
+                          {g.nombre}
+                        </button>
+                        <a
+                          href={g.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity"
+                          title="Abrir Sheet"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5 text-slate-400 hover:text-[#c8a84b]" />
+                        </a>
+                        <button
+                          onClick={() => eliminarGuardada(g.id)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity"
+                          title="Eliminar"
+                        >
+                          <Trash2 className="h-3.5 w-3.5 text-slate-400 hover:text-red-500" />
+                        </button>
+                      </div>
+                    ))}
+                </div>
               </div>
-              <DriveFilePicker
-                onBuffer={onBuffer}
-                onError={onError}
-                cargando={cargando}
-              />
-            </div>
+            )}
           </div>
 
           {error && (
