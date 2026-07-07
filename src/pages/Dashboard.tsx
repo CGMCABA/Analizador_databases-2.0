@@ -89,7 +89,7 @@ function SeccionPasado({
       {subtitulo && (
         <p className="text-xs italic text-slate-400 dark:text-slate-500 shrink-0">{subtitulo}</p>
       )}
-      <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
+      <div className="flex-1 h-px bg-slate-200 dark:bg-[#252d3d]" />
     </div>
   );
 }
@@ -452,7 +452,7 @@ export default function Dashboard() {
                     >×</button>
                   </span>
                 )}
-                <div className="text-sm text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-md border border-slate-200 dark:border-slate-700">
+                <div className="text-sm text-slate-500 dark:text-slate-400 bg-white dark:bg-[#131720] px-3 py-1.5 rounded-md border border-slate-200 dark:border-[#1f2535]">
                   {datos.meses.length} {datos.meses.length === 1 ? "mes" : "meses"} detectados
                 </div>
               </div>
@@ -987,7 +987,7 @@ export default function Dashboard() {
 
       {modalComparacion && datos && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={(e) => { if (e.target === e.currentTarget) setModalComparacion(false); }}>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden">
+          <div className="bg-white dark:bg-[#131720] rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden">
             {/* Encabezado */}
             <div className="bg-[#1a2b4a] text-white px-6 py-4 flex items-center gap-3">
               <GitCompareArrows className="h-5 w-5 shrink-0" />
@@ -1001,7 +1001,7 @@ export default function Dashboard() {
             </div>
 
             {/* Tabs */}
-            <div className="flex border-b border-slate-200 dark:border-slate-700">
+            <div className="flex border-b border-slate-200 dark:border-[#1f2535]">
               {(["meses", "archivo"] as const).map((tab) => (
                 <button
                   key={tab}
@@ -1038,7 +1038,7 @@ export default function Dashboard() {
                             <select
                               value={val}
                               onChange={(e) => set(e.target.value)}
-                              className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400"
+                              className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-[#2e3852] rounded-lg bg-white dark:bg-[#252d3d] text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400"
                             >
                               <option value="">-- Seleccionar --</option>
                               {datos.meses.map((m) => (
@@ -1065,7 +1065,7 @@ export default function Dashboard() {
                     onChange={(e) => setUrlComparacion(e.target.value)}
                     placeholder="https://docs.google.com/spreadsheets/d/..."
                     onKeyDown={(e) => e.key === "Enter" && ejecutarComparacionUrl(urlComparacion)}
-                    className="w-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2.5 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                    className="w-full bg-white dark:bg-[#252d3d] border border-slate-200 dark:border-[#2e3852] rounded-lg px-3 py-2.5 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/30"
                     disabled={cargandoB}
                   />
                   <button

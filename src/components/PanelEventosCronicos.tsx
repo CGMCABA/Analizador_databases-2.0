@@ -107,7 +107,7 @@ export function PanelEventosCronicos({ crucesCronicos }: PanelEventosCronicosPro
   if (crucesCronicos.length === 0) return null;
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-md p-5 animate-fade-in-up delay-200">
+    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-md p-5 animate-fade-in-up delay-200">
       <div className="flex items-center gap-2 mb-1">
         <RotateCcw className="h-4 w-4 text-red-500" />
         <h3 className="font-semibold text-slate-800 dark:text-slate-100">Eventos crónicos</h3>
@@ -119,7 +119,7 @@ export function PanelEventosCronicos({ crucesCronicos }: PanelEventosCronicosPro
       <div className="overflow-x-auto">
         <table className="w-full text-sm border-collapse">
           <thead>
-            <tr className="border-b border-slate-200 dark:border-slate-700">
+            <tr className="border-b border-slate-200 dark:border-[#1f2535]">
               <ThSort label="Intersección" sortKey="interseccion" currentKey={sortKey} dir={sortDir} onSort={handleSort} />
               <ThSort label="Categoría" sortKey="motivo" currentKey={sortKey} dir={sortDir} onSort={handleSort} />
               <th className="text-left py-2 px-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
@@ -179,7 +179,7 @@ export function PanelEventosCronicos({ crucesCronicos }: PanelEventosCronicosPro
         </table>
       </div>
 
-      <p className="text-xs text-slate-400 dark:text-slate-500 mt-4 border-t border-slate-100 dark:border-slate-700 pt-3">
+      <p className="text-xs text-slate-400 dark:text-slate-500 mt-4 border-t border-slate-100 dark:border-[#1f2535] pt-3">
         Los eventos crónicos indican problemas estructurales no resueltos. Priorizá intervenciones en las intersecciones de nivel CRÍTICO.
       </p>
     </div>

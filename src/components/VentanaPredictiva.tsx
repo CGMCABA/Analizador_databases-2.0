@@ -80,7 +80,7 @@ function TarjetaRiesgo({ dia, rank }: { dia: DiaProyectado; rank: number }) {
   const colores = ["bg-red-600", "bg-orange-500", "bg-amber-400"];
   const bgBadge = colores[rank] ?? "bg-slate-400";
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 flex flex-col gap-3">
+    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] p-4 flex flex-col gap-3">
       <div className="flex items-center gap-2">
         <span className={`${bgBadge} text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0`}>
           {rank + 1}
@@ -110,7 +110,7 @@ function TarjetaRiesgo({ dia, rank }: { dia: DiaProyectado; rank: number }) {
       )}
       <div className="grid grid-cols-3 gap-1 text-center text-xs">
         {([["Mañana", dia.pctMañana], ["Tarde", dia.pctTarde], ["Noche", dia.pctNoche]] as [string, number][]).map(([label, pct]) => (
-          <div key={label} className="bg-slate-50 dark:bg-slate-700/50 rounded p-1">
+          <div key={label} className="bg-slate-50 dark:bg-[#252d3d]/50 rounded p-1">
             <p className="font-semibold text-slate-700 dark:text-slate-200">{pct}%</p>
             <p className="text-slate-400 dark:text-slate-500">{label}</p>
           </div>
@@ -139,7 +139,7 @@ function BannerDatosInsuficientes({ porDiaSemana }: { porDiaSemana: { dia: strin
       {diasOrdenados.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2">
           {diasOrdenados.map((d) => (
-            <div key={d.dia} className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-3 text-center">
+            <div key={d.dia} className="bg-white dark:bg-[#131720] rounded-lg border border-slate-200 dark:border-[#1f2535] p-3 text-center">
               <p className="text-xs text-slate-400 dark:text-slate-500 font-medium truncate">{d.dia}</p>
               <p className="text-lg font-bold text-slate-800 dark:text-slate-100 mt-1 tabular-nums">
                 {d.cantidad.toLocaleString("es-AR")}
@@ -191,10 +191,10 @@ export function VentanaPredictiva({ datos }: VentanaPredictivaProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-futuro animate-fade-in-up delay-150">
+    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-futuro animate-fade-in-up delay-150">
       {/* Encabezado colapsable */}
       <button
-        className="w-full p-5 flex items-center gap-3 text-left hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors rounded-xl"
+        className="w-full p-5 flex items-center gap-3 text-left hover:bg-slate-50/50 dark:hover:bg-[#252d3d]/30 transition-colors rounded-xl"
         onClick={() => setExpandido((v) => !v)}
       >
         <div className="p-1.5 bg-violet-100 dark:bg-violet-900/40 rounded-lg shrink-0">
@@ -233,7 +233,7 @@ export function VentanaPredictiva({ datos }: VentanaPredictivaProps) {
 
       {/* Contenido colapsable */}
       {expandido && (
-        <div className="px-5 pb-5 space-y-5 border-t border-slate-100 dark:border-slate-700 pt-4">
+        <div className="px-5 pb-5 space-y-5 border-t border-slate-100 dark:border-[#1f2535] pt-4">
           {resultado.datosInsuficientes ? (
             <BannerDatosInsuficientes porDiaSemana={datos.porDiaSemana} />
           ) : (

@@ -145,11 +145,11 @@ export function TablaDetalle({ registros, columnas, meses }: TablaDetalleProps) 
     Object.values(filtrosCategoricos).some(Boolean);
 
   const inputCls =
-    "px-3 py-1.5 text-sm border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-700";
+    "px-3 py-1.5 text-sm border border-slate-200 dark:border-[#2e3852] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 text-slate-600 dark:text-slate-300 bg-white dark:bg-[#252d3d]";
 
   const ColHeader = ({ col, label }: { col: string; label: string }) => (
     <th
-      className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors select-none whitespace-nowrap"
+      className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 cursor-pointer hover:bg-slate-100 dark:hover:bg-[#252d3d] transition-colors select-none whitespace-nowrap"
       onClick={() => toggleSort(col)}
     >
       <div className="flex items-center gap-1">
@@ -236,8 +236,8 @@ export function TablaDetalle({ registros, columnas, meses }: TablaDetalleProps) 
   }
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-      <div className="p-5 border-b border-slate-100 dark:border-slate-700">
+    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-sm">
+      <div className="p-5 border-b border-slate-100 dark:border-[#1f2535]">
         <div className="flex items-center justify-between gap-4 flex-wrap mb-4">
           <div>
             <h3 className="font-semibold text-slate-800 dark:text-slate-100">
@@ -272,7 +272,7 @@ export function TablaDetalle({ registros, columnas, meses }: TablaDetalleProps) 
                 setBusqueda(e.target.value);
                 setPagina(1);
               }}
-              className={`pl-8 pr-4 py-1.5 text-sm border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 w-64 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-700`}
+              className={`pl-8 pr-4 py-1.5 text-sm border border-slate-200 dark:border-[#2e3852] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 w-64 text-slate-600 dark:text-slate-300 bg-white dark:bg-[#252d3d]`}
             />
           </div>
           <select
@@ -321,7 +321,7 @@ export function TablaDetalle({ registros, columnas, meses }: TablaDetalleProps) 
 
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700">
+          <thead className="bg-slate-50 dark:bg-[#252d3d]/50 border-b border-slate-100 dark:border-[#1f2535]">
             <tr>
               {colsVisibles.map((col) => (
                 <ColHeader
@@ -356,8 +356,8 @@ export function TablaDetalle({ registros, columnas, meses }: TablaDetalleProps) 
                   key={idx}
                   className={`${
                     idx % 2 === 0
-                      ? "bg-white dark:bg-slate-800"
-                      : "bg-slate-50/50 dark:bg-slate-700/30"
+                      ? "bg-white dark:bg-[#131720]"
+                      : "bg-slate-50/50 dark:bg-[#252d3d]/30"
                   } hover:bg-blue-50/40 dark:hover:bg-blue-900/10 transition-colors`}
                 >
                   {colsVisibles.map((col) => {
@@ -391,7 +391,7 @@ export function TablaDetalle({ registros, columnas, meses }: TablaDetalleProps) 
       </div>
 
       {totalPaginas > 1 && (
-        <div className="presentation-hide px-5 py-3 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
+        <div className="presentation-hide px-5 py-3 border-t border-slate-100 dark:border-[#1f2535] flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
           <span>
             Mostrando {(paginaReal - 1) * PAGE_SIZE + 1}–
             {Math.min(paginaReal * PAGE_SIZE, ordenados.length)} de{" "}
@@ -401,7 +401,7 @@ export function TablaDetalle({ registros, columnas, meses }: TablaDetalleProps) 
             <button
               onClick={() => setPagina((p) => Math.max(1, p - 1))}
               disabled={paginaReal === 1}
-              className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="p-1 rounded hover:bg-slate-100 dark:hover:bg-[#252d3d] disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
@@ -411,7 +411,7 @@ export function TablaDetalle({ registros, columnas, meses }: TablaDetalleProps) 
             <button
               onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
               disabled={paginaReal === totalPaginas}
-              className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="p-1 rounded hover:bg-slate-100 dark:hover:bg-[#252d3d] disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <ChevronRight className="h-4 w-4" />
             </button>

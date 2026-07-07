@@ -99,7 +99,7 @@ function PanelDetalle({ linea, onCerrar }: { linea: DatoLinea; onCerrar: () => v
                 {item.cantidad} <span className="text-slate-400 dark:text-slate-500 font-normal">({pct}%)</span>
               </span>
             </div>
-            <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-slate-100 dark:bg-[#252d3d] rounded-full overflow-hidden">
               <div
                 className={`h-full rounded-full ${colorBar}`}
                 style={{ width: `${pct}%` }}
@@ -124,7 +124,7 @@ function PanelDetalle({ linea, onCerrar }: { linea: DatoLinea; onCerrar: () => v
         </div>
         <button
           onClick={onCerrar}
-          className="p-1 rounded-md hover:bg-slate-200/60 dark:hover:bg-slate-700 transition-colors text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+          className="p-1 rounded-md hover:bg-slate-200/60 dark:hover:bg-[#252d3d] transition-colors text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
           title="Cerrar"
         >
           <X className="h-4 w-4" />
@@ -189,7 +189,7 @@ export function GraficoLineas({ datos }: GraficoLineasProps) {
 
   if (datos.length === 0) {
     return (
-      <div className={`bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}>
+      <div className={`bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-sm p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}>
         <h3 className="font-semibold text-slate-800 dark:text-slate-100 mb-1">Análisis por Línea</h3>
         <p className="text-sm text-slate-400 dark:text-slate-500 mt-4 text-center">Sin datos de líneas disponibles</p>
       </div>
@@ -197,7 +197,7 @@ export function GraficoLineas({ datos }: GraficoLineasProps) {
   }
 
   return (
-    <div className={`bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}>
+    <div className={`bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-sm p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}>
       <div className="flex items-start justify-between gap-4 mb-4 flex-wrap">
         <div>
           <h3 className="font-semibold text-slate-800 dark:text-slate-100">Análisis por Línea de Colectivo</h3>
@@ -206,26 +206,26 @@ export function GraficoLineas({ datos }: GraficoLineasProps) {
           </p>
         </div>
         <div className="flex flex-col gap-2 shrink-0">
-          <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-0.5 gap-0.5">
+          <div className="flex bg-slate-100 dark:bg-[#252d3d] rounded-lg p-0.5 gap-0.5">
             <button
               onClick={() => setVista("cantidad")}
-              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${vista === "cantidad" ? "bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100 shadow-sm" : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"}`}
+              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${vista === "cantidad" ? "bg-white dark:bg-[#2e3852] text-slate-800 dark:text-slate-100 shadow-sm" : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"}`}
             >
               Más solicitadas
             </button>
             <button
               onClick={() => setVista("tasa")}
-              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${vista === "tasa" ? "bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100 shadow-sm" : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"}`}
+              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${vista === "tasa" ? "bg-white dark:bg-[#2e3852] text-slate-800 dark:text-slate-100 shadow-sm" : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"}`}
             >
               Mayor resolución
             </button>
           </div>
-          <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-0.5 gap-0.5">
+          <div className="flex bg-slate-100 dark:bg-[#252d3d] rounded-lg p-0.5 gap-0.5">
             {LIMITES.map((l) => (
               <button
                 key={l}
                 onClick={() => setLimite(l)}
-                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${limite === l ? "bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100 shadow-sm" : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"}`}
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${limite === l ? "bg-white dark:bg-[#2e3852] text-slate-800 dark:text-slate-100 shadow-sm" : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"}`}
               >
                 {LIMITE_LABELS[l]}
               </button>
@@ -246,7 +246,7 @@ export function GraficoLineas({ datos }: GraficoLineasProps) {
                   : ""
               } ${
                 i === 0 ? "bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30" :
-                i === 1 ? "bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-600" :
+                i === 1 ? "bg-slate-50 dark:bg-[#252d3d] border-slate-200 dark:border-[#2e3852] hover:bg-slate-100 dark:hover:bg-[#2e3852]" :
                 "bg-orange-50 dark:bg-orange-900/20 border-orange-100 dark:border-orange-800 hover:bg-orange-100 dark:hover:bg-orange-900/30"
               }`}
             >

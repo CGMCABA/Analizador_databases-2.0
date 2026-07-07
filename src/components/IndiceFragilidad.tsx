@@ -37,7 +37,7 @@ export function IndiceFragilidad({ indiceFragilidad }: IndiceFragilidadProps) {
   const maxPuntuacion = top15[0]?.puntuacion ?? 1;
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-md p-5 animate-fade-in-up delay-100">
+    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-md p-5 animate-fade-in-up delay-100">
       <div className="flex items-center gap-2 mb-1">
         <ShieldAlert className="h-4 w-4 text-red-500" />
         <h3 className="font-semibold text-slate-800 dark:text-slate-100">Índice de Fragilidad Operativa</h3>
@@ -98,7 +98,7 @@ export function IndiceFragilidad({ indiceFragilidad }: IndiceFragilidadProps) {
                   </span>
                 </div>
               </div>
-              <div className="h-2 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden ml-7">
+              <div className="h-2 w-full bg-slate-100 dark:bg-[#252d3d] rounded-full overflow-hidden ml-7">
                 <div
                   className="h-full rounded-full transition-all duration-700"
                   style={{
@@ -112,7 +112,7 @@ export function IndiceFragilidad({ indiceFragilidad }: IndiceFragilidadProps) {
         })}
       </div>
 
-      <p className="text-xs text-slate-400 dark:text-slate-500 mt-4 border-t border-slate-100 dark:border-slate-700 pt-3">
+      <p className="text-xs text-slate-400 dark:text-slate-500 mt-4 border-t border-slate-100 dark:border-[#1f2535] pt-3">
         Las zonas con fragilidad muy alta concentran alto volumen, baja tasa de resolución y tiempos de respuesta elevados. Prioricidad de intervención.
       </p>
     </div>

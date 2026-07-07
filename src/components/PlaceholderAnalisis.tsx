@@ -20,10 +20,10 @@ const ESTILOS: Record<Variante, {
   btnBase: string;
 }> = {
   ausente: {
-    borde:      "border-slate-200 dark:border-slate-700",
-    fondo:      "bg-slate-50/60 dark:bg-slate-800/40",
+    borde:      "border-slate-200 dark:border-[#1f2535]",
+    fondo:      "bg-slate-50/60 dark:bg-[#131720]/40",
     iconoColor: "text-slate-300 dark:text-slate-600",
-    btnBase:    "bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300",
+    btnBase:    "bg-slate-100 hover:bg-slate-200 dark:bg-[#252d3d] dark:hover:bg-[#2e3852] text-slate-600 dark:text-slate-300",
   },
   temporal: {
     borde:      "border-amber-200 dark:border-amber-800/50",
@@ -38,10 +38,10 @@ const ESTILOS: Record<Variante, {
     btnBase:    "bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400",
   },
   insuficiente: {
-    borde:      "border-slate-200 dark:border-slate-700",
-    fondo:      "bg-slate-50/60 dark:bg-slate-800/40",
+    borde:      "border-slate-200 dark:border-[#1f2535]",
+    fondo:      "bg-slate-50/60 dark:bg-[#131720]/40",
     iconoColor: "text-slate-300 dark:text-slate-600",
-    btnBase:    "bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300",
+    btnBase:    "bg-slate-100 hover:bg-slate-200 dark:bg-[#252d3d] dark:hover:bg-[#2e3852] text-slate-600 dark:text-slate-300",
   },
   calidad: {
     borde:      "border-orange-200 dark:border-orange-800/50",

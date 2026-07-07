@@ -96,7 +96,7 @@ function PanelDetalle({
                 {item.cantidad} <span className="text-slate-400 dark:text-slate-500 font-normal">({pct}%)</span>
               </span>
             </div>
-            <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-slate-100 dark:bg-[#252d3d] rounded-full overflow-hidden">
               <div
                 className={`h-full rounded-full ${colorBar}`}
                 style={{ width: `${pct}%` }}
@@ -124,7 +124,7 @@ function PanelDetalle({
         </div>
         <button
           onClick={onCerrar}
-          className="p-1 rounded-md hover:bg-slate-200/60 dark:hover:bg-slate-700 transition-colors text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 shrink-0"
+          className="p-1 rounded-md hover:bg-slate-200/60 dark:hover:bg-[#252d3d] transition-colors text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 shrink-0"
           title="Cerrar"
         >
           <X className="h-4 w-4" />
@@ -191,7 +191,7 @@ export function GraficoCalles({ datos, totalSolicitudes }: GraficoCallesProps) {
 
   if (datos.length === 0) {
     return (
-      <div className={`bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}>
+      <div className={`bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-sm p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}>
         <h3 className="font-semibold text-slate-800 dark:text-slate-100 mb-1">Calles con más registros</h3>
         <p className="text-sm text-slate-400 dark:text-slate-500 mt-4 text-center">Sin datos de calles disponibles</p>
       </div>
@@ -199,7 +199,7 @@ export function GraficoCalles({ datos, totalSolicitudes }: GraficoCallesProps) {
   }
 
   return (
-    <div className={`bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}>
+    <div className={`bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-sm p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}>
       <div className="flex items-start justify-between gap-4 mb-4 flex-wrap">
         <div>
           <h3 className="font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
@@ -210,12 +210,12 @@ export function GraficoCalles({ datos, totalSolicitudes }: GraficoCallesProps) {
             {datos.length} calles distintas · cada registro puede mencionar hasta 3 · hacé clic en una barra para ver el desglose
           </p>
         </div>
-        <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-0.5 gap-0.5 shrink-0">
+        <div className="flex bg-slate-100 dark:bg-[#252d3d] rounded-lg p-0.5 gap-0.5 shrink-0">
           {LIMITES.map((l) => (
             <button
               key={l}
               onClick={() => setLimite(l)}
-              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${limite === l ? "bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100 shadow-sm" : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"}`}
+              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${limite === l ? "bg-white dark:bg-[#2e3852] text-slate-800 dark:text-slate-100 shadow-sm" : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"}`}
             >
               Top {l}
             </button>

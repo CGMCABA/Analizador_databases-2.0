@@ -82,7 +82,7 @@ export function GraficoTiempoRespuesta({ datos, titulo, subtitulo }: GraficoTiem
   }));
 
   return (
-    <div className={`bg-white dark:bg-slate-800 rounded-xl border border-amber-200 dark:border-amber-800 shadow-sm p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}>
+    <div className={`bg-white dark:bg-[#131720] rounded-xl border border-amber-200 dark:border-amber-800 shadow-sm p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}>
       <div className="flex items-center gap-2 mb-1">
         <Clock className="h-4 w-4 text-amber-500" />
         <h3 className="font-semibold text-slate-800 dark:text-slate-100">

@@ -62,7 +62,7 @@ export function PanelFalsosPositivos({
   const alturaGrafico = Math.max(160, tiposFalsosPositivos.length * 30 + 40);
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-md p-5 animate-fade-in-up delay-150">
+    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-md p-5 animate-fade-in-up delay-150">
       <div className="flex items-center gap-2 mb-1">
         <Ban className="h-4 w-4 text-amber-500" />
         <h3 className="font-semibold text-slate-800 dark:text-slate-100">Falsos positivos operativos</h3>
@@ -125,7 +125,7 @@ export function PanelFalsosPositivos({
         )}
       </div>
 
-      <p className="text-xs text-slate-400 dark:text-slate-500 mt-4 border-t border-slate-100 dark:border-slate-700 pt-3">
+      <p className="text-xs text-slate-400 dark:text-slate-500 mt-4 border-t border-slate-100 dark:border-[#1f2535] pt-3">
         Estos registros representan eventos donde el operador no encontró el suceso real. Separarlos del análisis principal mejora la calidad de los indicadores de eficiencia.
       </p>
     </div>

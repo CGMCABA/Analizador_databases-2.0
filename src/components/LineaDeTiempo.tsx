@@ -129,7 +129,7 @@ export function LineaDeTiempo({ solicitudes, meses }: LineaDeTiempoProps) {
 
   return (
     <div
-      className={`bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}
+      className={`bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-sm transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}
       onMouseLeave={() => setTooltip(null)}
     >
       <div className="p-5 pb-0">

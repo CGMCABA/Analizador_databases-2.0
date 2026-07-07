@@ -44,7 +44,7 @@ export function RecomendacionesOperativas({ recomendaciones }: RecomendacionesOp
   if (recomendaciones.length === 0) return null;
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-futuro p-5 animate-fade-in-up delay-75">
+    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-futuro p-5 animate-fade-in-up delay-75">
       <div className="flex items-center gap-2 mb-4">
         <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg shrink-0">
           <Lightbulb className="h-4 w-4 text-blue-600 dark:text-blue-400" />
@@ -57,7 +57,7 @@ export function RecomendacionesOperativas({ recomendaciones }: RecomendacionesOp
             Acciones sugeridas basadas en los datos del dataset · ordenadas por impacto
           </p>
         </div>
-        <span className="ml-auto text-xs font-semibold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full">
+        <span className="ml-auto text-xs font-semibold bg-slate-100 dark:bg-[#252d3d] text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full">
           {recomendaciones.length}
         </span>
       </div>
@@ -69,7 +69,7 @@ export function RecomendacionesOperativas({ recomendaciones }: RecomendacionesOp
           return (
             <div
               key={idx}
-              className={`flex items-start gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50 border border-slate-100 dark:border-slate-700 border-l-[3px] ${pc.accentBorder} ${pc.hoverBg} transition-colors animate-fade-in-up`}
+              className={`flex items-start gap-3 p-3 rounded-lg bg-slate-50 dark:bg-[#252d3d]/50 border border-slate-100 dark:border-[#1f2535] border-l-[3px] ${pc.accentBorder} ${pc.hoverBg} transition-colors animate-fade-in-up`}
               style={{ animationDelay: `${idx * 60}ms` }}
             >
               <div

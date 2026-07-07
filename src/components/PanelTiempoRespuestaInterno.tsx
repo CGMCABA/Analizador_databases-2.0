@@ -164,7 +164,7 @@ export function PanelTiempoRespuestaInterno({
   const peorMotivo = porMotivo[porMotivo.length - 1];
 
   return (
-    <div className={`bg-white dark:bg-slate-800 rounded-xl border border-violet-200 dark:border-violet-800 shadow-sm p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}>
+    <div className={`bg-white dark:bg-[#131720] rounded-xl border border-violet-200 dark:border-violet-800 shadow-sm p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}>
       <div className="flex items-center gap-2 mb-1">
         <Timer className="h-4 w-4 text-violet-500" />
         <h3 className="font-semibold text-slate-800 dark:text-slate-100">Tiempo de respuesta interno</h3>
@@ -236,14 +236,14 @@ export function PanelTiempoRespuestaInterno({
       <div className="flex gap-2 mb-4">
         <button
           onClick={() => setVista("motivo")}
-          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${vista === "motivo" ? "bg-violet-600 text-white" : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600"}`}
+          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${vista === "motivo" ? "bg-violet-600 text-white" : "bg-slate-100 dark:bg-[#252d3d] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#2e3852]"}`}
         >
           Por {etiquetaMotivo}
         </button>
         {porArea.length > 0 && (
           <button
             onClick={() => setVista("area")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${vista === "area" ? "bg-violet-600 text-white" : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600"}`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${vista === "area" ? "bg-violet-600 text-white" : "bg-slate-100 dark:bg-[#252d3d] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#2e3852]"}`}
           >
             Por Área
           </button>

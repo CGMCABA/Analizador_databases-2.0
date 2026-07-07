@@ -39,7 +39,7 @@ export function GraficoCruceHeatmap({ cruce, totalSolicitudes }: GraficoCruceHea
 
   return (
     <div
-      className={`bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}
+      className={`bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-sm p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}
     >
       <div className="flex items-center gap-2 mb-4">
         <div className="p-1.5 bg-blue-100 dark:bg-blue-900/40 rounded-lg shrink-0">
@@ -134,7 +134,7 @@ export function GraficoCruceHeatmap({ cruce, totalSolicitudes }: GraficoCruceHea
             ))}
           </tbody>
           <tfoot>
-            <tr className="border-t border-slate-100 dark:border-slate-700">
+            <tr className="border-t border-slate-100 dark:border-[#1f2535]">
               <td className="pt-2 pr-3 text-slate-400 dark:text-slate-500 text-xs font-medium">Total col.</td>
               {columnas.map((col, ci) => {
                 const colTotal = filas.reduce((sum, _, fi) => sum + valores[fi][ci], 0);
@@ -168,7 +168,7 @@ export function GraficoCruceHeatmap({ cruce, totalSolicitudes }: GraficoCruceHea
           Poco frecuente
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="inline-block w-3 h-3 rounded-sm bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600" />
+          <span className="inline-block w-3 h-3 rounded-sm bg-slate-100 dark:bg-[#252d3d] border border-slate-200 dark:border-[#2e3852]" />
           Sin datos
         </span>
       </div>

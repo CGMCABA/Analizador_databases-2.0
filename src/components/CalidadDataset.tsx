@@ -59,7 +59,7 @@ export function CalidadDataset({ calidadDataset, tieneColumnaProgramacion, etiqu
     calidadDataset.sugerencias[0].startsWith("El dataset tiene buena calidad");
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 animate-fade-in-up delay-75">
+    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-sm p-5 animate-fade-in-up delay-75">
       <div className="flex items-center gap-2 mb-1">
         <Database className="h-4 w-4 text-blue-500" />
         <h3 className="font-semibold text-slate-800 dark:text-slate-100">Calidad del dataset</h3>
@@ -99,7 +99,7 @@ export function CalidadDataset({ calidadDataset, tieneColumnaProgramacion, etiqu
                   {pctCompleto}%
                 </span>
               </div>
-              <div className="h-2 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+              <div className="h-2 w-full bg-slate-100 dark:bg-[#252d3d] rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-700 ${col.bar}`}
                   style={{ width: `${pctCompleto}%` }}
@@ -118,7 +118,7 @@ export function CalidadDataset({ calidadDataset, tieneColumnaProgramacion, etiqu
       {calidadDataset.sugerencias.length > 0 && (
         <div className={`rounded-lg border p-4 ${esSoloBuena
           ? "bg-emerald-50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-800"
-          : "bg-slate-50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-700"
+          : "bg-slate-50 dark:bg-[#252d3d]/50 border-slate-200 dark:border-[#1f2535]"
           }`}>
           <div className="flex items-center gap-2 mb-3">
             <Lightbulb className={`h-4 w-4 shrink-0 ${esSoloBuena ? "text-emerald-500" : "text-amber-500"}`} />

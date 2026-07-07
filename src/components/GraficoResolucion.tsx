@@ -140,7 +140,7 @@ export function GraficoResolucion({ porMotivo, porArea }: GraficoResolucionProps
   const peores = [...datos].reverse().slice(0, 3);
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 animate-fade-in-up delay-100">
+    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-sm p-5 animate-fade-in-up delay-100">
       <div className="flex items-start justify-between gap-4 mb-4 flex-wrap">
         <div>
           <h3 className="font-semibold text-slate-800 dark:text-slate-100">Tasa de Resolución por Categoría</h3>
@@ -148,12 +148,12 @@ export function GraficoResolucion({ porMotivo, porArea }: GraficoResolucionProps
             % de registros resueltos según {vista === "motivo" ? "tipo de motivo" : "área asignada"} · ordenado de mayor a menor
           </p>
         </div>
-        <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-0.5 gap-0.5 shrink-0">
+        <div className="flex bg-slate-100 dark:bg-[#252d3d] rounded-lg p-0.5 gap-0.5 shrink-0">
           <button
             onClick={() => setVista("motivo")}
             className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
               vista === "motivo"
-                ? "bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100 shadow-sm"
+                ? "bg-white dark:bg-[#2e3852] text-slate-800 dark:text-slate-100 shadow-sm"
                 : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
             }`}
           >
@@ -163,7 +163,7 @@ export function GraficoResolucion({ porMotivo, porArea }: GraficoResolucionProps
             onClick={() => setVista("area")}
             className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
               vista === "area"
-                ? "bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100 shadow-sm"
+                ? "bg-white dark:bg-[#2e3852] text-slate-800 dark:text-slate-100 shadow-sm"
                 : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
             }`}
           >
@@ -207,7 +207,7 @@ export function GraficoResolucion({ porMotivo, porArea }: GraficoResolucionProps
         </div>
       </div>
 
-      <div className="border-t border-slate-100 dark:border-slate-700 pt-4">
+      <div className="border-t border-slate-100 dark:border-[#1f2535] pt-4">
         <div className="flex items-center gap-4 mb-3 text-xs text-slate-400 dark:text-slate-500">
           <span className="flex items-center gap-1.5">
             <span className="inline-block w-3 h-3 rounded bg-green-500" /> ≥ 75%

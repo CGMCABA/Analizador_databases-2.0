@@ -41,7 +41,7 @@ function DeltaBadge({ delta, mejoraSubida }: { delta: DeltaMetrica; mejoraSubida
   const cambio = delta.deltaAbs;
   if (cambio === 0) {
     return (
-      <span className="flex items-center gap-1 text-xs font-semibold text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">
+      <span className="flex items-center gap-1 text-xs font-semibold text-slate-400 bg-slate-100 dark:bg-[#252d3d] px-2 py-0.5 rounded-full">
         <Minus className="h-3 w-3" /> Sin cambio
       </span>
     );
@@ -79,7 +79,7 @@ function DeltaCard({
 }) {
   if (!disponible || !delta) {
     return (
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 flex flex-col gap-3">
+      <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] p-4 flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <Icon className="h-4 w-4 text-slate-300 dark:text-slate-600 shrink-0" />
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">{titulo}</span>
@@ -89,7 +89,7 @@ function DeltaCard({
     );
   }
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 flex flex-col gap-3">
+    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] p-4 flex flex-col gap-3">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Icon className="h-4 w-4 text-slate-400 shrink-0" />
@@ -114,7 +114,7 @@ function DeltaCard({
 function FilaVariacion({ fila, totalA, totalB, idx }: { fila: VariacionCategoria; totalA: number; totalB: number; idx: number }) {
   const cambio = fila.deltaAbs;
   return (
-    <tr className={`${idx % 2 === 0 ? "bg-white dark:bg-slate-800" : "bg-slate-50/60 dark:bg-slate-700/30"} hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors`}>
+    <tr className={`${idx % 2 === 0 ? "bg-white dark:bg-[#131720]" : "bg-slate-50/60 dark:bg-[#252d3d]/30"} hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors`}>
       <td className="px-3 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 max-w-[180px]">
         <span className="block truncate" title={fila.nombre}>{fila.nombre}</span>
       </td>
@@ -217,7 +217,7 @@ export function ComparacionPeriodos({ resultado, onCerrar }: ComparacionPeriodos
         {(resultado.motivosNuevos.length > 0 || resultado.motivosDesaparecidos.length > 0) && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {resultado.motivosNuevos.length > 0 && (
-              <div className="bg-white dark:bg-slate-800 rounded-xl border border-emerald-200 dark:border-emerald-800 p-4">
+              <div className="bg-white dark:bg-[#131720] rounded-xl border border-emerald-200 dark:border-emerald-800 p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Sparkles className="h-4 w-4 text-emerald-500 shrink-0" />
                   <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">
@@ -240,7 +240,7 @@ export function ComparacionPeriodos({ resultado, onCerrar }: ComparacionPeriodos
               </div>
             )}
             {resultado.motivosDesaparecidos.length > 0 && (
-              <div className="bg-white dark:bg-slate-800 rounded-xl border border-orange-200 dark:border-orange-800 p-4">
+              <div className="bg-white dark:bg-[#131720] rounded-xl border border-orange-200 dark:border-orange-800 p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Trash2 className="h-4 w-4 text-orange-500 shrink-0" />
                   <span className="text-sm font-semibold text-orange-700 dark:text-orange-400">
@@ -266,8 +266,8 @@ export function ComparacionPeriodos({ resultado, onCerrar }: ComparacionPeriodos
         )}
 
         {/* Tabla de variación */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-          <div className="p-5 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3 flex-wrap">
+        <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-sm">
+          <div className="p-5 border-b border-slate-100 dark:border-[#1f2535] flex items-center gap-3 flex-wrap">
             <div>
               <h3 className="font-semibold text-slate-800 dark:text-slate-100">Variación por categoría</h3>
               <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
@@ -275,7 +275,7 @@ export function ComparacionPeriodos({ resultado, onCerrar }: ComparacionPeriodos
               </p>
             </div>
             {hayVariacionAreas && (
-              <div className="ml-auto flex rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
+              <div className="ml-auto flex rounded-lg overflow-hidden border border-slate-200 dark:border-[#1f2535]">
                 {(["motivos", "areas"] as const).map((tab) => (
                   <button
                     key={tab}
@@ -283,7 +283,7 @@ export function ComparacionPeriodos({ resultado, onCerrar }: ComparacionPeriodos
                     className={`text-xs font-semibold px-3 py-1.5 transition-colors ${
                       tablaActiva === tab
                         ? "bg-[#1a2b4a] text-white"
-                        : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+                        : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252d3d]"
                     }`}
                   >
                     {tab === "motivos" ? "Por motivo" : "Por área"}
@@ -295,7 +295,7 @@ export function ComparacionPeriodos({ resultado, onCerrar }: ComparacionPeriodos
 
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700">
+              <thead className="bg-slate-50 dark:bg-[#252d3d]/50 border-b border-slate-100 dark:border-[#1f2535]">
                 <tr>
                   <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     {tablaActiva === "motivos" ? "Categoría" : "Área"}

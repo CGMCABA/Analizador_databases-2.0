@@ -99,7 +99,7 @@ export function GraficoRankingH({
     ? Math.round((primero.cantidad / totalGlobal) * 100) : 0;
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 animate-fade-in-up delay-75">
+    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-sm p-5 animate-fade-in-up delay-75">
       <div className="flex items-start justify-between gap-4 mb-3 flex-wrap">
         <div>
           <h3 className="font-semibold text-slate-800 dark:text-slate-100">{titulo}</h3>
@@ -108,14 +108,14 @@ export function GraficoRankingH({
           )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-0.5 gap-0.5">
+          <div className="flex bg-slate-100 dark:bg-[#252d3d] rounded-lg p-0.5 gap-0.5">
             {LIMITES.filter((l) => l === "Todos" || (typeof l === "number" && l <= sorted.length)).map((l) => (
               <button
                 key={l}
                 onClick={() => setLimite(l)}
                 className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
                   limite === l
-                    ? "bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100 shadow-sm"
+                    ? "bg-white dark:bg-[#2e3852] text-slate-800 dark:text-slate-100 shadow-sm"
                     : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                 }`}
               >

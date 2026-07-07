@@ -121,7 +121,7 @@ export function GraficoCruceCalle({
 
   return (
     <div
-      className={`bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-5 transition-opacity duration-500 ${
+      className={`bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-sm p-5 transition-opacity duration-500 ${
         montado ? "opacity-100" : "opacity-0"
       }`}
     >
@@ -138,14 +138,14 @@ export function GraficoCruceCalle({
           </div>
         </div>
         {validLimites.length > 1 && (
-          <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-0.5 gap-0.5 shrink-0">
+          <div className="flex bg-slate-100 dark:bg-[#252d3d] rounded-lg p-0.5 gap-0.5 shrink-0">
             {validLimites.map((l) => (
               <button
                 key={l}
                 onClick={() => setLimiteFila(l)}
                 className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
                   limiteFila === l
-                    ? "bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100 shadow-sm"
+                    ? "bg-white dark:bg-[#2e3852] text-slate-800 dark:text-slate-100 shadow-sm"
                     : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                 }`}
               >
@@ -156,7 +156,7 @@ export function GraficoCruceCalle({
         )}
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-slate-100 dark:border-slate-700">
+      <div className="overflow-x-auto rounded-lg border border-slate-100 dark:border-[#1f2535]">
         <table className="min-w-full border-collapse text-xs" style={{ tableLayout: "fixed" }}>
           <colgroup>
             <col style={{ width: 180 }} />
@@ -166,9 +166,9 @@ export function GraficoCruceCalle({
             <col style={{ width: 54 }} />
           </colgroup>
           <thead>
-            <tr className="bg-slate-50 dark:bg-slate-900/50">
+            <tr className="bg-slate-50 dark:bg-[#0d0f14]/50">
               <th
-                className="text-left px-3 py-2 font-semibold text-slate-600 dark:text-slate-300 border-b border-r border-slate-200 dark:border-slate-700 sticky left-0 bg-slate-50 dark:bg-slate-900/80 z-10"
+                className="text-left px-3 py-2 font-semibold text-slate-600 dark:text-slate-300 border-b border-r border-slate-200 dark:border-[#1f2535] sticky left-0 bg-slate-50 dark:bg-[#0d0f14]/80 z-10"
                 style={{ minWidth: 180 }}
               >
                 {labelFila}
@@ -176,7 +176,7 @@ export function GraficoCruceCalle({
               {columnas.map((col) => (
                 <th
                   key={col}
-                  className="text-center px-1 py-2 font-medium text-slate-500 dark:text-slate-400 border-b border-r border-slate-200 dark:border-slate-700"
+                  className="text-center px-1 py-2 font-medium text-slate-500 dark:text-slate-400 border-b border-r border-slate-200 dark:border-[#1f2535]"
                   title={col}
                 >
                   <span
@@ -187,7 +187,7 @@ export function GraficoCruceCalle({
                   </span>
                 </th>
               ))}
-              <th className="text-center px-2 py-2 font-semibold text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700">
+              <th className="text-center px-2 py-2 font-semibold text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-[#1f2535]">
                 Total
               </th>
             </tr>
@@ -201,11 +201,11 @@ export function GraficoCruceCalle({
                 <tr
                   key={fila}
                   className={`${
-                    rowIdx % 2 === 0 ? "" : "bg-slate-50/50 dark:bg-slate-900/20"
+                    rowIdx % 2 === 0 ? "" : "bg-slate-50/50 dark:bg-[#0d0f14]/20"
                   } hover:bg-violet-50/30 dark:hover:bg-violet-900/10 transition-colors`}
                 >
                   <td
-                    className="px-3 py-1.5 font-medium text-slate-700 dark:text-slate-200 border-r border-slate-200 dark:border-slate-700 sticky left-0 bg-white dark:bg-slate-800 z-10 truncate"
+                    className="px-3 py-1.5 font-medium text-slate-700 dark:text-slate-200 border-r border-slate-200 dark:border-[#1f2535] sticky left-0 bg-white dark:bg-[#131720] z-10 truncate"
                     title={fila}
                     style={{ maxWidth: 180 }}
                   >
@@ -219,7 +219,7 @@ export function GraficoCruceCalle({
                     return (
                       <td
                         key={col}
-                        className="text-center py-1.5 border-r border-slate-100 dark:border-slate-700/50 cursor-default select-none"
+                        className="text-center py-1.5 border-r border-slate-100 dark:border-[#1f2535]/50 cursor-default select-none"
                         style={{ backgroundColor: bg }}
                         onMouseEnter={(e) =>
                           count > 0 && handleMouseEnter(e, fila, col, count)
