@@ -400,6 +400,16 @@
   to { opacity: 1; transform: scale(1); }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up,
+  .animate-fade-in,
+  .animate-scale-in,
+  .chart-fade-in {
+    animation: none;
+    opacity: 1;
+  }
+}
+
 [data-presentation="true"] .presentation-hide {
   display: none !important;
 }

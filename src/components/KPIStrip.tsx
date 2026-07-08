@@ -1,4 +1,5 @@
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { useAnimateOnEnter } from "@/hooks/useAnimateOnEnter";
 
 type KPIAccent = "gold" | "green" | "amber" | "red" | "violet" | "indigo";
 
@@ -46,11 +47,18 @@ function DeltaBadge({ delta, mes }: { delta: number; mes?: string }) {
 }
 
 export function KPIStrip({ cells }: KPIStripProps) {
+  const { ref, entered } = useAnimateOnEnter(0.1);
+  const ease = "cubic-bezier(0, 0, 0.2, 1)";
+
   if (cells.length === 0) return null;
 
   return (
-    <div className="animate-fade-in-up bg-slate-50 dark:bg-[#0d0f14] border border-slate-200 dark:border-[#1f2535] rounded-lg overflow-hidden">
-      <div className={`grid divide-x divide-slate-200 dark:divide-[#1f2535]`}
+    <div
+      ref={ref as unknown as React.RefObject<HTMLDivElement>}
+      className="bg-slate-50 dark:bg-[#0d0f14] border border-slate-200 dark:border-[#1f2535] rounded-lg overflow-hidden"
+    >
+      <div
+        className="grid divide-x divide-slate-200 dark:divide-[#1f2535]"
         style={{ gridTemplateColumns: `repeat(${cells.length}, minmax(0, 1fr))` }}
       >
         {cells.map((cell, i) => {
@@ -59,7 +67,11 @@ export function KPIStrip({ cells }: KPIStripProps) {
             <div
               key={cell.label}
               className="relative px-5 py-4"
-              style={{ animationDelay: `${i * 60}ms` }}
+              style={{
+                opacity: entered ? 1 : 0,
+                transform: entered ? "none" : "translateY(10px)",
+                transition: `opacity 280ms ${i * 70}ms ${ease}, transform 280ms ${i * 70}ms ${ease}`,
+              }}
             >
               {/* Accent bar */}
               <span className={`absolute inset-y-0 left-0 w-[2.5px] ${a.bar} opacity-70`} aria-hidden="true" />

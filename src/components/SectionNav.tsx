@@ -28,7 +28,7 @@ export function SectionNav({ chapters, activeIndex, onNavigate }: SectionNavProp
         >
           <span
             className={[
-              "block rounded-full transition-all duration-200",
+              "block rounded-full transition-all duration-[220ms] ease-out",
               i === activeIndex
                 ? "w-2.5 h-2.5 bg-[#c8a84b] shadow-[0_0_6px_rgba(200,168,75,0.5)]"
                 : "w-2 h-2 bg-slate-600 dark:bg-slate-600 hover:bg-slate-400 dark:hover:bg-slate-400",
