@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+﻿import { useMemo } from "react";
 import { Search, CheckCircle2, AlertCircle, AlertTriangle, TrendingUp, RefreshCw, ArrowUpRight, ArrowDownRight, ArrowRight, Zap, GitCompareArrows } from "lucide-react";
 import type { Anomalia, PerfilDataset } from "@/lib/insights/tipos";
 
@@ -220,7 +220,7 @@ export function HallazgosPrincipales({ perfil, onVerComparacion }: HallazgosPrin
     perfil.caracteristicas.tendenciaGeneral !== "estable";
 
   return (
-    <div className="presentation-hide bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] p-5 print:hidden">
+    <div className="presentation-hide bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535] p-5 print:hidden">
       <div className="flex items-center justify-between gap-3 flex-wrap mb-4">
         <div className="flex items-center gap-2">
           <div className="p-1.5 bg-[rgba(200,168,75,0.10)] rounded-lg shrink-0">

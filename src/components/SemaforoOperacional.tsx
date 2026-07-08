@@ -1,4 +1,4 @@
-import { ShieldCheck, Clock, CheckCircle, RefreshCw, HelpCircle } from "lucide-react";
+﻿import { ShieldCheck, Clock, CheckCircle, RefreshCw, HelpCircle } from "lucide-react";
 import { SemaforoResultado, EjeSemaforo, EstadoSemaforo } from "@/lib/semaforoRecomendaciones";
 
 interface SemaforoOperacionalProps {
@@ -96,7 +96,7 @@ function EjeCard({ eje, titulo, Icono }: { eje: EjeSemaforo; titulo: string; Ico
 
 export function SemaforoOperacional({ resultado }: SemaforoOperacionalProps) {
   return (
-    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] p-5 animate-fade-in-up delay-75">
+    <div className="bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535] p-5 animate-fade-in-up delay-75">
       <div className="flex items-center gap-2 mb-4">
         <div className="p-1.5 bg-[rgba(200,168,75,0.10)] rounded-lg shrink-0">
           <ShieldCheck className="h-4 w-4 text-[#c8a84b]" />

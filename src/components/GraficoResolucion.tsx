@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import {
   BarChart,
   Bar,
@@ -140,7 +140,7 @@ export function GraficoResolucion({ porMotivo, porArea }: GraficoResolucionProps
   const peores = [...datos].reverse().slice(0, 3);
 
   return (
-    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-sm p-5 animate-fade-in-up delay-100">
+    <div className="bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535] p-5 animate-fade-in-up delay-100">
       <div className="flex items-start justify-between gap-4 mb-4 flex-wrap">
         <div>
           <h3 className="font-semibold text-slate-800 dark:text-slate-100">Tasa de Resolución por Categoría</h3>

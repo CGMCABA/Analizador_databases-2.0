@@ -1,4 +1,4 @@
-import { ShieldAlert } from "lucide-react";
+﻿import { ShieldAlert } from "lucide-react";
 
 interface ZonaFragilidad {
   zona: string;
@@ -37,7 +37,7 @@ export function IndiceFragilidad({ indiceFragilidad }: IndiceFragilidadProps) {
   const maxPuntuacion = top15[0]?.puntuacion ?? 1;
 
   return (
-    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-md p-5 animate-fade-in-up delay-100">
+    <div className="bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535] p-5 animate-fade-in-up delay-100">
       <div className="flex items-center gap-2 mb-1">
         <ShieldAlert className="h-4 w-4 text-red-500" />
         <h3 className="font-semibold text-slate-800 dark:text-slate-100">Índice de Fragilidad Operativa</h3>

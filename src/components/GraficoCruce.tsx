@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+﻿import { useState, useEffect, useMemo, useCallback } from "react";
 import { Solicitud } from "@/lib/excelParser";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { LayoutGrid } from "lucide-react";
@@ -96,7 +96,7 @@ export function GraficoCruce({ solicitudes, meses, porMotivo, limiteInicial = 10
 
   return (
     <div
-      className={`bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-sm p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}
+      className={`bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535] p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}
     >
       <div className="flex items-start justify-between gap-4 mb-4 flex-wrap">
         <div className="flex items-center gap-2">
@@ -170,7 +170,7 @@ export function GraficoCruce({ solicitudes, meses, porMotivo, limiteInicial = 10
                   className={`${rowIdx % 2 === 0 ? "" : "bg-slate-50/50 dark:bg-[#0d0f14]/20"} hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors`}
                 >
                   <td
-                    className="px-3 py-1.5 font-medium text-slate-700 dark:text-slate-200 border-r border-slate-200 dark:border-[#1f2535] sticky left-0 bg-white dark:bg-[#131720] z-10 truncate"
+                    className="px-3 py-1.5 font-medium text-slate-700 dark:text-slate-200 border-r border-slate-200 dark:border-[#1f2535] sticky left-0 bg-slate-50 dark:bg-[#0d0f14] z-10 truncate"
                     title={motivo}
                     style={{ maxWidth: 196 }}
                   >

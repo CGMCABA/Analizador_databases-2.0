@@ -6,7 +6,7 @@ import { perfilarDataset } from "@/lib/insights/perfilDataset";
 import { calcularSemaforo, generarRecomendaciones } from "@/lib/semaforoRecomendaciones";
 
 import { PaginaInicio } from "@/components/PaginaInicio";
-import { MetricCard } from "@/components/MetricCard";
+import { KPIStrip, type KPICell } from "@/components/KPIStrip";
 import { GraficoBarras } from "@/components/GraficoBarras";
 import { GraficoResolucion } from "@/components/GraficoResolucion";
 import { GraficoLineas } from "@/components/GraficoLineas";
@@ -327,10 +327,10 @@ export default function Dashboard() {
 
   return (
     <div
-      className="min-h-screen bg-[#f0f2f5] dark:bg-[#0d0f14] transition-colors duration-300"
+      className="min-h-screen bg-[#f0f2f5] dark:bg-[#0a0c10] transition-colors duration-300"
     >
       <header className="bg-[#0a0c10] text-white shadow-lg border-b-2 border-[#c8a84b] print-header">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-3 flex-wrap">
+        <div className="max-w-[1680px] mx-auto px-6 py-4 flex items-center gap-3 flex-wrap">
           <div className="flex flex-col shrink-0">
             <span className="text-[17px] font-black tracking-[.15em] text-[#c8a84b] leading-none uppercase">CGM</span>
             <span className="text-[9px] text-slate-500 tracking-[.06em] uppercase mt-0.5">Centro de Monitoreo y Gestión de la Movilidad</span>
@@ -446,7 +446,7 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className="max-w-[1680px] mx-auto px-6 py-8">
         {!datos ? (
           <PaginaInicio
             onUrl={handleUrl}
@@ -585,22 +585,19 @@ export default function Dashboard() {
                   : null,
               ].filter(Boolean) as NonNullable<typeof cards[number]>[];
 
+              const accentMap: Record<string, KPICell["accent"]> = {
+                blue: "gold", cyan: "gold", green: "green", red: "red",
+                amber: "amber", indigo: "indigo", violet: "violet",
+              };
               return (
-                <div className={`grid gap-4 grid-cols-2 ${cards.length >= 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>
-                  {cards.slice(0, 4).map((card, i) => (
-                    <div key={card.titulo} className="animate-fade-in-up" style={{ animationDelay: `${i * 60}ms` }}>
-                      <MetricCard
-                        titulo={card.titulo}
-                        valor={card.valor}
-                        subtitulo={card.subtitulo}
-                        color={card.color}
-                        icono={card.icono}
-                        delta={"delta" in card ? card.delta : undefined}
-                        subtituloMes={"subtituloMes" in card ? card.subtituloMes : undefined}
-                      />
-                    </div>
-                  ))}
-                </div>
+                <KPIStrip cells={cards.slice(0, 4).map((card) => ({
+                  label: card.titulo,
+                  value: card.valor,
+                  sub: card.subtitulo,
+                  accent: accentMap[card.color as string] ?? "gold",
+                  delta: "delta" in card ? card.delta : undefined,
+                  deltaMes: "subtituloMes" in card ? card.subtituloMes : undefined,
+                }))} />
               );
             })()}
 
@@ -704,148 +701,105 @@ export default function Dashboard() {
             <SeccionPasado icono={TrendingUp} titulo="Evolución temporal" subtitulo="¿cómo evolucionó el volumen?" />
 
             {activa(datos.capacidades, "Estado") && utilizable(datos.calidad, "Estado") ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {[
-                  {
-                    titulo: "Total Registros",
-                    valor: (datosFiltrados?.totalSolicitudes ?? 0).toLocaleString("es-AR"),
-                    subtitulo: mesFiltro ? `registros en ${mesFiltro}` : "registros totales",
-                    color: "blue" as const, icono: "chart" as const,
-                    delta: mesFiltro ? undefined : deltaTotal,
-                    subtituloMes: mesFiltro ? undefined : ultimoMes?.mes,
-                  },
-                  {
-                    titulo: datos.etiquetaStatus === "Resuelto" ? "Tasa de Resolución" : "Tasa de Finalización",
-                    valor: `${datosFiltrados?.tasaResolucion ?? 0}%`,
-                    subtitulo: mesFiltro
-                      ? `tasa en ${mesFiltro}`
-                      : datos.etiquetaStatus === "Resuelto" ? "porcentaje resueltas" : "porcentaje finalizadas",
-                    color: "cyan" as const, icono: "activity" as const,
-                    delta: mesFiltro ? undefined : deltaTasa,
-                    subtituloMes: mesFiltro ? undefined : ultimoMes?.mes,
-                  },
-                ].map((card, i) => (
-                  <div
-                    key={card.titulo}
-                    className="animate-fade-in-up"
-                    style={{ animationDelay: `${i * 80}ms` }}
-                  >
-                    <MetricCard
-                      titulo={card.titulo}
-                      valor={card.valor}
-                      subtitulo={card.subtitulo}
-                      color={card.color}
-                      icono={card.icono}
-                      delta={card.delta}
-                      subtituloMes={card.subtituloMes}
-                    />
-                  </div>
-                ))}
-              </div>
+              <KPIStrip cells={[
+                {
+                  label: "Total Registros",
+                  value: (datosFiltrados?.totalSolicitudes ?? 0).toLocaleString("es-AR"),
+                  sub: mesFiltro ? `registros en ${mesFiltro}` : "registros totales",
+                  accent: "gold",
+                  delta: mesFiltro ? undefined : deltaTotal,
+                  deltaMes: mesFiltro ? undefined : ultimoMes?.mes,
+                },
+                {
+                  label: datos.etiquetaStatus === "Resuelto" ? "Tasa de Resolución" : "Tasa de Finalización",
+                  value: `${datosFiltrados?.tasaResolucion ?? 0}%`,
+                  sub: mesFiltro ? `tasa en ${mesFiltro}` : datos.etiquetaStatus === "Resuelto" ? "porcentaje resueltas" : "porcentaje finalizadas",
+                  accent: (datosFiltrados?.tasaResolucion ?? 0) >= 75 ? "green" : (datosFiltrados?.tasaResolucion ?? 0) >= 50 ? "amber" : "red",
+                  delta: mesFiltro ? undefined : deltaTasa,
+                  deltaMes: mesFiltro ? undefined : ultimoMes?.mes,
+                },
+              ]} />
             ) : datos.tipoDato === 'sucesos' ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {(() => {
-                  const horaPico = (datosFiltrados?.porHora ?? []).length > 0
-                    ? [...datosFiltrados!.porHora].sort((a, b) => b.cantidad - a.cantidad)[0]
-                    : null;
-                  const diaPico = (datosFiltrados?.porDiaSemana ?? []).length > 0
-                    ? [...datosFiltrados!.porDiaSemana].sort((a, b) => b.cantidad - a.cantidad)[0]
-                    : null;
-                  const intPico = (datosFiltrados?.porInterseccion ?? []).length > 0 ? datosFiltrados!.porInterseccion[0] : null;
-                  const total = datosFiltrados?.totalSolicitudes ?? 0;
-                  return [
+              (() => {
+                const horaPico = (datosFiltrados?.porHora ?? []).length > 0
+                  ? [...datosFiltrados!.porHora].sort((a, b) => b.cantidad - a.cantidad)[0]
+                  : null;
+                const diaPico = (datosFiltrados?.porDiaSemana ?? []).length > 0
+                  ? [...datosFiltrados!.porDiaSemana].sort((a, b) => b.cantidad - a.cantidad)[0]
+                  : null;
+                const intPico = (datosFiltrados?.porInterseccion ?? []).length > 0 ? datosFiltrados!.porInterseccion[0] : null;
+                const total = datosFiltrados?.totalSolicitudes ?? 0;
+                return (
+                  <KPIStrip cells={[
                     {
-                      titulo: "Total Registros",
-                      valor: total.toLocaleString("es-AR"),
-                      subtitulo: mesFiltro ? `registros en ${mesFiltro}` : "registros totales",
-                      color: "blue" as const, icono: "chart" as const,
+                      label: "Total Registros",
+                      value: total.toLocaleString("es-AR"),
+                      sub: mesFiltro ? `registros en ${mesFiltro}` : "registros totales",
+                      accent: "gold",
                       delta: mesFiltro ? undefined : deltaTotal,
-                      subtituloMes: mesFiltro ? undefined : ultimoMes?.mes,
+                      deltaMes: mesFiltro ? undefined : ultimoMes?.mes,
                     },
                     {
-                      titulo: "Hora pico",
-                      valor: horaPico ? `${String(horaPico.hora).padStart(2, "0")}:00 hs` : "—",
-                      subtitulo: horaPico ? `${horaPico.cantidad.toLocaleString("es-AR")} registros en esa franja` : "sin datos de hora",
-                      color: "amber" as const, icono: "activity" as const,
+                      label: "Hora pico",
+                      value: horaPico ? `${String(horaPico.hora).padStart(2, "0")}:00 hs` : "—",
+                      sub: horaPico ? `${horaPico.cantidad.toLocaleString("es-AR")} registros en esa franja` : "sin datos de hora",
+                      accent: "amber",
                     },
                     {
-                      titulo: "Día más activo",
-                      valor: diaPico ? diaPico.dia : "—",
-                      subtitulo: diaPico ? `${diaPico.cantidad.toLocaleString("es-AR")} registros` : "sin datos de fecha",
-                      color: "indigo" as const, icono: "calendar" as const,
+                      label: "Día más activo",
+                      value: diaPico ? diaPico.dia : "—",
+                      sub: diaPico ? `${diaPico.cantidad.toLocaleString("es-AR")} registros` : "sin datos de fecha",
+                      accent: "indigo",
                     },
                     {
-                      titulo: "Intersección principal",
-                      valor: intPico ? intPico.cantidad.toLocaleString("es-AR") : "—",
-                      subtitulo: intPico ? intPico.nombre : ((datosFiltrados?.porInterseccion ?? []).length === 0 ? "sin datos de calles" : ""),
-                      color: "violet" as const, icono: "tag" as const,
+                      label: "Intersección principal",
+                      value: intPico ? intPico.cantidad.toLocaleString("es-AR") : "—",
+                      sub: intPico ? intPico.nombre : ((datosFiltrados?.porInterseccion ?? []).length === 0 ? "sin datos de calles" : ""),
+                      accent: "violet",
                     },
-                  ].map((card, i) => (
-                    <div
-                      key={card.titulo}
-                      className="animate-fade-in-up"
-                      style={{ animationDelay: `${i * 80}ms` }}
-                    >
-                      <MetricCard
-                        titulo={card.titulo}
-                        valor={card.valor}
-                        subtitulo={card.subtitulo}
-                        color={card.color}
-                        icono={card.icono}
-                        delta={"delta" in card ? card.delta : undefined}
-                        subtituloMes={"subtituloMes" in card ? card.subtituloMes : undefined}
-                      />
-                    </div>
-                  ));
-                })()}
-              </div>
+                  ]} />
+                );
+              })()
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <MetricCard
-                  titulo="Total Registros"
-                  valor={(datosFiltrados?.totalSolicitudes ?? 0).toLocaleString("es-AR")}
-                  subtitulo={mesFiltro ? `registros en ${mesFiltro}` : "registros totales en el archivo"}
-                  color="blue"
-                  icono="chart"
-                  delta={mesFiltro ? undefined : deltaTotal}
-                  subtituloMes={mesFiltro ? undefined : ultimoMes?.mes}
-                />
-                <MetricCard
-                  titulo="Meses con datos"
-                  valor={String(datos.meses.length)}
-                  subtitulo={datos.meses.length > 0 ? `${datos.meses[0]} → ${datos.meses[datos.meses.length - 1]}` : ""}
-                  color="indigo"
-                  icono="calendar"
-                />
-                {datosFiltrados?.distribucionesCategoricas[0] && (
-                  <MetricCard
-                    titulo={`Valores en ${datos.colCategorica1 ?? "Categoría"}`}
-                    valor={String(datosFiltrados.distribucionesCategoricas[0].datos.length)}
-                    subtitulo={`categorías distintas detectadas`}
-                    color="violet"
-                    icono="tag"
-                  />
-                )}
-              </div>
+              <KPIStrip cells={[
+                {
+                  label: "Total Registros",
+                  value: (datosFiltrados?.totalSolicitudes ?? 0).toLocaleString("es-AR"),
+                  sub: mesFiltro ? `registros en ${mesFiltro}` : "registros totales en el archivo",
+                  accent: "gold",
+                  delta: mesFiltro ? undefined : deltaTotal,
+                  deltaMes: mesFiltro ? undefined : ultimoMes?.mes,
+                },
+                {
+                  label: "Meses con datos",
+                  value: String(datos.meses.length),
+                  sub: datos.meses.length > 0 ? `${datos.meses[0]} → ${datos.meses[datos.meses.length - 1]}` : "",
+                  accent: "indigo",
+                },
+                ...(datosFiltrados?.distribucionesCategoricas[0] ? [{
+                  label: `Valores en ${datos.colCategorica1 ?? "Categoría"}`,
+                  value: String(datosFiltrados.distribucionesCategoricas[0].datos.length),
+                  sub: "categorías distintas detectadas",
+                  accent: "violet" as const,
+                }] : []),
+              ]} />
             )}
 
             {activa(datos.capacidades, "Programacion") && (
-              <div className="grid grid-cols-2 gap-4">
-                <MetricCard
-                  titulo="No Programados"
-                  valor={(datosFiltrados?.totalNoProgramados ?? 0).toLocaleString("es-AR")}
-                  subtitulo="sucesos reactivos sin planificación previa"
-                  color="red"
-                  icono="activity"
-                />
-                <MetricCard
-                  titulo="Programados"
-                  valor={(datosFiltrados?.totalProgramados ?? 0).toLocaleString("es-AR")}
-                  subtitulo="eventos y tareas con planificación previa"
-                  color="amber"
-                  icono="calendar"
-                />
-              </div>
+              <KPIStrip cells={[
+                {
+                  label: "No Programados",
+                  value: (datosFiltrados?.totalNoProgramados ?? 0).toLocaleString("es-AR"),
+                  sub: "sucesos reactivos sin planificación previa",
+                  accent: "red",
+                },
+                {
+                  label: "Programados",
+                  value: (datosFiltrados?.totalProgramados ?? 0).toLocaleString("es-AR"),
+                  sub: "eventos y tareas con planificación previa",
+                  accent: "amber",
+                },
+              ]} />
             )}
 
             <GraficoBarras

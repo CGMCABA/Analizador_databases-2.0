@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { CruceAutomatico } from "@/lib/excelParser";
 import { LayoutGrid } from "lucide-react";
 
@@ -39,7 +39,7 @@ export function GraficoCruceHeatmap({ cruce, totalSolicitudes }: GraficoCruceHea
 
   return (
     <div
-      className={`bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-sm p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}
+      className={`bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535] p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}
     >
       <div className="flex items-center gap-2 mb-4">
         <div className="p-1.5 bg-blue-100 dark:bg-blue-900/40 rounded-lg shrink-0">

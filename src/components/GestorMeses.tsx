@@ -1,4 +1,4 @@
-import { Calendar, AlertTriangle, RotateCcw, Check, X } from "lucide-react";
+﻿import { Calendar, AlertTriangle, RotateCcw, Check, X } from "lucide-react";
 import type { DatosDashboard } from "@/lib/excelParser";
 
 interface GestorMesesProps {
@@ -36,7 +36,7 @@ export function GestorMeses({
   const outliers     = detectarOutliers(datos.porMes, mesesExcluidos);
 
   return (
-    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] p-4 animate-fade-in-up print:hidden">
+    <div className="bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535] p-4 animate-fade-in-up print:hidden">
 
       {/* ── Encabezado ─────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between gap-3 flex-wrap mb-3">

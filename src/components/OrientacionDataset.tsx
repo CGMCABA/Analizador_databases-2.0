@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { ChevronDown, Check, Minus, Clock, Table2 } from "lucide-react";
 import type { DatosDashboard } from "@/lib/excelParser";
 import { activa, type NombreCapacidad } from "@/lib/capacidades";
@@ -134,7 +134,7 @@ export function OrientacionDataset({ datos, nombreArchivo }: Props) {
   const columnasIgnoradas = datos.columnas.filter((c) => c.tipo === "ignorar");
 
   return (
-    <div className="presentation-hide print:hidden bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] overflow-hidden animate-fade-in-up">
+    <div className="presentation-hide print:hidden bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535] overflow-hidden animate-fade-in-up">
 
       {/* ── Header: badge · volumen · período ─────────────────────────────── */}
       <div className="flex items-center justify-between flex-wrap gap-3 px-5 py-3 border-b border-slate-100 dark:border-[#1f2535]">

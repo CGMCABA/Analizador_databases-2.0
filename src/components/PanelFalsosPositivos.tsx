@@ -1,4 +1,4 @@
-import {
+﻿import {
   BarChart,
   Bar,
   XAxis,
@@ -62,7 +62,7 @@ export function PanelFalsosPositivos({
   const alturaGrafico = Math.max(160, tiposFalsosPositivos.length * 30 + 40);
 
   return (
-    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-md p-5 animate-fade-in-up delay-150">
+    <div className="bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535] p-5 animate-fade-in-up delay-150">
       <div className="flex items-center gap-2 mb-1">
         <Ban className="h-4 w-4 text-amber-500" />
         <h3 className="font-semibold text-slate-800 dark:text-slate-100">Falsos positivos operativos</h3>

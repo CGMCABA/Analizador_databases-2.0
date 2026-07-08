@@ -1,4 +1,4 @@
-import {
+﻿import {
   AlertTriangle, Clock, User, TrendingDown, MapPin, Database, Lightbulb,
 } from "lucide-react";
 import { Recomendacion, PrioridadRecomendacion } from "@/lib/semaforoRecomendaciones";
@@ -44,7 +44,7 @@ export function RecomendacionesOperativas({ recomendaciones }: RecomendacionesOp
   if (recomendaciones.length === 0) return null;
 
   return (
-    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-futuro p-5 animate-fade-in-up delay-75">
+    <div className="bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535] shadow-futuro p-5 animate-fade-in-up delay-75">
       <div className="flex items-center gap-2 mb-4">
         <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg shrink-0">
           <Lightbulb className="h-4 w-4 text-blue-600 dark:text-blue-400" />

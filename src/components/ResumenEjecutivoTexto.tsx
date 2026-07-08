@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { FileText, Copy, Download, Check, AlertCircle } from "lucide-react";
 import type { DatosDashboard } from "@/lib/excelParser";
 import type { PerfilDataset } from "@/lib/insights/tipos";
@@ -340,7 +340,7 @@ export function ResumenEjecutivoTexto({
   };
 
   return (
-    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] overflow-hidden animate-fade-in-up">
+    <div className="bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535] overflow-hidden animate-fade-in-up">
       {/* Header */}
       <div className="flex items-center justify-between gap-3 px-5 py-3.5 border-b border-slate-100 dark:border-[#1f2535]">
         <div className="flex items-center gap-2">

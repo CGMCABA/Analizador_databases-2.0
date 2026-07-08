@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -191,7 +191,7 @@ export function GraficoCalles({ datos, totalSolicitudes }: GraficoCallesProps) {
 
   if (datos.length === 0) {
     return (
-      <div className={`bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-sm p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}>
+      <div className={`bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535] p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}>
         <h3 className="font-semibold text-slate-800 dark:text-slate-100 mb-1">Calles con más registros</h3>
         <p className="text-sm text-slate-400 dark:text-slate-500 mt-4 text-center">Sin datos de calles disponibles</p>
       </div>
@@ -199,7 +199,7 @@ export function GraficoCalles({ datos, totalSolicitudes }: GraficoCallesProps) {
   }
 
   return (
-    <div className={`bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-sm p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}>
+    <div className={`bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535] p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}>
       <div className="flex items-start justify-between gap-4 mb-4 flex-wrap">
         <div>
           <h3 className="font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">

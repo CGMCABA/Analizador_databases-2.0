@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+﻿import { useState, useEffect, useMemo, useCallback } from "react";
 import { RegistroGenerico } from "@/lib/excelParser";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { MapPin } from "lucide-react";
@@ -121,7 +121,7 @@ export function GraficoCruceCalle({
 
   return (
     <div
-      className={`bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-sm p-5 transition-opacity duration-500 ${
+      className={`bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535] p-5 transition-opacity duration-500 ${
         montado ? "opacity-100" : "opacity-0"
       }`}
     >
@@ -205,7 +205,7 @@ export function GraficoCruceCalle({
                   } hover:bg-violet-50/30 dark:hover:bg-violet-900/10 transition-colors`}
                 >
                   <td
-                    className="px-3 py-1.5 font-medium text-slate-700 dark:text-slate-200 border-r border-slate-200 dark:border-[#1f2535] sticky left-0 bg-white dark:bg-[#131720] z-10 truncate"
+                    className="px-3 py-1.5 font-medium text-slate-700 dark:text-slate-200 border-r border-slate-200 dark:border-[#1f2535] sticky left-0 bg-slate-50 dark:bg-[#0d0f14] z-10 truncate"
                     title={fila}
                     style={{ maxWidth: 180 }}
                   >

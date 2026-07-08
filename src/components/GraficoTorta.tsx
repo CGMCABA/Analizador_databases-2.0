@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import {
   PieChart,
   Pie,
@@ -89,7 +89,7 @@ export function GraficoTorta({ datos, titulo, subtitulo, alturaGrafico = 200 }: 
   const innerRadius = Math.round(alturaGrafico * 0.17);
 
   return (
-    <div className={`bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-sm p-5 h-full transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}>
+    <div className={`bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535] p-5 h-full transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}>
       <div className="mb-4">
         <h3 className="font-semibold text-slate-800 dark:text-slate-100">{titulo}</h3>
         {subtitulo && <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{subtitulo}</p>}

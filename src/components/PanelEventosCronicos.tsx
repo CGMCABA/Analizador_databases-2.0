@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+﻿import { useState, useMemo } from "react";
 import { RotateCcw, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 
 interface CruceCronico {
@@ -107,7 +107,7 @@ export function PanelEventosCronicos({ crucesCronicos }: PanelEventosCronicosPro
   if (crucesCronicos.length === 0) return null;
 
   return (
-    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-md p-5 animate-fade-in-up delay-200">
+    <div className="bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535] p-5 animate-fade-in-up delay-200">
       <div className="flex items-center gap-2 mb-1">
         <RotateCcw className="h-4 w-4 text-red-500" />
         <h3 className="font-semibold text-slate-800 dark:text-slate-100">Eventos crónicos</h3>

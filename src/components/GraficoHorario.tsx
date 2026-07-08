@@ -1,4 +1,4 @@
-import {
+﻿import {
   BarChart,
   Bar,
   XAxis,
@@ -90,7 +90,7 @@ export function GraficoHorario({ datos, totalSolicitudes }: GraficoHorarioProps)
   const pico = datosCompletos.reduce((acc, d) => d.cantidad > acc.cantidad ? d : acc, datosCompletos[0]);
 
   return (
-    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-sm p-5 animate-fade-in-up delay-100">
+    <div className="bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535] p-5 animate-fade-in-up delay-100">
       <div className="flex items-start justify-between gap-4 mb-3 flex-wrap">
         <div className="flex items-center gap-2">
           <div className="p-1.5 bg-amber-100 dark:bg-amber-900/40 rounded-lg shrink-0">

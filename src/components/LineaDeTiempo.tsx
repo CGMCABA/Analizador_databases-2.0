@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef } from "react";
+﻿import { useMemo, useState, useEffect, useRef } from "react";
 import { Solicitud } from "@/lib/excelParser";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { Clock } from "lucide-react";
@@ -129,7 +129,7 @@ export function LineaDeTiempo({ solicitudes, meses }: LineaDeTiempoProps) {
 
   return (
     <div
-      className={`bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-sm transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}
+      className={`bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535] transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}
       onMouseLeave={() => setTooltip(null)}
     >
       <div className="p-5 pb-0">

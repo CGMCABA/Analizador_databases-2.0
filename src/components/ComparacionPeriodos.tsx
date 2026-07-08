@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import {
   X, TrendingUp, TrendingDown, Minus, ArrowRight,
   Users, CheckCircle2, Clock, AlertTriangle,
@@ -79,7 +79,7 @@ function DeltaCard({
 }) {
   if (!disponible || !delta) {
     return (
-      <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] p-4 flex flex-col gap-3">
+      <div className="bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535] p-4 flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <Icon className="h-4 w-4 text-slate-300 dark:text-slate-600 shrink-0" />
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">{titulo}</span>
@@ -89,7 +89,7 @@ function DeltaCard({
     );
   }
   return (
-    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] p-4 flex flex-col gap-3">
+    <div className="bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535] p-4 flex flex-col gap-3">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Icon className="h-4 w-4 text-slate-400 shrink-0" />
@@ -266,7 +266,7 @@ export function ComparacionPeriodos({ resultado, onCerrar }: ComparacionPeriodos
         )}
 
         {/* Tabla de variación */}
-        <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-sm">
+        <div className="bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535]">
           <div className="p-5 border-b border-slate-100 dark:border-[#1f2535] flex items-center gap-3 flex-wrap">
             <div>
               <h3 className="font-semibold text-slate-800 dark:text-slate-100">Variación por categoría</h3>

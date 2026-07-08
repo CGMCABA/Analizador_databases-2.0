@@ -1,4 +1,4 @@
-import {
+﻿import {
   BarChart,
   Bar,
   XAxis,
@@ -76,7 +76,7 @@ export function GraficoHeatmap({ datos, topMotivoPorDia, totalSolicitudes }: Gra
   const max = Math.max(...datos.map((d) => d.cantidad));
 
   return (
-    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-sm p-5 animate-fade-in-up delay-75">
+    <div className="bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535] p-5 animate-fade-in-up delay-75">
       <div className="flex items-center gap-2 mb-1">
         <Calendar className="h-4 w-4 text-blue-500" />
         <h3 className="font-semibold text-slate-800 dark:text-slate-100">Registros por día de la semana</h3>

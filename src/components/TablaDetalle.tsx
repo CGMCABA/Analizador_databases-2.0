@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+﻿import { useState, useMemo } from "react";
 import type { RegistroGenerico, ColumnaDetectada, TipoColumna } from "@/lib/excelParser";
 import { ChevronDown, ChevronUp, Search, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -236,7 +236,7 @@ export function TablaDetalle({ registros, columnas, meses }: TablaDetalleProps) 
   }
 
   return (
-    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-sm">
+    <div className="bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535]">
       <div className="p-5 border-b border-slate-100 dark:border-[#1f2535]">
         <div className="flex items-center justify-between gap-4 flex-wrap mb-4">
           <div>

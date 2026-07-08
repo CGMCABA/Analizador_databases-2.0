@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell, ReferenceLine,
@@ -80,7 +80,7 @@ function TarjetaRiesgo({ dia, rank }: { dia: DiaProyectado; rank: number }) {
   const colores = ["bg-red-600", "bg-orange-500", "bg-amber-400"];
   const bgBadge = colores[rank] ?? "bg-slate-400";
   return (
-    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] p-4 flex flex-col gap-3">
+    <div className="bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535] p-4 flex flex-col gap-3">
       <div className="flex items-center gap-2">
         <span className={`${bgBadge} text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0`}>
           {rank + 1}
@@ -191,7 +191,7 @@ export function VentanaPredictiva({ datos }: VentanaPredictivaProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-futuro animate-fade-in-up delay-150">
+    <div className="bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535] shadow-futuro animate-fade-in-up delay-150">
       {/* Encabezado colapsable */}
       <button
         className="w-full p-5 flex items-center gap-3 text-left hover:bg-slate-50/50 dark:hover:bg-[#252d3d]/30 transition-colors rounded-xl"

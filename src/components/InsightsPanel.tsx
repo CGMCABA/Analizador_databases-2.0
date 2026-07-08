@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+﻿import { useMemo } from "react";
 import { DatosDashboard } from "@/lib/excelParser";
 import { Lightbulb, TrendingUp, TrendingDown, Minus, Clock, MapPin, Tag, Calendar, AlertTriangle } from "lucide-react";
 
@@ -206,7 +206,7 @@ export function InsightsPanel({ datos, mesFiltro, soloAlertas = false }: Insight
   if (visibles.length === 0) return null;
 
   return (
-    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] p-5 animate-fade-in-up delay-75">
+    <div className="bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535] p-5 animate-fade-in-up delay-75">
       <div className="flex items-center gap-2 mb-4">
         <Lightbulb className="h-4 w-4 text-[#c8a84b] shrink-0" />
         <div>

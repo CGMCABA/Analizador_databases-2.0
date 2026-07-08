@@ -1,4 +1,4 @@
-import { Database, CheckCircle, AlertCircle, AlertTriangle, Lightbulb, Ban } from "lucide-react";
+﻿import { Database, CheckCircle, AlertCircle, AlertTriangle, Lightbulb, Ban } from "lucide-react";
 
 interface CalidadDatasetData {
   pctSinFecha: number;
@@ -59,7 +59,7 @@ export function CalidadDataset({ calidadDataset, tieneColumnaProgramacion, etiqu
     calidadDataset.sugerencias[0].startsWith("El dataset tiene buena calidad");
 
   return (
-    <div className="bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-sm p-5 animate-fade-in-up delay-75">
+    <div className="bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535] p-5 animate-fade-in-up delay-75">
       <div className="flex items-center gap-2 mb-1">
         <Database className="h-4 w-4 text-blue-500" />
         <h3 className="font-semibold text-slate-800 dark:text-slate-100">Calidad del dataset</h3>

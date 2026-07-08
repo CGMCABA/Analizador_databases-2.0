@@ -1,4 +1,4 @@
-import { MapPin, AlertTriangle, RefreshCw } from "lucide-react";
+﻿import { MapPin, AlertTriangle, RefreshCw } from "lucide-react";
 import type { PerfilDataset } from "@/lib/insights/tipos";
 
 interface DatoCalle {
@@ -43,7 +43,7 @@ export function ResumenGeografico({ porCalle, totalSolicitudes, perfil }: Resume
   const patronesGeograficos = perfil.patrones;
 
   return (
-    <div className="presentation-hide bg-white dark:bg-[#131720] rounded-xl border border-slate-200 dark:border-[#1f2535] shadow-sm p-5 print:hidden">
+    <div className="presentation-hide bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-slate-200 dark:border-[#1f2535] p-5 print:hidden">
       <div className="flex items-center gap-2 mb-3">
         <div className="p-1.5 bg-violet-100 dark:bg-violet-900/40 rounded-lg shrink-0">
           <MapPin className="h-4 w-4 text-violet-600 dark:text-violet-400" />

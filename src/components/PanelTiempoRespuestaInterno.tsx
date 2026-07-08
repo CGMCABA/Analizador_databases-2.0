@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell, LabelList,
@@ -164,7 +164,7 @@ export function PanelTiempoRespuestaInterno({
   const peorMotivo = porMotivo[porMotivo.length - 1];
 
   return (
-    <div className={`bg-white dark:bg-[#131720] rounded-xl border border-violet-200 dark:border-violet-800 shadow-sm p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}>
+    <div className={`bg-slate-50 dark:bg-[#0d0f14] rounded-lg border border-violet-200 dark:border-violet-800 p-5 transition-opacity duration-500 ${montado ? "opacity-100" : "opacity-0"}`}>
       <div className="flex items-center gap-2 mb-1">
         <Timer className="h-4 w-4 text-violet-500" />
         <h3 className="font-semibold text-slate-800 dark:text-slate-100">Tiempo de respuesta interno</h3>
