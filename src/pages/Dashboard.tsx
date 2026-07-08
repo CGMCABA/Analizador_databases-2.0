@@ -21,7 +21,6 @@ import { GraficoCruceLinea } from "@/components/GraficoCruceLinea";
 import { GraficoCruceCalle } from "@/components/GraficoCruceCalle";
 import { LineaDeTiempo } from "@/components/LineaDeTiempo";
 import { TablaDetalle } from "@/components/TablaDetalle";
-
 import { InsightsPanel } from "@/components/InsightsPanel";
 import { HallazgosPrincipales } from "@/components/HallazgosPrincipales";
 import { GraficoCruceHeatmap } from "@/components/GraficoCruceHeatmap";
@@ -43,6 +42,11 @@ import { VentanaPredictiva } from "@/components/VentanaPredictiva";
 import { PlaceholderAnalisis } from "@/components/PlaceholderAnalisis";
 import { ResumenEjecutivoTexto } from "@/components/ResumenEjecutivoTexto";
 import { GestorMeses } from "@/components/GestorMeses";
+import { SectionNav } from "@/components/SectionNav";
+import { DashboardSection } from "@/components/DashboardSection";
+import { useSectionNav } from "@/hooks/useSectionNav";
+
+// ── helpers de layout (solo para modo ejecutivo / separadores legacy) ───────
 
 function SeparadorCapa({
   etiqueta,
@@ -53,7 +57,7 @@ function SeparadorCapa({
   pregunta: string;
   acento: "slate" | "amber" | "teal";
 }) {
-  const _acento = acento; // conservado para compatibilidad de prop; todos los capítulos usan identidad dorada CGM
+  const _acento = acento;
   void _acento;
   const colores = {
     label: "text-[#c8a84b] bg-[rgba(200,168,75,0.10)] border border-[rgba(200,168,75,0.35)]",
@@ -61,7 +65,6 @@ function SeparadorCapa({
     pregunta: "text-[#d4b96a]",
     gradFrom: "from-[#c8a84b]/50",
   };
-
   return (
     <div className="presentation-hide print:hidden flex items-center gap-3 pt-4 pb-1">
       <span className={`shrink-0 inline-flex items-center gap-1.5 text-[10px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-full ${colores.label}`}>
@@ -73,7 +76,6 @@ function SeparadorCapa({
     </div>
   );
 }
-
 
 function SeccionPasado({
   icono: Icono,
@@ -96,6 +98,12 @@ function SeccionPasado({
   );
 }
 
+// ── tipos de capítulo ────────────────────────────────────────────────────────
+
+type ChapterDef = { id: string; numero: string; label: string; pregunta: string };
+
+// ── componente principal ─────────────────────────────────────────────────────
+
 export default function Dashboard() {
   const [datos, setDatos] = useState<DatosDashboard | null>(null);
   const [nombreArchivo, setNombreArchivo] = useState<string>("");
@@ -108,7 +116,6 @@ export default function Dashboard() {
   const [bannerCuarentenaVisible, setBannerCuarentenaVisible] = useState(false);
   const { isDark, toggle } = useDarkMode();
 
-  // Comparación de períodos
   const [modalComparacion, setModalComparacion] = useState(false);
   const [modoSeleccion, setModoSeleccion] = useState<"meses" | "archivo">("meses");
   const [mesA, setMesA] = useState("");
@@ -130,9 +137,6 @@ export default function Dashboard() {
     return () => window.removeEventListener("keydown", handler);
   }, [modoEjecutivo, modalComparacion, modoComparacion]);
 
-  // Acepta mesA/mesB opcionales para poder dispararse directo (ej. desde el CTA de
-  // HallazgosPrincipales con los últimos 2 meses) sin pasar por el modal de selección.
-  // Misma lógica de siempre — solo agrega de dónde puede venir el mes elegido.
   const ejecutarComparacionMeses = (mesAParam?: string, mesBParam?: string) => {
     const a = mesAParam ?? mesA;
     const b = mesBParam ?? mesB;
@@ -149,10 +153,7 @@ export default function Dashboard() {
   const ejecutarComparacionUrl = async (url: string) => {
     if (!datos) return;
     const exportUrl = construirUrlExportXlsx(url);
-    if (!exportUrl) {
-      setErrorB("URL de Google Sheet no válida.");
-      return;
-    }
+    if (!exportUrl) { setErrorB("URL de Google Sheet no válida."); return; }
     setCargandoB(true);
     setErrorB("");
     try {
@@ -161,15 +162,12 @@ export default function Dashboard() {
       const buffer = await res.arrayBuffer();
       const datosSegundoArchivo = parsearExcel(buffer);
       if (datosSegundoArchivo.tipoDato !== datos.tipoDato) {
-        setErrorB(
-          `Los archivos tienen tipos de datos distintos: "${datos.tipoDato}" vs "${datosSegundoArchivo.tipoDato}". Cargá dos archivos del mismo tipo.`
-        );
+        setErrorB(`Los archivos tienen tipos de datos distintos: "${datos.tipoDato}" vs "${datosSegundoArchivo.tipoDato}". Cargá dos archivos del mismo tipo.`);
         setCargandoB(false);
         return;
       }
       const labelA = nombreArchivo.replace(/\.(xlsx|xls)$/i, "");
-      const labelB = "Sheet comparado";
-      const resultado = compararPeriodos(datos, datosSegundoArchivo, labelA, labelB, "archivos");
+      const resultado = compararPeriodos(datos, datosSegundoArchivo, labelA, "Sheet comparado", "archivos");
       setComparacionResultado(resultado);
       setModalComparacion(false);
       setModoComparacion(true);
@@ -192,10 +190,7 @@ export default function Dashboard() {
       setBannerCuarentenaVisible((resultado.calidadDataset.registrosSinFechaValida ?? 0) > 0);
     } catch (e) {
       console.error("[Dashboard] Error al parsear Excel:", e);
-      const mensaje =
-        e instanceof Error && e.message
-          ? e.message
-          : "No se pudo leer el archivo. Asegurate de que sea un Excel válido (.xlsx o .xls).";
+      const mensaje = e instanceof Error && e.message ? e.message : "No se pudo leer el archivo. Asegurate de que sea un Excel válido (.xlsx o .xls).";
       setError(mensaje);
     } finally {
       setCargando(false);
@@ -237,18 +232,13 @@ export default function Dashboard() {
     (mes: string) => {
       const activosDespues = (datos?.meses ?? []).length - mesesExcluidos.length;
       const estaExcluido = mesesExcluidos.includes(mes);
-      // No permitir excluir el último mes activo
       if (!estaExcluido && activosDespues <= 1) return;
-      // Si el mes filtrado queda excluido, limpiar el filtro
       if (!estaExcluido && mesFiltro === mes) setMesFiltro("");
-      setMesesExcluidos((prev) =>
-        estaExcluido ? prev.filter((m) => m !== mes) : [...prev, mes]
-      );
+      setMesesExcluidos((prev) => estaExcluido ? prev.filter((m) => m !== mes) : [...prev, mes]);
     },
     [mesesExcluidos, mesFiltro, datos?.meses]
   );
 
-  // Aplica exclusión de meses antes de cualquier filtro de mes/calle
   const datosBase = useMemo<DatosDashboard | null>(() => {
     if (!datos) return null;
     return excluirMeses(datos, mesesExcluidos);
@@ -266,12 +256,11 @@ export default function Dashboard() {
   const calcDelta = (curr: number, prev: number | undefined) =>
     prev && prev > 0 ? Math.round(((curr - prev) / prev) * 100) : undefined;
 
-  const deltaTotal = ultimoMes && penultimoMes
-    ? calcDelta(ultimoMes.cantidad, penultimoMes.cantidad) : undefined;
-  const deltaResueltas = ultimoMes && penultimoMes
-    ? calcDelta(ultimoMes.resueltas, penultimoMes.resueltas) : undefined;
-  const deltaNoResueltas = ultimoMes && penultimoMes
-    ? calcDelta(ultimoMes.cantidad - ultimoMes.resueltas, penultimoMes.cantidad - penultimoMes.resueltas) : undefined;
+  const deltaTotal = ultimoMes && penultimoMes ? calcDelta(ultimoMes.cantidad, penultimoMes.cantidad) : undefined;
+  const deltaResueltas = ultimoMes && penultimoMes ? calcDelta(ultimoMes.resueltas, penultimoMes.resueltas) : undefined;
+  void deltaResueltas;
+  const deltaNoResueltas = ultimoMes && penultimoMes ? calcDelta(ultimoMes.cantidad - ultimoMes.resueltas, penultimoMes.cantidad - penultimoMes.resueltas) : undefined;
+  void deltaNoResueltas;
   const deltaTasa = ultimoMes && penultimoMes && penultimoMes.cantidad > 0
     ? Math.round(((ultimoMes.resueltas / ultimoMes.cantidad) - (penultimoMes.resueltas / penultimoMes.cantidad)) * 100)
     : undefined;
@@ -285,18 +274,9 @@ export default function Dashboard() {
     );
   }, [datosFiltrados, datos]);
 
-  const semaforo = useMemo(
-    () => (datosFiltrados ? calcularSemaforo(datosFiltrados) : null),
-    [datosFiltrados]
-  );
+  const semaforo = useMemo(() => (datosFiltrados ? calcularSemaforo(datosFiltrados) : null), [datosFiltrados]);
 
-  // Perfilado de dataset (capacidades/características/insights) — se calcula una sola
-  // vez acá y se reutiliza tanto en InsightsPanel como en generarRecomendaciones, para
-  // no correr perfilarDataset() dos veces sobre el mismo datosFiltrados por render.
-  const perfil = useMemo(
-    () => (datosFiltrados ? perfilarDataset(datosFiltrados) : null),
-    [datosFiltrados]
-  );
+  const perfil = useMemo(() => (datosFiltrados ? perfilarDataset(datosFiltrados) : null), [datosFiltrados]);
 
   const recomendaciones = useMemo(
     () => (datosFiltrados && perfil ? generarRecomendaciones(datosFiltrados, perfil) : []),
@@ -325,10 +305,29 @@ export default function Dashboard() {
     return resultado;
   }, [datosFiltrados]);
 
+  // ── Capítulos narrativos (modo operativo) ────────────────────────────────
+  const chapters = useMemo<ChapterDef[]>(() => {
+    if (!datos) return [];
+    const all = [
+      { id: "situacion", label: "Situación", pregunta: "¿Cómo estamos ahora mismo?", visible: true },
+      { id: "evolucion", label: "Evolución", pregunta: "¿Qué pasó en el tiempo?", visible: true },
+      { id: "distribucion", label: "Distribución", pregunta: "¿Qué ocurre más y en qué categorías?", visible: true },
+      { id: "patrones", label: "Patrones", pregunta: "¿Cuándo y cómo se concentra?", visible: activa(datos.capacidades, "TemporalBasica") },
+      { id: "geografia", label: "Geografía", pregunta: "¿Dónde se concentra el problema?", visible: activa(datos.capacidades, "GeograficaCalles") },
+      { id: "fragilidad", label: "Fragilidad", pregunta: "¿Qué está en riesgo estructural?", visible: true },
+      { id: "accion", label: "Acción", pregunta: "¿Qué conviene hacer ahora?", visible: true },
+    ].filter((c) => c.visible);
+    return all.map((c, i) => ({ ...c, numero: String(i + 1).padStart(2, "0") }));
+  }, [datos]);
+
+  const { activeIndex, scrollTo, setRef } = useSectionNav();
+
+  // ── render ───────────────────────────────────────────────────────────────
+
   return (
-    <div
-      className="min-h-screen bg-[#f0f2f5] dark:bg-[#0a0c10] transition-colors duration-300"
-    >
+    <div className="min-h-screen bg-[#f0f2f5] dark:bg-[#0a0c10] transition-colors duration-300">
+
+      {/* ── HEADER ──────────────────────────────────────────────────────── */}
       <header className="bg-[#0a0c10] text-white shadow-lg border-b-2 border-[#c8a84b] print-header">
         <div className="max-w-[1680px] mx-auto px-6 py-4 flex items-center gap-3 flex-wrap">
           <div className="flex flex-col shrink-0">
@@ -351,11 +350,9 @@ export default function Dashboard() {
                   style={{ colorScheme: "dark" }}
                 >
                   <option value="" className="bg-slate-800 text-white">Todos los meses</option>
-                  {datos.meses
-                    .filter((m) => !mesesExcluidos.includes(m))
-                    .map((m) => (
-                      <option key={m} value={m} className="bg-slate-800 text-white">{m}</option>
-                    ))}
+                  {datos.meses.filter((m) => !mesesExcluidos.includes(m)).map((m) => (
+                    <option key={m} value={m} className="bg-slate-800 text-white">{m}</option>
+                  ))}
                 </select>
               </div>
             )}
@@ -380,25 +377,12 @@ export default function Dashboard() {
                 </select>
               </div>
             )}
-            <button
-              onClick={toggle}
-              title={isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
-              className="presentation-hide p-2 rounded-md bg-white/10 hover:bg-white/20 transition-colors"
-            >
-              {isDark
-                ? <Sun className="h-4 w-4 text-yellow-300" />
-                : <Moon className="h-4 w-4 text-slate-200" />
-              }
+            <button onClick={toggle} title={isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro"} className="presentation-hide p-2 rounded-md bg-white/10 hover:bg-white/20 transition-colors">
+              {isDark ? <Sun className="h-4 w-4 text-yellow-300" /> : <Moon className="h-4 w-4 text-slate-200" />}
             </button>
             {datos && (
               <button
-                onClick={() => {
-                  setModalComparacion(true);
-                  setModoSeleccion("meses");
-                  setMesA(datos.meses[0] ?? "");
-                  setMesB(datos.meses[datos.meses.length - 1] ?? "");
-                  setErrorB("");
-                }}
+                onClick={() => { setModalComparacion(true); setModoSeleccion("meses"); setMesA(datos.meses[0] ?? ""); setMesB(datos.meses[datos.meses.length - 1] ?? ""); setErrorB(""); }}
                 title="Comparar dos períodos de datos"
                 className="presentation-hide flex items-center gap-1.5 text-sm bg-white/10 hover:bg-white/20 transition-colors px-3 py-1.5 rounded-md font-medium"
               >
@@ -407,10 +391,7 @@ export default function Dashboard() {
               </button>
             )}
             {datos && (
-              <button
-                onClick={handleNuevaCarga}
-                className="presentation-hide text-sm bg-white/10 hover:bg-white/20 transition-colors px-4 py-1.5 rounded-md font-medium"
-              >
+              <button onClick={handleNuevaCarga} className="presentation-hide text-sm bg-white/10 hover:bg-white/20 transition-colors px-4 py-1.5 rounded-md font-medium">
                 Cargar otro archivo
               </button>
             )}
@@ -419,11 +400,7 @@ export default function Dashboard() {
                 <button
                   onClick={() => setModoEjecutivo(false)}
                   title="Vista operativa completa"
-                  className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-md font-semibold transition-colors ${
-                    !modoEjecutivo
-                      ? "bg-white/15 text-white"
-                      : "text-slate-400 hover:text-slate-200"
-                  }`}
+                  className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-md font-semibold transition-colors ${!modoEjecutivo ? "bg-white/15 text-white" : "text-slate-400 hover:text-slate-200"}`}
                 >
                   <LayoutDashboard className="h-3.5 w-3.5" />
                   Operativo
@@ -431,11 +408,7 @@ export default function Dashboard() {
                 <button
                   onClick={() => setModoEjecutivo(true)}
                   title="Vista ejecutiva — KPIs, hallazgos y recomendaciones"
-                  className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-md font-semibold transition-colors ${
-                    modoEjecutivo
-                      ? "bg-[#c8a84b] text-[#0a0c10]"
-                      : "text-slate-400 hover:text-slate-200"
-                  }`}
+                  className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-md font-semibold transition-colors ${modoEjecutivo ? "bg-[#c8a84b] text-[#0a0c10]" : "text-slate-400 hover:text-slate-200"}`}
                 >
                   <Briefcase className="h-3.5 w-3.5" />
                   Ejecutivo
@@ -446,709 +419,533 @@ export default function Dashboard() {
         </div>
       </header>
 
+      {/* ── MAIN ────────────────────────────────────────────────────────── */}
       <main className="max-w-[1680px] mx-auto px-6 py-8">
         {!datos ? (
-          <PaginaInicio
-            onUrl={handleUrl}
-            onBuffer={handleBuffer}
-            onError={setError}
-            cargando={cargando}
-            error={error}
-          />
+          <PaginaInicio onUrl={handleUrl} onBuffer={handleBuffer} onError={setError} cargando={cargando} error={error} />
         ) : (
           <div className="space-y-5">
+
             <GestorMeses
               datos={datos}
               mesesExcluidos={mesesExcluidos}
               onToggleMes={toggleMes}
               onResetExclusiones={() => setMesesExcluidos([])}
             />
+
             {modoEjecutivo ? (
-          // ── MODO EJECUTIVO ─────────────────────────────────────────────────
-          // VISIBLES (A): ResumenEjecutivoTexto · KPIs · SemaforoOperacional
-          //               HallazgosPrincipales · GraficoMapa · RecomendacionesOperativas
-          // OCULTOS  (C): OrientacionDataset · CalidadDataset · GraficoBarras
-          //               GraficoLineas · GraficoHorario · GraficoHeatmap · GraficoCruce*
-          //               GraficoCalles · GraficoRankingH · GraficoResolucion
-          //               GraficoTiempoRespuesta · TablaDetalle · LineaDeTiempo
-          //               VentanaPredictiva · PanelEventosCronicos · PanelFalsosPositivos
-          //               PanelTiempoRespuestaInterno · ZonasDeAtencion · InsightsPanel
-          <div id="ejecutivo-content" className="space-y-5">
 
-            {/* ── Barra de contexto ────────────────────────────────────────── */}
-            <div className="flex items-center justify-between gap-3 flex-wrap">
-              <div className="flex items-center gap-2.5">
-                <div className="p-1.5 bg-[rgba(200,168,75,0.10)] rounded-lg shrink-0">
-                  <Briefcase className="h-4 w-4 text-[#c8a84b]" />
-                </div>
-                <div>
-                  <p className="font-semibold text-slate-800 dark:text-slate-100 text-sm leading-snug">
-                    {nombreArchivo}
-                  </p>
-                  <p className="text-[11px] text-slate-400 dark:text-slate-500">
-                    {datos.meses.length} {datos.meses.length === 1 ? "mes" : "meses"} · {datos.totalSolicitudes.toLocaleString("es-AR")} registros
-                    {mesFiltro ? ` · Filtrando: ${mesFiltro}` : ""}
-                  </p>
-                </div>
-              </div>
-              {mesFiltro && (
-                <button
-                  onClick={() => setMesFiltro("")}
-                  className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center gap-1 bg-slate-100 dark:bg-[#252d3d] px-2.5 py-1 rounded-md border border-slate-200 dark:border-[#2e3852] transition-colors"
-                >
-                  <FilterX className="h-3 w-3" />
-                  Quitar filtro
-                </button>
-              )}
-            </div>
+              // ── MODO EJECUTIVO ───────────────────────────────────────────
+              <div id="ejecutivo-content" className="space-y-5">
 
-            {/* ── Resumen ejecutivo texto ──────────────────────────────────── */}
-            {datosFiltrados && perfil && semaforo && (
-              <ResumenEjecutivoTexto
-                datos={datosFiltrados}
-                perfil={perfil}
-                semaforo={semaforo}
-                recomendaciones={recomendaciones}
-                nombreArchivo={nombreArchivo}
-                mesFiltro={mesFiltro}
-              />
-            )}
-
-            {/* ── KPIs ─────────────────────────────────────────────────────── */}
-            {datosFiltrados && (() => {
-              const total = datosFiltrados.totalSolicitudes;
-              const horaPico = datosFiltrados.porHora.length > 0
-                ? [...datosFiltrados.porHora].sort((a, b) => b.cantidad - a.cantidad)[0]
-                : null;
-              const diaPico = datosFiltrados.porDiaSemana.length > 0
-                ? [...datosFiltrados.porDiaSemana].sort((a, b) => b.cantidad - a.cantidad)[0]
-                : null;
-              const topMotivo = datosFiltrados.porMotivo[0] ?? null;
-              const topInt = datosFiltrados.porInterseccion[0] ?? null;
-
-              const cards = [
-                {
-                  titulo: "Total Registros",
-                  valor: total.toLocaleString("es-AR"),
-                  subtitulo: mesFiltro ? `registros en ${mesFiltro}` : "registros totales",
-                  color: "blue" as const, icono: "chart" as const,
-                  delta: mesFiltro ? undefined : deltaTotal,
-                  subtituloMes: mesFiltro ? undefined : ultimoMes?.mes,
-                },
-                datos.tieneColumnaStatus
-                  ? {
-                      titulo: datos.etiquetaStatus === "Resuelto" ? "Tasa de Resolución" : "Tasa de Finalización",
-                      valor: `${datosFiltrados.tasaResolucion}%`,
-                      subtitulo: datosFiltrados.tasaResolucion >= 75 ? "dentro de parámetro" : datosFiltrados.tasaResolucion >= 50 ? "requiere seguimiento" : "requiere atención urgente",
-                      color: datosFiltrados.tasaResolucion >= 75 ? "green" as const : datosFiltrados.tasaResolucion >= 50 ? "amber" as const : "red" as const,
-                      icono: "activity" as const,
-                      delta: mesFiltro ? undefined : deltaTasa,
-                      subtituloMes: mesFiltro ? undefined : ultimoMes?.mes,
-                    }
-                  : horaPico
-                  ? {
-                      titulo: "Hora pico",
-                      valor: `${String(horaPico.hora).padStart(2, "0")}:00 hs`,
-                      subtitulo: `${horaPico.cantidad.toLocaleString("es-AR")} registros en esa franja`,
-                      color: "amber" as const, icono: "activity" as const,
-                    }
-                  : null,
-                horaPico && datos.tieneColumnaStatus
-                  ? {
-                      titulo: "Hora pico",
-                      valor: `${String(horaPico.hora).padStart(2, "0")}:00 hs`,
-                      subtitulo: `${horaPico.cantidad.toLocaleString("es-AR")} registros en esa franja`,
-                      color: "amber" as const, icono: "activity" as const,
-                    }
-                  : diaPico
-                  ? {
-                      titulo: "Día más activo",
-                      valor: diaPico.dia,
-                      subtitulo: `${diaPico.cantidad.toLocaleString("es-AR")} registros`,
-                      color: "indigo" as const, icono: "calendar" as const,
-                    }
-                  : null,
-                topInt
-                  ? {
-                      titulo: "Intersección principal",
-                      valor: topInt.cantidad.toLocaleString("es-AR"),
-                      subtitulo: topInt.nombre,
-                      color: "violet" as const, icono: "tag" as const,
-                    }
-                  : topMotivo
-                  ? {
-                      titulo: `Tipo más frecuente`,
-                      valor: `${total > 0 ? Math.round((topMotivo.cantidad / total) * 100) : 0}%`,
-                      subtitulo: topMotivo.nombre,
-                      color: "cyan" as const, icono: "tag" as const,
-                    }
-                  : null,
-              ].filter(Boolean) as NonNullable<typeof cards[number]>[];
-
-              const accentMap: Record<string, KPICell["accent"]> = {
-                blue: "gold", cyan: "gold", green: "green", red: "red",
-                amber: "amber", indigo: "indigo", violet: "violet",
-              };
-              return (
-                <KPIStrip cells={cards.slice(0, 4).map((card) => ({
-                  label: card.titulo,
-                  value: card.valor,
-                  sub: card.subtitulo,
-                  accent: accentMap[card.color as string] ?? "gold",
-                  delta: "delta" in card ? card.delta : undefined,
-                  deltaMes: "subtituloMes" in card ? card.subtituloMes : undefined,
-                }))} />
-              );
-            })()}
-
-            {/* ── Semáforo operacional ─────────────────────────────────────── */}
-            {semaforo && <SemaforoOperacional resultado={semaforo} />}
-
-            {/* ── Hallazgos + Mapa ─────────────────────────────────────────── */}
-            {(() => {
-              const tieneMapa = activa(datos.capacidades, "GeograficaCalles") && (datosFiltrados?.porCalle ?? []).length > 0;
-              return (
-                <div className={tieneMapa ? "grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-5 items-start" : ""}>
-                  {perfil && (
-                    <HallazgosPrincipales
-                      perfil={perfil}
-                      onVerComparacion={() => {
-                        const ultimo = datos.meses[datos.meses.length - 1];
-                        const penultimo = datos.meses[datos.meses.length - 2];
-                        if (ultimo && penultimo) ejecutarComparacionMeses(penultimo, ultimo);
-                      }}
-                    />
-                  )}
-                  {tieneMapa && datosFiltrados && (
-                    <GraficoMapa
-                      intersecciones={datosFiltrados.porInterseccion}
-                      totalSolicitudes={datosFiltrados.totalSolicitudes}
-                    />
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-1.5 bg-[rgba(200,168,75,0.10)] rounded-lg shrink-0">
+                      <Briefcase className="h-4 w-4 text-[#c8a84b]" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-800 dark:text-slate-100 text-sm leading-snug">{nombreArchivo}</p>
+                      <p className="text-[11px] text-slate-400 dark:text-slate-500">
+                        {datos.meses.length} {datos.meses.length === 1 ? "mes" : "meses"} · {datos.totalSolicitudes.toLocaleString("es-AR")} registros
+                        {mesFiltro ? ` · Filtrando: ${mesFiltro}` : ""}
+                      </p>
+                    </div>
+                  </div>
+                  {mesFiltro && (
+                    <button onClick={() => setMesFiltro("")} className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center gap-1 bg-slate-100 dark:bg-[#252d3d] px-2.5 py-1 rounded-md border border-slate-200 dark:border-[#2e3852] transition-colors">
+                      <FilterX className="h-3 w-3" />
+                      Quitar filtro
+                    </button>
                   )}
                 </div>
-              );
-            })()}
 
-            {/* ── Recomendaciones ──────────────────────────────────────────── */}
-            {recomendaciones.length > 0 && (
-              <RecomendacionesOperativas recomendaciones={recomendaciones} />
-            )}
-
-          </div>
-        ) : (
-          // ── MODO OPERATIVO ─────────────────────────────────────────────────
-          <div id="dashboard-content" className="space-y-6">
-            <div className="presentation-hide flex items-center justify-between flex-wrap gap-3 print:hidden">
-              <div>
-                <p className="text-sm text-slate-500 dark:text-slate-400">Archivo cargado</p>
-                <p className="font-semibold text-slate-800 dark:text-slate-100">{nombreArchivo}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                {mesFiltro && (
-                  <span className="text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 px-2.5 py-1 rounded-md font-medium">
-                    Filtrando: {mesFiltro}
-                    <button
-                      onClick={() => setMesFiltro("")}
-                      className="ml-1.5 text-blue-400 hover:text-blue-600 dark:hover:text-blue-300"
-                    >×</button>
-                  </span>
-                )}
-                {calleFiltro && (
-                  <span className="text-xs text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/30 border border-violet-200 dark:border-violet-800 px-2.5 py-1 rounded-md font-medium">
-                    Calle: {calleFiltro}
-                    <button
-                      onClick={() => setCalleFiltro("")}
-                      className="ml-1.5 text-violet-400 hover:text-violet-600 dark:hover:text-violet-300"
-                    >×</button>
-                  </span>
-                )}
-                <div className="text-sm text-slate-500 dark:text-slate-400 bg-white dark:bg-[#131720] px-3 py-1.5 rounded-md border border-slate-200 dark:border-[#1f2535]">
-                  {datos.meses.length} {datos.meses.length === 1 ? "mes" : "meses"} detectados
-                </div>
-              </div>
-            </div>
-
-            <div className="hidden print:block text-xs text-slate-500 mb-2">
-              Archivo: {nombreArchivo}{mesFiltro ? ` · Mes: ${mesFiltro}` : ""}{calleFiltro ? ` · Calle: ${calleFiltro}` : ""}
-            </div>
-
-            <OrientacionDataset datos={datos} nombreArchivo={nombreArchivo} />
-
-            {bannerCuarentenaVisible && (datos.calidadDataset.registrosSinFechaValida ?? 0) > 0 && (
-              <div className="presentation-hide flex items-start gap-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl px-4 py-4 print:hidden">
-                <Ban className="h-5 w-5 text-red-500 dark:text-red-400 mt-0.5 shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-red-700 dark:text-red-400">
-                    {(datos.calidadDataset.registrosSinFechaValida ?? 0).toLocaleString("es-AR")} registro{(datos.calidadDataset.registrosSinFechaValida ?? 0) !== 1 ? "s" : ""} excluido{(datos.calidadDataset.registrosSinFechaValida ?? 0) !== 1 ? "s" : ""} del análisis
-                  </p>
-                  <p className="text-xs text-red-600 dark:text-red-500 mt-0.5 leading-relaxed">
-                    {(datos.calidadDataset.registrosSinFechaValida ?? 0) !== 1 ? "Estos registros tienen" : "Este registro tiene"} fecha inválida, ausente o fuera del rango permitido y no {(datos.calidadDataset.registrosSinFechaValida ?? 0) !== 1 ? "fueron tomados" : "fue tomado"} en ninguna métrica ni gráfico. Revisá la columna de fecha en el archivo original para corregirlos.
-                  </p>
-                </div>
-                <button
-                  onClick={() => setBannerCuarentenaVisible(false)}
-                  className="shrink-0 p-1 rounded hover:bg-red-100 dark:hover:bg-red-800/40 text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors"
-                  title="Cerrar aviso"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-
-            <SeparadorCapa etiqueta="Pasado" pregunta="¿Qué pasó y por qué?" acento="slate" />
-
-            {/* ─── A. Evolución temporal ────────────────────────────── */}
-            <SeccionPasado icono={TrendingUp} titulo="Evolución temporal" subtitulo="¿cómo evolucionó el volumen?" />
-
-            {activa(datos.capacidades, "Estado") && utilizable(datos.calidad, "Estado") ? (
-              <KPIStrip cells={[
-                {
-                  label: "Total Registros",
-                  value: (datosFiltrados?.totalSolicitudes ?? 0).toLocaleString("es-AR"),
-                  sub: mesFiltro ? `registros en ${mesFiltro}` : "registros totales",
-                  accent: "gold",
-                  delta: mesFiltro ? undefined : deltaTotal,
-                  deltaMes: mesFiltro ? undefined : ultimoMes?.mes,
-                },
-                {
-                  label: datos.etiquetaStatus === "Resuelto" ? "Tasa de Resolución" : "Tasa de Finalización",
-                  value: `${datosFiltrados?.tasaResolucion ?? 0}%`,
-                  sub: mesFiltro ? `tasa en ${mesFiltro}` : datos.etiquetaStatus === "Resuelto" ? "porcentaje resueltas" : "porcentaje finalizadas",
-                  accent: (datosFiltrados?.tasaResolucion ?? 0) >= 75 ? "green" : (datosFiltrados?.tasaResolucion ?? 0) >= 50 ? "amber" : "red",
-                  delta: mesFiltro ? undefined : deltaTasa,
-                  deltaMes: mesFiltro ? undefined : ultimoMes?.mes,
-                },
-              ]} />
-            ) : datos.tipoDato === 'sucesos' ? (
-              (() => {
-                const horaPico = (datosFiltrados?.porHora ?? []).length > 0
-                  ? [...datosFiltrados!.porHora].sort((a, b) => b.cantidad - a.cantidad)[0]
-                  : null;
-                const diaPico = (datosFiltrados?.porDiaSemana ?? []).length > 0
-                  ? [...datosFiltrados!.porDiaSemana].sort((a, b) => b.cantidad - a.cantidad)[0]
-                  : null;
-                const intPico = (datosFiltrados?.porInterseccion ?? []).length > 0 ? datosFiltrados!.porInterseccion[0] : null;
-                const total = datosFiltrados?.totalSolicitudes ?? 0;
-                return (
-                  <KPIStrip cells={[
-                    {
-                      label: "Total Registros",
-                      value: total.toLocaleString("es-AR"),
-                      sub: mesFiltro ? `registros en ${mesFiltro}` : "registros totales",
-                      accent: "gold",
-                      delta: mesFiltro ? undefined : deltaTotal,
-                      deltaMes: mesFiltro ? undefined : ultimoMes?.mes,
-                    },
-                    {
-                      label: "Hora pico",
-                      value: horaPico ? `${String(horaPico.hora).padStart(2, "0")}:00 hs` : "—",
-                      sub: horaPico ? `${horaPico.cantidad.toLocaleString("es-AR")} registros en esa franja` : "sin datos de hora",
-                      accent: "amber",
-                    },
-                    {
-                      label: "Día más activo",
-                      value: diaPico ? diaPico.dia : "—",
-                      sub: diaPico ? `${diaPico.cantidad.toLocaleString("es-AR")} registros` : "sin datos de fecha",
-                      accent: "indigo",
-                    },
-                    {
-                      label: "Intersección principal",
-                      value: intPico ? intPico.cantidad.toLocaleString("es-AR") : "—",
-                      sub: intPico ? intPico.nombre : ((datosFiltrados?.porInterseccion ?? []).length === 0 ? "sin datos de calles" : ""),
-                      accent: "violet",
-                    },
-                  ]} />
-                );
-              })()
-            ) : (
-              <KPIStrip cells={[
-                {
-                  label: "Total Registros",
-                  value: (datosFiltrados?.totalSolicitudes ?? 0).toLocaleString("es-AR"),
-                  sub: mesFiltro ? `registros en ${mesFiltro}` : "registros totales en el archivo",
-                  accent: "gold",
-                  delta: mesFiltro ? undefined : deltaTotal,
-                  deltaMes: mesFiltro ? undefined : ultimoMes?.mes,
-                },
-                {
-                  label: "Meses con datos",
-                  value: String(datos.meses.length),
-                  sub: datos.meses.length > 0 ? `${datos.meses[0]} → ${datos.meses[datos.meses.length - 1]}` : "",
-                  accent: "indigo",
-                },
-                ...(datosFiltrados?.distribucionesCategoricas[0] ? [{
-                  label: `Valores en ${datos.colCategorica1 ?? "Categoría"}`,
-                  value: String(datosFiltrados.distribucionesCategoricas[0].datos.length),
-                  sub: "categorías distintas detectadas",
-                  accent: "violet" as const,
-                }] : []),
-              ]} />
-            )}
-
-            {activa(datos.capacidades, "Programacion") && (
-              <KPIStrip cells={[
-                {
-                  label: "No Programados",
-                  value: (datosFiltrados?.totalNoProgramados ?? 0).toLocaleString("es-AR"),
-                  sub: "sucesos reactivos sin planificación previa",
-                  accent: "red",
-                },
-                {
-                  label: "Programados",
-                  value: (datosFiltrados?.totalProgramados ?? 0).toLocaleString("es-AR"),
-                  sub: "eventos y tareas con planificación previa",
-                  accent: "amber",
-                },
-              ]} />
-            )}
-
-            <GraficoBarras
-              datos={datos.porMes}
-              mesFiltro={mesFiltro}
-              mostrarResolucion={activa(datos.capacidades, "Estado") && utilizable(datos.calidad, "Estado")}
-              mostrarProgramacion={activa(datos.capacidades, "Programacion")}
-              etiquetaStatus={datos.etiquetaStatus}
-            />
-
-            {perfil && (
-              <HallazgosPrincipales
-                perfil={perfil}
-                onVerComparacion={() => {
-                  const ultimo = datos.meses[datos.meses.length - 1];
-                  const penultimo = datos.meses[datos.meses.length - 2];
-                  if (ultimo && penultimo) ejecutarComparacionMeses(penultimo, ultimo);
-                }}
-              />
-            )}
-
-            <InsightsPanel datos={datosFiltrados!} mesFiltro={mesFiltro} soloAlertas />
-
-            {!mesFiltro && activa(datos.capacidades, "CruceCategoriaMes") && (datosFiltrados?.porMotivo ?? []).length >= 2 && (
-              <GraficoCruce
-                solicitudes={datosFiltrados!.solicitudes}
-                meses={datos.meses}
-                porMotivo={datosFiltrados!.porMotivo}
-                colNombreFila={datos.colCategorica1 ?? "Categoría"}
-              />
-            )}
-
-            {mesFiltro && activa(datos.capacidades, "CruceCategoriaMes") && datos.porMotivo.length >= 2 && (
-              <PlaceholderAnalisis
-                icono={FilterX}
-                titulo="Análisis por mes no disponible con filtro activo"
-                descripcion={`Este gráfico necesita todos los meses para mostrar la evolución por categoría. Estás viendo solo ${mesFiltro}.`}
-                variante="filtro"
-                accion={{ label: "Quitar filtro de mes", onClick: () => setMesFiltro("") }}
-              />
-            )}
-
-            {datos.meses.length >= 1 && (datosFiltrados?.solicitudes ?? []).length > 0 && (
-              <LineaDeTiempo
-                solicitudes={datosFiltrados!.solicitudes}
-                meses={datos.meses}
-              />
-            )}
-
-            {/* ─── B. Distribución ─────────────────────────────────── */}
-            <SeccionPasado icono={BarChart3} titulo="Distribución" subtitulo="¿qué ocurre más y en qué categorías?" />
-
-            {activa(datos.capacidades, "Categoria") && (datosFiltrados?.porMotivo ?? []).length > 0 && (
-              <GraficoRankingH
-                datos={datosFiltrados!.porMotivo}
-                titulo={`Ranking por ${datos.colCategorica1 ?? "Categoría Principal"}`}
-                subtitulo="Valores ordenados por volumen — categoría principal de análisis"
-                totalGlobal={datosFiltrados!.totalSolicitudes}
-                acento="blue"
-                limiteInicial={10}
-              />
-            )}
-
-            {((datosFiltrados?.porArea ?? []).length > 0 || (datosFiltrados?.porLinea ?? []).length > 0) && (
-              <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-                {(datosFiltrados?.porArea ?? []).length > 0 && (
-                  <div className="lg:col-span-2">
-                    <GraficoRankingH
-                      datos={datosFiltrados!.porArea}
-                      titulo={`Por ${datos.colCategorica2 ?? "Categoría Secundaria"}`}
-                      subtitulo="Segunda dimensión de análisis"
-                      totalGlobal={datosFiltrados!.totalSolicitudes}
-                      acento="violet"
-                      limiteInicial={10}
-                      alturaFila={24}
-                    />
-                  </div>
-                )}
-                {activa(datos.capacidades, "Cobertura") && (datosFiltrados?.porLinea ?? []).length > 0 && (
-                  <div className={(datosFiltrados?.porArea ?? []).length > 0 ? "lg:col-span-3" : "lg:col-span-5"}>
-                    <GraficoLineas datos={datosFiltrados!.porLinea ?? []} />
-                  </div>
-                )}
-              </div>
-            )}
-
-            {distribucionesCategoricasExtras.map((dist, idx) => (
-              <GraficoRankingH
-                key={dist.columna}
-                datos={dist.datos}
-                titulo={`Distribución: ${dist.columna}`}
-                subtitulo={`Frecuencia de valores detectados en la columna "${dist.columna}"`}
-                totalGlobal={datosFiltrados!.totalSolicitudes}
-                acento={idx % 2 === 0 ? "green" : "blue"}
-                limiteInicial={10}
-              />
-            ))}
-
-            {activa(datos.capacidades, "CruceCategoriaCobertura") && (datosFiltrados?.porLinea ?? []).length >= 2 && (datosFiltrados?.porMotivo ?? []).length >= 2 && (
-              <GraficoCruceLinea
-                registros={datosFiltrados!.registros}
-                porMotivo={datosFiltrados!.porMotivo}
-                porLinea={datosFiltrados!.porLinea ?? []}
-                colNombreFila={datos.colCategorica1}
-                colNombreLinea={datos.colLinea}
-              />
-            )}
-
-            {/* ─── C. Calidad de atención ──────────────────────────── */}
-            <SeccionPasado icono={CheckCircle2} titulo="Calidad de atención" subtitulo="¿se resuelve bien y rápido?" />
-
-            {((activa(datos.capacidades, "Estado") && utilizable(datos.calidad, "Estado")) ||
-              activa(datos.capacidades, "TiempoRespuesta") ||
-              activa(datos.capacidades, "DerivacionInterna")) ? (
-              <>
-                {activa(datos.capacidades, "Estado") && utilizable(datos.calidad, "Estado") && (
-                  <GraficoResolucion
-                    porMotivo={datosFiltrados?.resolucionPorMotivo ?? []}
-                    porArea={datosFiltrados?.resolucionPorArea ?? []}
-                  />
-                )}
-
-                {activa(datos.capacidades, "TiempoRespuesta") && ((datosFiltrados?.porTiempoRespuestaArea ?? []).length >= 2 || (datosFiltrados?.tiempoRespuestaPorMotivo ?? []).length >= 2) && (
-                  <div className={
-                    (datosFiltrados?.porTiempoRespuestaArea ?? []).length >= 2 && (datosFiltrados?.tiempoRespuestaPorMotivo ?? []).length >= 2
-                      ? "grid grid-cols-1 lg:grid-cols-2 gap-4"
-                      : ""
-                  }>
-                    {(datosFiltrados?.porTiempoRespuestaArea ?? []).length >= 2 && (
-                      <GraficoTiempoRespuesta datos={datosFiltrados!.porTiempoRespuestaArea} />
-                    )}
-                    {(datosFiltrados?.tiempoRespuestaPorMotivo ?? []).length >= 2 && (
-                      <GraficoTiempoRespuesta
-                        datos={datosFiltrados!.tiempoRespuestaPorMotivo}
-                        titulo={`Tiempo de respuesta por ${datos.colCategorica1 ?? "categoría"}`}
-                        subtitulo={`Promedio de tiempo en minutos · por tipo de ${datos.colCategorica1 ?? "categoría"} · top 15`}
-                      />
-                    )}
-                  </div>
-                )}
-
-                {activa(datos.capacidades, "DerivacionInterna") && (
-                  <PanelTiempoRespuestaInterno
-                    promedioGeneral={datosFiltrados?.tiempoRespuestaInternoPromedio ?? 0}
-                    porMotivo={datosFiltrados?.tiempoRespuestaInternoPorMotivo ?? []}
-                    porArea={datosFiltrados?.tiempoRespuestaInternoPorArea ?? []}
-                    distribucion={datosFiltrados?.distribucionTiempoRespuestaInterno ?? []}
-                    etiquetaMotivo={datos.colCategorica1 ?? "Categoría"}
-                  />
-                )}
-              </>
-            ) : (
-              <PlaceholderAnalisis
-                icono={AlertCircle}
-                titulo="Sin datos de resolución ni tiempos de atención"
-                descripcion="Para ver este análisis el archivo necesita una columna de estado/resolución, tiempo de respuesta o derivación interna."
-                variante="ausente"
-              />
-            )}
-
-            {/* ─── D. Geografía ────────────────────────────────────── */}
-            {activa(datos.capacidades, "GeograficaCalles") && (
-              <>
-                <SeccionPasado icono={MapPin} titulo="Geografía" subtitulo="¿dónde se concentra el problema?" />
-
-                {perfil && (
-                  <ResumenGeografico
-                    porCalle={datosFiltrados?.porCalle ?? []}
-                    totalSolicitudes={datosFiltrados?.totalSolicitudes ?? 0}
+                {datosFiltrados && perfil && semaforo && (
+                  <ResumenEjecutivoTexto
+                    datos={datosFiltrados}
                     perfil={perfil}
+                    semaforo={semaforo}
+                    recomendaciones={recomendaciones}
+                    nombreArchivo={nombreArchivo}
+                    mesFiltro={mesFiltro}
                   />
                 )}
 
-                <GraficoCalles
-                  datos={datosFiltrados?.porCalle ?? []}
-                  totalSolicitudes={datosFiltrados?.totalSolicitudes ?? 0}
-                />
+                {datosFiltrados && (() => {
+                  const total = datosFiltrados.totalSolicitudes;
+                  const horaPico = datosFiltrados.porHora.length > 0 ? [...datosFiltrados.porHora].sort((a, b) => b.cantidad - a.cantidad)[0] : null;
+                  const diaPico = datosFiltrados.porDiaSemana.length > 0 ? [...datosFiltrados.porDiaSemana].sort((a, b) => b.cantidad - a.cantidad)[0] : null;
+                  const topMotivo = datosFiltrados.porMotivo[0] ?? null;
+                  const topInt = datosFiltrados.porInterseccion[0] ?? null;
 
-                {(datosFiltrados?.porInterseccion ?? []).length > 0 && (
-                  <GraficoRankingH
-                    datos={datosFiltrados!.porInterseccion}
-                    titulo="Intersecciones más cargadas"
-                    subtitulo="Combinación de calles con mayor cantidad de registros"
-                    totalGlobal={datosFiltrados!.totalSolicitudes}
-                    acento="violet"
-                    limiteInicial={10}
-                  />
-                )}
+                  const cards = [
+                    { titulo: "Total Registros", valor: total.toLocaleString("es-AR"), subtitulo: mesFiltro ? `registros en ${mesFiltro}` : "registros totales", color: "blue" as const, icono: "chart" as const, delta: mesFiltro ? undefined : deltaTotal, subtituloMes: mesFiltro ? undefined : ultimoMes?.mes },
+                    datos.tieneColumnaStatus
+                      ? { titulo: datos.etiquetaStatus === "Resuelto" ? "Tasa de Resolución" : "Tasa de Finalización", valor: `${datosFiltrados.tasaResolucion}%`, subtitulo: datosFiltrados.tasaResolucion >= 75 ? "dentro de parámetro" : datosFiltrados.tasaResolucion >= 50 ? "requiere seguimiento" : "requiere atención urgente", color: datosFiltrados.tasaResolucion >= 75 ? "green" as const : datosFiltrados.tasaResolucion >= 50 ? "amber" as const : "red" as const, icono: "activity" as const, delta: mesFiltro ? undefined : deltaTasa, subtituloMes: mesFiltro ? undefined : ultimoMes?.mes }
+                      : horaPico ? { titulo: "Hora pico", valor: `${String(horaPico.hora).padStart(2, "0")}:00 hs`, subtitulo: `${horaPico.cantidad.toLocaleString("es-AR")} registros en esa franja`, color: "amber" as const, icono: "activity" as const } : null,
+                    horaPico && datos.tieneColumnaStatus
+                      ? { titulo: "Hora pico", valor: `${String(horaPico.hora).padStart(2, "0")}:00 hs`, subtitulo: `${horaPico.cantidad.toLocaleString("es-AR")} registros en esa franja`, color: "amber" as const, icono: "activity" as const }
+                      : diaPico ? { titulo: "Día más activo", valor: diaPico.dia, subtitulo: `${diaPico.cantidad.toLocaleString("es-AR")} registros`, color: "indigo" as const, icono: "calendar" as const } : null,
+                    topInt ? { titulo: "Intersección principal", valor: topInt.cantidad.toLocaleString("es-AR"), subtitulo: topInt.nombre, color: "violet" as const, icono: "tag" as const }
+                      : topMotivo ? { titulo: "Tipo más frecuente", valor: `${total > 0 ? Math.round((topMotivo.cantidad / total) * 100) : 0}%`, subtitulo: topMotivo.nombre, color: "cyan" as const, icono: "tag" as const } : null,
+                  ].filter(Boolean) as NonNullable<typeof cards[number]>[];
 
-                <div className="print:hidden">
-                  <GraficoMapa
-                    intersecciones={datosFiltrados?.porInterseccion ?? []}
-                    totalSolicitudes={datosFiltrados?.totalSolicitudes ?? 0}
-                  />
-                </div>
-              </>
-            )}
-
-            {/* ─── E. Patrones temporales ──────────────────────────── */}
-            {activa(datos.capacidades, "TemporalBasica") && (
-              <>
-                <SeccionPasado icono={Clock} titulo="Patrones temporales" subtitulo="¿cuándo ocurre?" />
-
-                {(datosFiltrados?.porDiaSemana ?? []).length >= 7 && (
-                  <GraficoHeatmap
-                    datos={datosFiltrados!.porDiaSemana}
-                    topMotivoPorDia={topMotivoPorDia}
-                    totalSolicitudes={datosFiltrados!.totalSolicitudes}
-                  />
-                )}
-
-                {activa(datos.capacidades, "TemporalBasica") &&
-                  (datosFiltrados?.porDiaSemana ?? []).length > 0 &&
-                  (datosFiltrados?.porDiaSemana ?? []).length < 7 && (
-                  <p className="presentation-hide print:hidden text-xs text-slate-400 dark:text-slate-500 italic px-1">
-                    El mapa de calor por día requiere datos de los 7 días de la semana — este período cubre {(datosFiltrados?.porDiaSemana ?? []).length} día{(datosFiltrados?.porDiaSemana ?? []).length !== 1 ? "s" : ""}.
-                  </p>
-                )}
-
-                {activa(datos.capacidades, "Horaria") && (datosFiltrados?.porHora ?? []).length > 0 && (
-                  <GraficoHorario
-                    datos={datosFiltrados!.porHora}
-                    totalSolicitudes={datosFiltrados!.totalSolicitudes}
-                  />
-                )}
-
-                {(() => {
-                  const crucesSinMes = (datosFiltrados?.crucesAutomaticos ?? []).filter(
-                    (c) => !c.titulo.toLowerCase().includes("mes")
-                  );
-                  if (crucesSinMes.length === 0) return null;
+                  const accentMap: Record<string, KPICell["accent"]> = { blue: "gold", cyan: "gold", green: "green", red: "red", amber: "amber", indigo: "indigo", violet: "violet" };
                   return (
-                    <details className="group print:hidden">
-                      <summary className="presentation-hide flex items-center gap-2 cursor-pointer select-none px-1 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 list-none hover:text-slate-800 dark:hover:text-slate-100">
-                        <span className="transition-transform group-open:rotate-90 text-slate-400">▶</span>
-                        Ver patrones temporales avanzados (categoría × hora / día)
-                      </summary>
-                      <div className="mt-2 space-y-4">
-                        {crucesSinMes.map((cruce, idx) => (
-                          <GraficoCruceHeatmap
-                            key={`${cruce.tipo}-${idx}`}
-                            cruce={cruce}
-                            totalSolicitudes={datosFiltrados!.totalSolicitudes}
-                          />
-                        ))}
-                      </div>
-                    </details>
+                    <KPIStrip cells={cards.slice(0, 4).map((card) => ({
+                      label: card.titulo, value: card.valor, sub: card.subtitulo,
+                      accent: accentMap[card.color as string] ?? "gold",
+                      delta: "delta" in card ? card.delta : undefined,
+                      deltaMes: "subtituloMes" in card ? card.subtituloMes : undefined,
+                    }))} />
                   );
                 })()}
-              </>
-            )}
 
-            {/* ─── F. Datos complementarios ────────────────────────── */}
-            <details className="group print:hidden">
-              <summary className="presentation-hide flex items-center gap-2 cursor-pointer select-none px-1 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 list-none hover:text-slate-800 dark:hover:text-slate-100">
-                <span className="transition-transform group-open:rotate-90 text-slate-400">▶</span>
-                Datos complementarios
-              </summary>
-              <div className="mt-2 space-y-4">
-                {activa(datos.capacidades, "CruceCategoriaCalle") && (datosFiltrados?.porCalle1Ranking ?? []).length >= 2 && (datosFiltrados?.porMotivo ?? []).length >= 2 && (
-                  <GraficoCruceCalle
-                    registros={datosFiltrados!.registros}
-                    porMotivo={datosFiltrados!.porMotivo}
-                    porCalle1Ranking={datosFiltrados!.porCalle1Ranking ?? []}
-                    colNombreFila={datos.colCalle1}
-                    colNombreMotivo={datos.colCategorica1}
-                  />
-                )}
+                {semaforo && <SemaforoOperacional resultado={semaforo} />}
 
-                {(datosFiltrados?.registros ?? []).length > 0 && datos.columnas.length > 0 && (
-                  <TablaDetalle
-                    registros={datosFiltrados!.registros}
-                    columnas={datos.columnas}
-                    meses={datos.meses}
-                  />
-                )}
+                {(() => {
+                  const tieneMapa = activa(datos.capacidades, "GeograficaCalles") && (datosFiltrados?.porCalle ?? []).length > 0;
+                  return (
+                    <div className={tieneMapa ? "grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-5 items-start" : ""}>
+                      {perfil && (
+                        <HallazgosPrincipales
+                          perfil={perfil}
+                          onVerComparacion={() => {
+                            const ultimo = datos.meses[datos.meses.length - 1];
+                            const penultimo = datos.meses[datos.meses.length - 2];
+                            if (ultimo && penultimo) ejecutarComparacionMeses(penultimo, ultimo);
+                          }}
+                        />
+                      )}
+                      {tieneMapa && datosFiltrados && (
+                        <GraficoMapa intersecciones={datosFiltrados.porInterseccion} totalSolicitudes={datosFiltrados.totalSolicitudes} />
+                      )}
+                    </div>
+                  );
+                })()}
+
+                {recomendaciones.length > 0 && <RecomendacionesOperativas recomendaciones={recomendaciones} />}
+
               </div>
-            </details>
 
-            {/* ─── PRESENTE ─────────────────────────────────────────────── */}
-            <SeparadorCapa etiqueta="Presente" pregunta="¿Dónde estamos parados y qué es urgente?" acento="amber" />
-
-            {semaforo && <SemaforoOperacional resultado={semaforo} />}
-
-            {mesFiltro ? (
-              <PlaceholderAnalisis
-                icono={FilterX}
-                titulo="Zonas de atención no disponibles con filtro de mes activo"
-                descripcion={`Este análisis detecta patrones crónicos sobre el dataset completo. Estás viendo solo ${mesFiltro}.`}
-                variante="filtro"
-                accion={{ label: "Quitar filtro de mes", onClick: () => setMesFiltro("") }}
-              />
             ) : (
-              <ZonasDeAtencion
-                indiceFragilidad={datosFiltrados?.indiceFragilidad ?? []}
-                crucesCronicos={datosFiltrados?.crucesCronicos ?? []}
-              />
-            )}
 
-            {(datosFiltrados?.totalFalsosPositivos ?? 0) > 0 && (
-              <PanelFalsosPositivos
-                totalFalsosPositivos={datosFiltrados!.totalFalsosPositivos}
-                tasaFalsosPositivos={datosFiltrados!.tasaFalsosPositivos}
-                totalSolicitudes={datosFiltrados!.totalSolicitudes}
-                tiposFalsosPositivos={datosFiltrados!.tiposFalsosPositivos}
-              />
-            )}
+              // ── MODO OPERATIVO — estructura narrativa por capítulos ───────
+              <>
+                <SectionNav chapters={chapters} activeIndex={activeIndex} onNavigate={scrollTo} />
 
-            {/* ─── FUTURO ───────────────────────────────────────────────── */}
-            <SeparadorCapa etiqueta="Futuro" pregunta="¿Qué conviene hacer ahora?" acento="teal" />
+                <div id="dashboard-content">
+                  {chapters.map((ch, chIdx) => {
 
-            {recomendaciones.length > 0 && (
-              <RecomendacionesOperativas recomendaciones={recomendaciones} />
-            )}
+                    // ── 01 SITUACIÓN ────────────────────────────────────────
+                    if (ch.id === "situacion") return (
+                      <DashboardSection key="situacion" id="situacion" numero={ch.numero} label={ch.label} pregunta={ch.pregunta} sectionRef={setRef(chIdx)}>
 
-            {datos.tipoDato === "solicitudes" && datos.porMes.length >= 2 ? (
-              <VentanaPredictiva datos={datos} />
-            ) : datos.tipoDato !== "solicitudes" ? (
-              <PlaceholderAnalisis
-                icono={TrendingUp}
-                titulo="Proyección no disponible para este tipo de dataset"
-                descripcion="La ventana predictiva aplica solo a solicitudes de servicio, no a registros de sucesos o eventos."
-                variante="ausente"
-              />
-            ) : (
-              <PlaceholderAnalisis
-                icono={Clock}
-                titulo="Se necesitan al menos 2 meses para proyectar"
-                descripcion="El modelo predictivo requiere una tendencia histórica. Aparecerá automáticamente cuando el dataset tenga más meses."
-                variante="temporal"
-              />
-            )}
-          </div>
+                        <div className="presentation-hide flex items-center justify-between flex-wrap gap-3 print:hidden">
+                          <div>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Archivo cargado</p>
+                            <p className="font-semibold text-slate-800 dark:text-slate-100">{nombreArchivo}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {mesFiltro && (
+                              <span className="text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 px-2.5 py-1 rounded-md font-medium">
+                                Filtrando: {mesFiltro}
+                                <button onClick={() => setMesFiltro("")} className="ml-1.5 text-blue-400 hover:text-blue-600 dark:hover:text-blue-300">×</button>
+                              </span>
+                            )}
+                            {calleFiltro && (
+                              <span className="text-xs text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/30 border border-violet-200 dark:border-violet-800 px-2.5 py-1 rounded-md font-medium">
+                                Calle: {calleFiltro}
+                                <button onClick={() => setCalleFiltro("")} className="ml-1.5 text-violet-400 hover:text-violet-600 dark:hover:text-violet-300">×</button>
+                              </span>
+                            )}
+                            <div className="text-sm text-slate-500 dark:text-slate-400 bg-white dark:bg-[#131720] px-3 py-1.5 rounded-md border border-slate-200 dark:border-[#1f2535]">
+                              {datos.meses.length} {datos.meses.length === 1 ? "mes" : "meses"} detectados
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="hidden print:block text-xs text-slate-500 mb-2">
+                          Archivo: {nombreArchivo}{mesFiltro ? ` · Mes: ${mesFiltro}` : ""}{calleFiltro ? ` · Calle: ${calleFiltro}` : ""}
+                        </div>
+
+                        <OrientacionDataset datos={datos} nombreArchivo={nombreArchivo} />
+
+                        {bannerCuarentenaVisible && (datos.calidadDataset.registrosSinFechaValida ?? 0) > 0 && (
+                          <div className="presentation-hide flex items-start gap-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl px-4 py-4 print:hidden">
+                            <Ban className="h-5 w-5 text-red-500 dark:text-red-400 mt-0.5 shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-semibold text-red-700 dark:text-red-400">
+                                {(datos.calidadDataset.registrosSinFechaValida ?? 0).toLocaleString("es-AR")} registro{(datos.calidadDataset.registrosSinFechaValida ?? 0) !== 1 ? "s" : ""} excluido{(datos.calidadDataset.registrosSinFechaValida ?? 0) !== 1 ? "s" : ""} del análisis
+                              </p>
+                              <p className="text-xs text-red-600 dark:text-red-500 mt-0.5 leading-relaxed">
+                                {(datos.calidadDataset.registrosSinFechaValida ?? 0) !== 1 ? "Estos registros tienen" : "Este registro tiene"} fecha inválida, ausente o fuera del rango permitido y no {(datos.calidadDataset.registrosSinFechaValida ?? 0) !== 1 ? "fueron tomados" : "fue tomado"} en ninguna métrica ni gráfico.
+                              </p>
+                            </div>
+                            <button onClick={() => setBannerCuarentenaVisible(false)} className="shrink-0 p-1 rounded hover:bg-red-100 dark:hover:bg-red-800/40 text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors" title="Cerrar aviso">
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                        )}
+
+                        {/* KPIs según tipo de dataset */}
+                        {activa(datos.capacidades, "Estado") && utilizable(datos.calidad, "Estado") ? (
+                          <KPIStrip cells={[
+                            { label: "Total Registros", value: (datosFiltrados?.totalSolicitudes ?? 0).toLocaleString("es-AR"), sub: mesFiltro ? `registros en ${mesFiltro}` : "registros totales", accent: "gold", delta: mesFiltro ? undefined : deltaTotal, deltaMes: mesFiltro ? undefined : ultimoMes?.mes },
+                            { label: datos.etiquetaStatus === "Resuelto" ? "Tasa de Resolución" : "Tasa de Finalización", value: `${datosFiltrados?.tasaResolucion ?? 0}%`, sub: mesFiltro ? `tasa en ${mesFiltro}` : datos.etiquetaStatus === "Resuelto" ? "porcentaje resueltas" : "porcentaje finalizadas", accent: (datosFiltrados?.tasaResolucion ?? 0) >= 75 ? "green" : (datosFiltrados?.tasaResolucion ?? 0) >= 50 ? "amber" : "red", delta: mesFiltro ? undefined : deltaTasa, deltaMes: mesFiltro ? undefined : ultimoMes?.mes },
+                          ]} />
+                        ) : datos.tipoDato === "sucesos" ? (() => {
+                          const horaPico = (datosFiltrados?.porHora ?? []).length > 0 ? [...datosFiltrados!.porHora].sort((a, b) => b.cantidad - a.cantidad)[0] : null;
+                          const diaPico = (datosFiltrados?.porDiaSemana ?? []).length > 0 ? [...datosFiltrados!.porDiaSemana].sort((a, b) => b.cantidad - a.cantidad)[0] : null;
+                          const intPico = (datosFiltrados?.porInterseccion ?? []).length > 0 ? datosFiltrados!.porInterseccion[0] : null;
+                          const total = datosFiltrados?.totalSolicitudes ?? 0;
+                          return (
+                            <KPIStrip cells={[
+                              { label: "Total Registros", value: total.toLocaleString("es-AR"), sub: mesFiltro ? `registros en ${mesFiltro}` : "registros totales", accent: "gold", delta: mesFiltro ? undefined : deltaTotal, deltaMes: mesFiltro ? undefined : ultimoMes?.mes },
+                              { label: "Hora pico", value: horaPico ? `${String(horaPico.hora).padStart(2, "0")}:00 hs` : "—", sub: horaPico ? `${horaPico.cantidad.toLocaleString("es-AR")} registros en esa franja` : "sin datos de hora", accent: "amber" },
+                              { label: "Día más activo", value: diaPico ? diaPico.dia : "—", sub: diaPico ? `${diaPico.cantidad.toLocaleString("es-AR")} registros` : "sin datos de fecha", accent: "indigo" },
+                              { label: "Intersección principal", value: intPico ? intPico.cantidad.toLocaleString("es-AR") : "—", sub: intPico ? intPico.nombre : ((datosFiltrados?.porInterseccion ?? []).length === 0 ? "sin datos de calles" : ""), accent: "violet" },
+                            ]} />
+                          );
+                        })() : (
+                          <KPIStrip cells={[
+                            { label: "Total Registros", value: (datosFiltrados?.totalSolicitudes ?? 0).toLocaleString("es-AR"), sub: mesFiltro ? `registros en ${mesFiltro}` : "registros totales en el archivo", accent: "gold", delta: mesFiltro ? undefined : deltaTotal, deltaMes: mesFiltro ? undefined : ultimoMes?.mes },
+                            { label: "Meses con datos", value: String(datos.meses.length), sub: datos.meses.length > 0 ? `${datos.meses[0]} → ${datos.meses[datos.meses.length - 1]}` : "", accent: "indigo" },
+                            ...(datosFiltrados?.distribucionesCategoricas[0] ? [{ label: `Valores en ${datos.colCategorica1 ?? "Categoría"}`, value: String(datosFiltrados.distribucionesCategoricas[0].datos.length), sub: "categorías distintas detectadas", accent: "violet" as const }] : []),
+                          ]} />
+                        )}
+
+                        {activa(datos.capacidades, "Programacion") && (
+                          <KPIStrip cells={[
+                            { label: "No Programados", value: (datosFiltrados?.totalNoProgramados ?? 0).toLocaleString("es-AR"), sub: "sucesos reactivos sin planificación previa", accent: "red" },
+                            { label: "Programados", value: (datosFiltrados?.totalProgramados ?? 0).toLocaleString("es-AR"), sub: "eventos y tareas con planificación previa", accent: "amber" },
+                          ]} />
+                        )}
+
+                        {semaforo && <SemaforoOperacional resultado={semaforo} />}
+
+                      </DashboardSection>
+                    );
+
+                    // ── 02 EVOLUCIÓN ────────────────────────────────────────
+                    if (ch.id === "evolucion") return (
+                      <DashboardSection key="evolucion" id="evolucion" numero={ch.numero} label={ch.label} pregunta={ch.pregunta} sectionRef={setRef(chIdx)}>
+
+                        <GraficoBarras
+                          datos={datos.porMes}
+                          mesFiltro={mesFiltro}
+                          mostrarResolucion={activa(datos.capacidades, "Estado") && utilizable(datos.calidad, "Estado")}
+                          mostrarProgramacion={activa(datos.capacidades, "Programacion")}
+                          etiquetaStatus={datos.etiquetaStatus}
+                        />
+
+                        {perfil && (
+                          <HallazgosPrincipales
+                            perfil={perfil}
+                            onVerComparacion={() => {
+                              const ultimo = datos.meses[datos.meses.length - 1];
+                              const penultimo = datos.meses[datos.meses.length - 2];
+                              if (ultimo && penultimo) ejecutarComparacionMeses(penultimo, ultimo);
+                            }}
+                          />
+                        )}
+
+                        <InsightsPanel datos={datosFiltrados!} mesFiltro={mesFiltro} soloAlertas />
+
+                        {!mesFiltro && activa(datos.capacidades, "CruceCategoriaMes") && (datosFiltrados?.porMotivo ?? []).length >= 2 && (
+                          <GraficoCruce
+                            solicitudes={datosFiltrados!.solicitudes}
+                            meses={datos.meses}
+                            porMotivo={datosFiltrados!.porMotivo}
+                            colNombreFila={datos.colCategorica1 ?? "Categoría"}
+                          />
+                        )}
+
+                        {mesFiltro && activa(datos.capacidades, "CruceCategoriaMes") && datos.porMotivo.length >= 2 && (
+                          <PlaceholderAnalisis
+                            icono={FilterX}
+                            titulo="Análisis por mes no disponible con filtro activo"
+                            descripcion={`Este gráfico necesita todos los meses para mostrar la evolución por categoría. Estás viendo solo ${mesFiltro}.`}
+                            variante="filtro"
+                            accion={{ label: "Quitar filtro de mes", onClick: () => setMesFiltro("") }}
+                          />
+                        )}
+
+                        {datos.meses.length >= 1 && (datosFiltrados?.solicitudes ?? []).length > 0 && (
+                          <LineaDeTiempo solicitudes={datosFiltrados!.solicitudes} meses={datos.meses} />
+                        )}
+
+                      </DashboardSection>
+                    );
+
+                    // ── 03 DISTRIBUCIÓN ─────────────────────────────────────
+                    if (ch.id === "distribucion") return (
+                      <DashboardSection key="distribucion" id="distribucion" numero={ch.numero} label={ch.label} pregunta={ch.pregunta} sectionRef={setRef(chIdx)}>
+
+                        {activa(datos.capacidades, "Categoria") && (datosFiltrados?.porMotivo ?? []).length > 0 && (
+                          <GraficoRankingH
+                            datos={datosFiltrados!.porMotivo}
+                            titulo={`Ranking por ${datos.colCategorica1 ?? "Categoría Principal"}`}
+                            subtitulo="Valores ordenados por volumen — categoría principal de análisis"
+                            totalGlobal={datosFiltrados!.totalSolicitudes}
+                            acento="blue"
+                            limiteInicial={10}
+                          />
+                        )}
+
+                        {((datosFiltrados?.porArea ?? []).length > 0 || (datosFiltrados?.porLinea ?? []).length > 0) && (
+                          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+                            {(datosFiltrados?.porArea ?? []).length > 0 && (
+                              <div className="lg:col-span-2">
+                                <GraficoRankingH
+                                  datos={datosFiltrados!.porArea}
+                                  titulo={`Por ${datos.colCategorica2 ?? "Categoría Secundaria"}`}
+                                  subtitulo="Segunda dimensión de análisis"
+                                  totalGlobal={datosFiltrados!.totalSolicitudes}
+                                  acento="violet"
+                                  limiteInicial={10}
+                                  alturaFila={24}
+                                />
+                              </div>
+                            )}
+                            {activa(datos.capacidades, "Cobertura") && (datosFiltrados?.porLinea ?? []).length > 0 && (
+                              <div className={(datosFiltrados?.porArea ?? []).length > 0 ? "lg:col-span-3" : "lg:col-span-5"}>
+                                <GraficoLineas datos={datosFiltrados!.porLinea ?? []} />
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {distribucionesCategoricasExtras.map((dist, idx) => (
+                          <GraficoRankingH
+                            key={dist.columna}
+                            datos={dist.datos}
+                            titulo={`Distribución: ${dist.columna}`}
+                            subtitulo={`Frecuencia de valores detectados en la columna "${dist.columna}"`}
+                            totalGlobal={datosFiltrados!.totalSolicitudes}
+                            acento={idx % 2 === 0 ? "green" : "blue"}
+                            limiteInicial={10}
+                          />
+                        ))}
+
+                        {activa(datos.capacidades, "CruceCategoriaCobertura") && (datosFiltrados?.porLinea ?? []).length >= 2 && (datosFiltrados?.porMotivo ?? []).length >= 2 && (
+                          <GraficoCruceLinea
+                            registros={datosFiltrados!.registros}
+                            porMotivo={datosFiltrados!.porMotivo}
+                            porLinea={datosFiltrados!.porLinea ?? []}
+                            colNombreFila={datos.colCategorica1}
+                            colNombreLinea={datos.colLinea}
+                          />
+                        )}
+
+                        {activa(datos.capacidades, "Estado") && utilizable(datos.calidad, "Estado") && (
+                          <GraficoResolucion
+                            porMotivo={datosFiltrados?.resolucionPorMotivo ?? []}
+                            porArea={datosFiltrados?.resolucionPorArea ?? []}
+                          />
+                        )}
+
+                      </DashboardSection>
+                    );
+
+                    // ── 04 PATRONES ─────────────────────────────────────────
+                    if (ch.id === "patrones") return (
+                      <DashboardSection key="patrones" id="patrones" numero={ch.numero} label={ch.label} pregunta={ch.pregunta} sectionRef={setRef(chIdx)}>
+
+                        {(datosFiltrados?.porDiaSemana ?? []).length >= 7 && (
+                          <GraficoHeatmap
+                            datos={datosFiltrados!.porDiaSemana}
+                            topMotivoPorDia={topMotivoPorDia}
+                            totalSolicitudes={datosFiltrados!.totalSolicitudes}
+                          />
+                        )}
+
+                        {(datosFiltrados?.porDiaSemana ?? []).length > 0 && (datosFiltrados?.porDiaSemana ?? []).length < 7 && (
+                          <p className="presentation-hide print:hidden text-xs text-slate-400 dark:text-slate-500 italic px-1">
+                            El mapa de calor por día requiere datos de los 7 días de la semana — este período cubre {(datosFiltrados?.porDiaSemana ?? []).length} día{(datosFiltrados?.porDiaSemana ?? []).length !== 1 ? "s" : ""}.
+                          </p>
+                        )}
+
+                        {activa(datos.capacidades, "Horaria") && (datosFiltrados?.porHora ?? []).length > 0 && (
+                          <GraficoHorario datos={datosFiltrados!.porHora} totalSolicitudes={datosFiltrados!.totalSolicitudes} />
+                        )}
+
+                        {(() => {
+                          const crucesSinMes = (datosFiltrados?.crucesAutomaticos ?? []).filter((c) => !c.titulo.toLowerCase().includes("mes"));
+                          if (crucesSinMes.length === 0) return null;
+                          return (
+                            <details className="group print:hidden">
+                              <summary className="presentation-hide flex items-center gap-2 cursor-pointer select-none px-1 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 list-none hover:text-slate-800 dark:hover:text-slate-100">
+                                <span className="transition-transform group-open:rotate-90 text-slate-400">▶</span>
+                                Ver patrones temporales avanzados (categoría × hora / día)
+                              </summary>
+                              <div className="mt-2 space-y-4">
+                                {crucesSinMes.map((cruce, idx) => (
+                                  <GraficoCruceHeatmap key={`${cruce.tipo}-${idx}`} cruce={cruce} totalSolicitudes={datosFiltrados!.totalSolicitudes} />
+                                ))}
+                              </div>
+                            </details>
+                          );
+                        })()}
+
+                      </DashboardSection>
+                    );
+
+                    // ── 05 GEOGRAFÍA ────────────────────────────────────────
+                    if (ch.id === "geografia") return (
+                      <DashboardSection key="geografia" id="geografia" numero={ch.numero} label={ch.label} pregunta={ch.pregunta} sectionRef={setRef(chIdx)}>
+
+                        {perfil && (
+                          <ResumenGeografico
+                            porCalle={datosFiltrados?.porCalle ?? []}
+                            totalSolicitudes={datosFiltrados?.totalSolicitudes ?? 0}
+                            perfil={perfil}
+                          />
+                        )}
+
+                        <GraficoCalles datos={datosFiltrados?.porCalle ?? []} totalSolicitudes={datosFiltrados?.totalSolicitudes ?? 0} />
+
+                        {(datosFiltrados?.porInterseccion ?? []).length > 0 && (
+                          <GraficoRankingH
+                            datos={datosFiltrados!.porInterseccion}
+                            titulo="Intersecciones más cargadas"
+                            subtitulo="Combinación de calles con mayor cantidad de registros"
+                            totalGlobal={datosFiltrados!.totalSolicitudes}
+                            acento="violet"
+                            limiteInicial={10}
+                          />
+                        )}
+
+                        <div className="print:hidden">
+                          <GraficoMapa intersecciones={datosFiltrados?.porInterseccion ?? []} totalSolicitudes={datosFiltrados?.totalSolicitudes ?? 0} />
+                        </div>
+
+                      </DashboardSection>
+                    );
+
+                    // ── 06 FRAGILIDAD ───────────────────────────────────────
+                    if (ch.id === "fragilidad") return (
+                      <DashboardSection key="fragilidad" id="fragilidad" numero={ch.numero} label={ch.label} pregunta={ch.pregunta} sectionRef={setRef(chIdx)}>
+
+                        {mesFiltro ? (
+                          <PlaceholderAnalisis
+                            icono={FilterX}
+                            titulo="Zonas de atención no disponibles con filtro de mes activo"
+                            descripcion={`Este análisis detecta patrones crónicos sobre el dataset completo. Estás viendo solo ${mesFiltro}.`}
+                            variante="filtro"
+                            accion={{ label: "Quitar filtro de mes", onClick: () => setMesFiltro("") }}
+                          />
+                        ) : (
+                          <ZonasDeAtencion
+                            indiceFragilidad={datosFiltrados?.indiceFragilidad ?? []}
+                            crucesCronicos={datosFiltrados?.crucesCronicos ?? []}
+                          />
+                        )}
+
+                        {(datosFiltrados?.totalFalsosPositivos ?? 0) > 0 && (
+                          <PanelFalsosPositivos
+                            totalFalsosPositivos={datosFiltrados!.totalFalsosPositivos}
+                            tasaFalsosPositivos={datosFiltrados!.tasaFalsosPositivos}
+                            totalSolicitudes={datosFiltrados!.totalSolicitudes}
+                            tiposFalsosPositivos={datosFiltrados!.tiposFalsosPositivos}
+                          />
+                        )}
+
+                        {(activa(datos.capacidades, "TiempoRespuesta") || activa(datos.capacidades, "DerivacionInterna")) && (
+                          <>
+                            {activa(datos.capacidades, "TiempoRespuesta") && ((datosFiltrados?.porTiempoRespuestaArea ?? []).length >= 2 || (datosFiltrados?.tiempoRespuestaPorMotivo ?? []).length >= 2) && (
+                              <div className={(datosFiltrados?.porTiempoRespuestaArea ?? []).length >= 2 && (datosFiltrados?.tiempoRespuestaPorMotivo ?? []).length >= 2 ? "grid grid-cols-1 lg:grid-cols-2 gap-4" : ""}>
+                                {(datosFiltrados?.porTiempoRespuestaArea ?? []).length >= 2 && (
+                                  <GraficoTiempoRespuesta datos={datosFiltrados!.porTiempoRespuestaArea} />
+                                )}
+                                {(datosFiltrados?.tiempoRespuestaPorMotivo ?? []).length >= 2 && (
+                                  <GraficoTiempoRespuesta
+                                    datos={datosFiltrados!.tiempoRespuestaPorMotivo}
+                                    titulo={`Tiempo de respuesta por ${datos.colCategorica1 ?? "categoría"}`}
+                                    subtitulo={`Promedio de tiempo en minutos · por tipo de ${datos.colCategorica1 ?? "categoría"} · top 15`}
+                                  />
+                                )}
+                              </div>
+                            )}
+                            {activa(datos.capacidades, "DerivacionInterna") && (
+                              <PanelTiempoRespuestaInterno
+                                promedioGeneral={datosFiltrados?.tiempoRespuestaInternoPromedio ?? 0}
+                                porMotivo={datosFiltrados?.tiempoRespuestaInternoPorMotivo ?? []}
+                                porArea={datosFiltrados?.tiempoRespuestaInternoPorArea ?? []}
+                                distribucion={datosFiltrados?.distribucionTiempoRespuestaInterno ?? []}
+                                etiquetaMotivo={datos.colCategorica1 ?? "Categoría"}
+                              />
+                            )}
+                          </>
+                        )}
+
+                        {!activa(datos.capacidades, "TiempoRespuesta") && !activa(datos.capacidades, "DerivacionInterna") && (datosFiltrados?.totalFalsosPositivos ?? 0) === 0 && (
+                          <PlaceholderAnalisis
+                            icono={AlertCircle}
+                            titulo="Sin datos de resolución ni tiempos de atención"
+                            descripcion="Para ver este análisis el archivo necesita una columna de estado/resolución, tiempo de respuesta o derivación interna."
+                            variante="ausente"
+                          />
+                        )}
+
+                      </DashboardSection>
+                    );
+
+                    // ── 07 ACCIÓN ───────────────────────────────────────────
+                    if (ch.id === "accion") return (
+                      <DashboardSection key="accion" id="accion" numero={ch.numero} label={ch.label} pregunta={ch.pregunta} sectionRef={setRef(chIdx)}>
+
+                        {recomendaciones.length > 0 && <RecomendacionesOperativas recomendaciones={recomendaciones} />}
+
+                        {datos.tipoDato === "solicitudes" && datos.porMes.length >= 2 ? (
+                          <VentanaPredictiva datos={datos} />
+                        ) : datos.tipoDato !== "solicitudes" ? (
+                          <PlaceholderAnalisis icono={TrendingUp} titulo="Proyección no disponible para este tipo de dataset" descripcion="La ventana predictiva aplica solo a solicitudes de servicio, no a registros de sucesos o eventos." variante="ausente" />
+                        ) : (
+                          <PlaceholderAnalisis icono={Clock} titulo="Se necesitan al menos 2 meses para proyectar" descripcion="El modelo predictivo requiere una tendencia histórica. Aparecerá automáticamente cuando el dataset tenga más meses." variante="temporal" />
+                        )}
+
+                        <details className="group print:hidden">
+                          <summary className="presentation-hide flex items-center gap-2 cursor-pointer select-none px-1 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 list-none hover:text-slate-800 dark:hover:text-slate-100">
+                            <span className="transition-transform group-open:rotate-90 text-slate-400">▶</span>
+                            Datos complementarios
+                          </summary>
+                          <div className="mt-2 space-y-4">
+                            {activa(datos.capacidades, "CruceCategoriaCalle") && (datosFiltrados?.porCalle1Ranking ?? []).length >= 2 && (datosFiltrados?.porMotivo ?? []).length >= 2 && (
+                              <GraficoCruceCalle
+                                registros={datosFiltrados!.registros}
+                                porMotivo={datosFiltrados!.porMotivo}
+                                porCalle1Ranking={datosFiltrados!.porCalle1Ranking ?? []}
+                                colNombreFila={datos.colCalle1}
+                                colNombreMotivo={datos.colCategorica1}
+                              />
+                            )}
+                            {(datosFiltrados?.registros ?? []).length > 0 && datos.columnas.length > 0 && (
+                              <TablaDetalle registros={datosFiltrados!.registros} columnas={datos.columnas} meses={datos.meses} />
+                            )}
+                          </div>
+                        </details>
+
+                      </DashboardSection>
+                    );
+
+                    return null;
+                  })}
+                </div>
+              </>
+
             )}
           </div>
         )}
       </main>
 
+      {/* ── Comparación overlay ─────────────────────────────────────────── */}
       {modoComparacion && comparacionResultado && (
-        <ComparacionPeriodos
-          resultado={comparacionResultado}
-          onCerrar={() => setModoComparacion(false)}
-        />
+        <ComparacionPeriodos resultado={comparacionResultado} onCerrar={() => setModoComparacion(false)} />
       )}
 
       {modalComparacion && datos && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={(e) => { if (e.target === e.currentTarget) setModalComparacion(false); }}>
           <div className="bg-white dark:bg-[#131720] rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden">
-            {/* Encabezado */}
             <div className="bg-[#1a2b4a] text-white px-6 py-4 flex items-center gap-3">
               <GitCompareArrows className="h-5 w-5 shrink-0" />
               <div>
@@ -1160,26 +957,18 @@ export default function Dashboard() {
               </button>
             </div>
 
-            {/* Tabs */}
             <div className="flex border-b border-slate-200 dark:border-[#1f2535]">
               {(["meses", "archivo"] as const).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => { setModoSeleccion(tab); setErrorB(""); }}
-                  className={`flex-1 py-3 text-sm font-semibold transition-colors ${modoSeleccion === tab ? "border-b-2 border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400" : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"}`}
-                >
+                <button key={tab} onClick={() => { setModoSeleccion(tab); setErrorB(""); }} className={`flex-1 py-3 text-sm font-semibold transition-colors ${modoSeleccion === tab ? "border-b-2 border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400" : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"}`}>
                   {tab === "meses" ? "Comparar meses" : "Comparar con otra URL"}
                 </button>
               ))}
             </div>
 
-            {/* Contenido */}
             <div className="p-6 space-y-5">
               {modoSeleccion === "meses" ? (
                 <>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                    Seleccioná dos meses del archivo actual para comparar sus métricas lado a lado.
-                  </p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Seleccioná dos meses del archivo actual para comparar sus métricas lado a lado.</p>
                   {datos.meses.length < 2 ? (
                     <div className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3">
                       <AlertCircle className="h-4 w-4 shrink-0" />
@@ -1192,58 +981,24 @@ export default function Dashboard() {
                         const set = letra === "A" ? setMesA : setMesB;
                         return (
                           <div key={letra} className="space-y-1.5">
-                            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                              Período {letra}
-                            </label>
-                            <select
-                              value={val}
-                              onChange={(e) => set(e.target.value)}
-                              className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-[#2e3852] rounded-lg bg-white dark:bg-[#252d3d] text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400"
-                            >
+                            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Período {letra}</label>
+                            <select value={val} onChange={(e) => set(e.target.value)} className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-[#2e3852] rounded-lg bg-white dark:bg-[#252d3d] text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400">
                               <option value="">-- Seleccionar --</option>
-                              {datos.meses.map((m) => (
-                                <option key={m} value={m}>{m}</option>
-                              ))}
+                              {datos.meses.map((m) => <option key={m} value={m}>{m}</option>)}
                             </select>
                           </div>
                         );
                       })}
                     </div>
                   )}
-                  {mesA && mesB && mesA === mesB && (
-                    <p className="text-xs text-red-500 dark:text-red-400">Seleccioná dos meses distintos para comparar.</p>
-                  )}
+                  {mesA && mesB && mesA === mesB && <p className="text-xs text-red-500 dark:text-red-400">Seleccioná dos meses distintos para comparar.</p>}
                 </>
               ) : (
                 <>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                    Pegá la URL de otro Google Sheet para comparar con <span className="font-semibold text-slate-700 dark:text-slate-200">{nombreArchivo}</span>.
-                  </p>
-                  <input
-                    type="url"
-                    value={urlComparacion}
-                    onChange={(e) => setUrlComparacion(e.target.value)}
-                    placeholder="https://docs.google.com/spreadsheets/d/..."
-                    onKeyDown={(e) => e.key === "Enter" && ejecutarComparacionUrl(urlComparacion)}
-                    className="w-full bg-white dark:bg-[#252d3d] border border-slate-200 dark:border-[#2e3852] rounded-lg px-3 py-2.5 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-                    disabled={cargandoB}
-                  />
-                  <button
-                    onClick={() => ejecutarComparacionUrl(urlComparacion)}
-                    disabled={cargandoB || !urlComparacion.trim()}
-                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-2"
-                  >
-                    {cargandoB ? (
-                      <>
-                        <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
-                        Procesando...
-                      </>
-                    ) : (
-                      <>
-                        <FileSpreadsheet className="h-4 w-4" />
-                        Cargar y comparar
-                      </>
-                    )}
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Pegá la URL de otro Google Sheet para comparar con <span className="font-semibold text-slate-700 dark:text-slate-200">{nombreArchivo}</span>.</p>
+                  <input type="url" value={urlComparacion} onChange={(e) => setUrlComparacion(e.target.value)} placeholder="https://docs.google.com/spreadsheets/d/..." onKeyDown={(e) => e.key === "Enter" && ejecutarComparacionUrl(urlComparacion)} className="w-full bg-white dark:bg-[#252d3d] border border-slate-200 dark:border-[#2e3852] rounded-lg px-3 py-2.5 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/30" disabled={cargandoB} />
+                  <button onClick={() => ejecutarComparacionUrl(urlComparacion)} disabled={cargandoB || !urlComparacion.trim()} className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-2">
+                    {cargandoB ? (<><div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" />Procesando...</>) : (<><FileSpreadsheet className="h-4 w-4" />Cargar y comparar</>)}
                   </button>
                   {errorB && (
                     <div className="flex items-start gap-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg p-3">
@@ -1255,14 +1010,9 @@ export default function Dashboard() {
               )}
             </div>
 
-            {/* Footer */}
             {modoSeleccion === "meses" && datos.meses.length >= 2 && (
               <div className="px-6 pb-6 flex justify-end">
-                <button
-                  onClick={() => ejecutarComparacionMeses()}
-                  disabled={!mesA || !mesB || mesA === mesB}
-                  className="flex items-center gap-2 bg-[#1a2b4a] hover:bg-[#243b63] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors"
-                >
+                <button onClick={() => ejecutarComparacionMeses()} disabled={!mesA || !mesB || mesA === mesB} className="flex items-center gap-2 bg-[#1a2b4a] hover:bg-[#243b63] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
                   <GitCompareArrows className="h-4 w-4" />
                   Ver comparación
                 </button>
@@ -1274,3 +1024,7 @@ export default function Dashboard() {
     </div>
   );
 }
+
+// Silence unused import warning — SeccionPasado kept for potential future use within sections
+void SeccionPasado;
+void SeparadorCapa;
